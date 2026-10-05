@@ -1,0 +1,464 @@
+<!doctype html><html><head><meta charset=utf8><meta name="robots" content="noindex, nofollow"><title>Feldlabor</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: Werkbank – links die Zeichenfläche (Feld), rechts das Messprotokoll mit Reglern; auf dem Handy untereinander */
+:root{
+  --bg:#f5f7fa; --paper:#ffffff; --ink:#16222e; --muted:#5a6876; --line:#d3dbe4;
+  --blue:#1f3a5f; --blue2:#2e5c8a; --plus:#c00000; --minus:#1d5fd1; --eq:#7a8a99; --ok:#0b7a52;
+  --field:#16222e; --oil:#f6edd2; --grain:#7a5a1c;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1720; --paper:#16212c; --ink:#e4ebf2; --muted:#9aa9b8; --line:#2a3846;
+  --blue:#8fb4e6; --blue2:#6d9bd6; --plus:#ff6b6b; --minus:#6ea8ff; --eq:#7f8fa0; --ok:#3ecf98; --field:#e4ebf2; --oil:#2a2414; --grain:#e8c77a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1720; --paper:#16212c; --ink:#e4ebf2; --muted:#9aa9b8; --line:#2a3846;
+  --blue:#8fb4e6; --blue2:#6d9bd6; --plus:#ff6b6b; --minus:#6ea8ff; --eq:#7f8fa0; --ok:#3ecf98; --field:#e4ebf2; --oil:#2a2414; --grain:#e8c77a; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 28px;display:flex;flex-direction:column;gap:14px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px}
+h1{font-size:26px;margin:0;color:var(--blue);letter-spacing:.01em}
+.sub{color:var(--muted);font-size:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{font:inherit;font-weight:700;padding:7px 14px;border:1.5px solid var(--blue2);background:var(--paper);color:var(--blue2);border-radius:6px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--blue2);color:var(--paper)}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:14px;align-items:start}
+@media (max-width:860px){.main{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px;min-width:0}
+canvas{display:block;width:100%;height:auto;touch-action:none;border-radius:4px}
+.hint{font-size:13px;color:var(--muted);margin:6px 4px 0}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0}
+.row{display:flex;flex-wrap:wrap;gap:6px}
+.btn{font:inherit;font-size:14px;padding:6px 10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;cursor:pointer}
+.btn:hover{border-color:var(--blue2)}
+.btn.plus{color:var(--plus);font-weight:700}.btn.minus{color:var(--minus);font-weight:700}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--blue2);outline-offset:2px}
+label.chk{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer}
+.sl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:14px}
+.sl input[type=range]{grid-column:1/3;width:100%;accent-color:var(--blue2)}
+.sl output{font-family:var(--f-mono);font-size:13px;color:var(--blue)}
+select{font:inherit;font-size:14px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.read{font-family:var(--f-mono);font-size:13.5px;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-variant-numeric:tabular-nums}
+.read dt{color:var(--muted)} .read dd{margin:0;text-align:right;color:var(--ink)}
+.formula{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.state{font-weight:700;padding:4px 8px;border-radius:5px;border:1px solid var(--line);display:inline-block}
+.state.ok{color:var(--ok);border-color:var(--ok)} .state.up{color:var(--plus);border-color:var(--plus)} .state.down{color:var(--minus);border-color:var(--minus)}
+footer{font-size:12px;color:var(--muted)}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Feldlabor</h1>
+    <span class="sub">Physik J1 (Basisfach) · Elektrisches Feld · Feldlinien, Feldstärke, Potenzial, Kondensator, Grießkörner-Versuch</span>
+  </header>
+  <div class="tabs" role="tablist">
+    <button id="tab1" role="tab" aria-selected="true">Ladungen &amp; Feldlinien</button>
+    <button id="tab2" role="tab" aria-selected="false">Plattenkondensator</button>
+    <button id="tab3" role="tab" aria-selected="false">Grießkörner in Öl</button>
+  </div>
+
+  <section class="main" id="m1">
+    <div class="stage"><canvas id="c1" width="900" height="600" aria-label="Zeichenfläche mit Ladungen und Feldlinien"></canvas>
+      <p class="hint">Ladungen und Probeladung mit Maus oder Finger ziehen. Eine Ladung aus dem Feld ziehen, um sie zu entfernen. Gitter: 1 Kästchen = 1 cm.</p></div>
+    <div class="panel">
+      <div><h2>Ladungen</h2>
+        <div class="row" style="margin-top:6px">
+          <button class="btn plus" id="addP">+ 1 nC</button><button class="btn minus" id="addM">− 1 nC</button><button class="btn" id="clr">Alle entfernen</button>
+        </div></div>
+      <div><h2>Vorlagen</h2>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" data-pre="punkt">Punktladung</button><button class="btn" data-pre="dipol">Dipol</button>
+          <button class="btn" data-pre="gleich">gleichnamig</button><button class="btn" data-pre="platten">Platten</button>
+        </div></div>
+      <div><h2>Anzeigen</h2>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+          <label class="chk"><input type="checkbox" id="showL" checked> Feldlinien</label>
+          <label class="chk"><input type="checkbox" id="showE"> Äquipotenziallinien</label>
+          <label class="chk"><input type="checkbox" id="showP" checked> Probeladung +1 nC mit Kraftpfeil</label>
+        </div></div>
+      <div><h2>Messwerte an der Probeladung</h2>
+        <dl class="read" id="r1" style="margin-top:6px"></dl>
+        <p class="formula">E = F/q · F = q·E · k = 8,99·10⁹ N·m²/C²</p></div>
+    </div>
+  </section>
+
+  <section class="main" id="m2" hidden>
+    <div class="stage"><canvas id="c2" width="900" height="600" aria-label="Plattenkondensator mit Feldlinien"></canvas>
+      <p class="hint">Probeteilchen zwischen den Platten ziehen. Gestrichelt: Linien gleichen Potenzials (untere Platte = 0 V).</p></div>
+    <div class="panel">
+      <div class="sl"><span>Spannung U</span><output id="oU"></output><input type="range" id="U" min="0" max="5000" step="50" value="2000"></div>
+      <div class="sl"><span>Plattenabstand d</span><output id="od"></output><input type="range" id="d" min="1" max="10" step="0.5" value="4"></div>
+      <div class="sl"><span>Plattenfläche A</span><output id="oA"></output><input type="range" id="A" min="50" max="500" step="10" value="200"></div>
+      <div class="sl"><span>Dielektrikum</span><select id="er"><option value="1">Luft (εr ≈ 1)</option><option value="2.5">Kunststoff (εr ≈ 2,5)</option><option value="5">Glas (εr ≈ 5)</option><option value="80">Wasser (εr ≈ 80)</option></select></div>
+      <label class="chk"><input type="checkbox" id="detach"> Quelle abklemmen (Ladung Q bleibt fest)</label>
+      <label class="chk"><input type="checkbox" id="flip"> Polung tauschen (untere Platte +)</label>
+      <dl class="read" id="r2"></dl>
+      <div><h2>Probeteilchen</h2></div>
+      <div class="sl"><span>Ladung q</span><output id="oq"></output><input type="range" id="q" min="-50" max="50" step="1" value="10"></div>
+      <label class="chk"><input type="checkbox" id="grav"> Gewichtskraft einbeziehen (Schweben)</label>
+      <div class="sl" id="mRow" hidden><span>Masse m</span><output id="om"></output><input type="range" id="m" min="0.01" max="2" step="0.01" value="0.10"></div>
+      <dl class="read" id="r3"></dl>
+      <div id="st"></div>
+      <p class="formula">E = U/d · C = ε₀·εr·A/d · Q = C·U · Schweben: q·E = m·g</p>
+    </div>
+  </section>
+  <section class="main" id="m3" hidden>
+    <div class="stage"><canvas id="c3" width="900" height="600" aria-label="Simulation: Grießkörner in Rizinusöl zwischen Elektroden"></canvas>
+      <p class="hint">Simulation des Demo-Versuchs: Grießkörner schwimmen in Rizinusöl. Liegt Hochspannung an, werden die Körner zu Dipolen (Polarisation) und drehen sich in Feldrichtung – es entstehen Ketten entlang der Feldlinien.</p></div>
+    <div class="panel">
+      <div><h2>Elektroden</h2>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" data-g="dipol">zwei Punkte (+ −)</button><button class="btn" data-g="gleich">zwei Punkte (+ +)</button>
+          <button class="btn" data-g="platten">zwei Platten</button><button class="btn" data-g="punktplatte">Punkt und Platte</button>
+          <button class="btn" data-g="ring">Ring mit Mittelpunkt</button><button class="btn" data-g="kaefig">Ring geladen, Punkt außen</button>
+        </div></div>
+      <div class="sl"><span>Hochspannung</span><output id="oG"></output><input type="range" id="gU" min="0" max="10" step="0.5" value="6"></div>
+      <div class="row"><button class="btn" id="gOn">Spannung ein</button><button class="btn" id="gShake">Schale schütteln</button></div>
+      <label class="chk"><input type="checkbox" id="gLines"> berechnete Feldlinien zum Vergleich einblenden</label>
+      <div class="read"><dt>Zustand</dt><dd id="gState">Spannung aus</dd></div>
+      <p class="formula">Echter Versuch (Video, LMU München): didaktik.physik.uni-muenchen.de → Lehrerbildung → Videos → E-Lehre → Das elektrische Feld („Felder von zwei Punktladungen“, „Homogenes Feld im Kondensator“, „Ringelektrode“).</p>
+    </div>
+  </section>
+  <footer>Erstellung unterstützt von Claude. Modell: ideale Punktladungen bzw. idealer Plattenkondensator (Randeffekte vernachlässigt), g = 9,81 N/kg.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+const K = 8.99e9, EPS0 = 8.854e-12, G = 9.81;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const de = (x, d=2) => Number(x).toLocaleString("de-DE", {maximumSignificantDigits: d+1});
+function eng(x, unit, sig=3){
+  if (!isFinite(x)) return "–";
+  if (x === 0) return "0 " + unit;
+  const P = [[1e9,"G"],[1e6,"M"],[1e3,"k"],[1,""],[1e-3,"m"],[1e-6,"µ"],[1e-9,"n"],[1e-12,"p"]];
+  const a = Math.abs(x);
+  for (const [f,p] of P) if (a >= f*0.9999) return (x/f).toLocaleString("de-DE",{maximumSignificantDigits:sig}) + " " + p + unit;
+  return x.toExponential(2).replace(".", ",") + " " + unit;
+}
+function sci(x, unit){
+  if (!isFinite(x) || x === 0) return "0 " + unit;
+  const e = Math.floor(Math.log10(Math.abs(x))), m = x / Math.pow(10, e);
+  const sup = String(e).replace(/-/g,"⁻").replace(/\d/g, c => "⁰¹²³⁴⁵⁶⁷⁸⁹"[c]);
+  return m.toLocaleString("de-DE",{maximumFractionDigits:2}) + "·10" + sup + " " + unit;
+}
+function arrow(ctx, x1, y1, x2, y2, col, w=2.5, head=11){
+  const a = Math.atan2(y2-y1, x2-x1);
+  ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = w;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(x2-head*Math.cos(a-0.4), y2-head*Math.sin(a-0.4)); ctx.lineTo(x2-head*Math.cos(a+0.4), y2-head*Math.sin(a+0.4)); ctx.closePath(); ctx.fill();
+}
+function pointerPos(cv, ev){ const r = cv.getBoundingClientRect(); return { x: (ev.clientX - r.left) * cv.width / r.width, y: (ev.clientY - r.top) * cv.height / r.height }; }
+
+/* ---------- Modus 1: Ladungen ---------- */
+const c1 = document.getElementById("c1"), x1 = c1.getContext("2d");
+const PX = 30;                 // 30 px = 1 cm
+let charges = [], probe = {x: 600, y: 200}, drag = null;
+function preset(n){
+  const cx = c1.width/2, cy = c1.height/2;
+  if (n === "punkt") charges = [{x:cx, y:cy, q:2}];
+  if (n === "dipol") charges = [{x:cx-150, y:cy, q:1}, {x:cx+150, y:cy, q:-1}];
+  if (n === "gleich") charges = [{x:cx-150, y:cy, q:1}, {x:cx+150, y:cy, q:1}];
+  if (n === "platten") { charges = []; for (let i=0;i<11;i++){ charges.push({x:cx-150, y:cy-200+i*40, q:1}); charges.push({x:cx+150, y:cy-200+i*40, q:-1}); } }
+  probe = {x: cx, y: cy-120}; draw1();
+}
+function field(x, y){
+  let ex = 0, ey = 0, v = 0;
+  for (const c of charges){
+    const dx = (x-c.x)/PX/100, dy = (y-c.y)/PX/100;   // in m
+    const r2 = dx*dx + dy*dy, r = Math.sqrt(r2);
+    if (r < 1e-4) continue;
+    const E = K * c.q*1e-9 / r2;
+    ex += E*dx/r; ey += E*dy/r; v += K*c.q*1e-9/r;
+  }
+  return {ex, ey, v};
+}
+function trace(sx, sy, dir){
+  const pts = [[sx,sy]]; let x = sx, y = sy;
+  for (let i=0;i<900;i++){
+    const f = field(x,y), n = Math.hypot(f.ex,f.ey); if (!n) break;
+    const h = 4*dir;
+    const mx = x + 0.5*h*f.ex/n, my = y + 0.5*h*f.ey/n, f2 = field(mx,my), n2 = Math.hypot(f2.ex,f2.ey); if (!n2) break;
+    x += h*f2.ex/n2; y += h*f2.ey/n2; pts.push([x,y]);
+    if (x < -20 || y < -20 || x > c1.width+20 || y > c1.height+20) break;
+    if (charges.some(c => c.q*dir < 0 && Math.hypot(x-c.x, y-c.y) < 12)) break;
+  }
+  return pts;
+}
+function draw1(){
+  const W = c1.width, H = c1.height, ctx = x1;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle = css("--paper"); ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = css("--line"); ctx.lineWidth = 1;
+  for (let x=0;x<=W;x+=PX){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y=0;y<=H;y+=PX){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  if (document.getElementById("showE").checked && charges.length) drawEquip(ctx, W, H);
+  if (document.getElementById("showL").checked && charges.length){
+    const src = charges.some(c => c.q > 0) ? charges.filter(c => c.q > 0) : charges;
+    const dir = charges.some(c => c.q > 0) ? 1 : -1;
+    const per = charges.length > 8 ? 4 : 14;
+    ctx.lineWidth = 1.4;
+    for (const c of src){
+      const n = per * Math.abs(c.q);
+      for (let k=0;k<n;k++){
+        const a = 2*Math.PI*(k+0.5)/n, pts = trace(c.x+13*Math.cos(a), c.y+13*Math.sin(a), dir);
+        ctx.strokeStyle = css("--field"); ctx.beginPath(); pts.forEach((p,i) => i ? ctx.lineTo(p[0],p[1]) : ctx.moveTo(p[0],p[1])); ctx.stroke();
+        const i = Math.floor(pts.length*0.35);
+        if (pts.length > 20){ const [ax,ay] = pts[i], [bx,by] = pts[i+(dir>0?3:-3)] || pts[i]; if (dir < 0) arrow(ctx, ax, ay, bx, by, css("--field"), 1.4, 9); else arrow(ctx, ax, ay, bx, by, css("--field"), 1.4, 9); }
+      }
+    }
+  }
+  for (const c of charges){
+    ctx.fillStyle = c.q > 0 ? css("--plus") : css("--minus");
+    ctx.beginPath(); ctx.arc(c.x, c.y, 12, 0, 2*Math.PI); ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.font = "bold 18px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(c.q > 0 ? "+" : "−", c.x, c.y+1);
+  }
+  const r = document.getElementById("r1");
+  if (document.getElementById("showP").checked){
+    const f = field(probe.x, probe.y), E = Math.hypot(f.ex, f.ey);
+    const L = E ? Math.min(140, 22*Math.log10(1+E/50)) : 0;
+    if (L > 2) arrow(ctx, probe.x, probe.y, probe.x + L*f.ex/E, probe.y + L*f.ey/E, css("--ok"), 3, 12);
+    ctx.fillStyle = css("--paper"); ctx.strokeStyle = css("--ok"); ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(probe.x, probe.y, 8, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = css("--ok"); ctx.font = "bold 13px sans-serif"; ctx.fillText("+", probe.x, probe.y+1);
+    r.innerHTML = `<dt>Feldstärke E</dt><dd>${sci(E,"N/C")}</dd><dt>Kraft auf q = 1 nC</dt><dd>${sci(E*1e-9,"N")}</dd><dt>Potenzial φ</dt><dd>${eng(f.v,"V")}</dd>`;
+  } else r.innerHTML = `<dt>Probeladung</dt><dd>aus</dd>`;
+}
+function drawEquip(ctx, W, H){
+  const s = 10, nx = Math.ceil(W/s)+1, ny = Math.ceil(H/s)+1, V = new Float32Array(nx*ny);
+  let vmax = 0;
+  for (let j=0;j<ny;j++) for (let i=0;i<nx;i++){ const v = field(i*s, j*s).v; V[j*nx+i] = v; }
+  const ref = Math.max(...charges.map(c => Math.abs(K*c.q*1e-9/0.02)));   // Potenzial im Abstand 2 cm
+  const levels = []; for (let k=-6;k<=6;k++) if (k) levels.push(ref*k/7);
+  ctx.strokeStyle = css("--eq"); ctx.lineWidth = 1.2; ctx.setLineDash([6,5]);
+  for (const L of levels){
+    ctx.beginPath();
+    for (let j=0;j<ny-1;j++) for (let i=0;i<nx-1;i++){
+      const a = V[j*nx+i], b = V[j*nx+i+1], c = V[(j+1)*nx+i+1], d = V[(j+1)*nx+i];
+      const p = [];
+      const e = (v1, v2, x1, y1, x2, y2) => { if ((v1-L)*(v2-L) < 0){ const t = (L-v1)/(v2-v1); p.push([x1+t*(x2-x1), y1+t*(y2-y1)]); } };
+      const X = i*s, Y = j*s;
+      e(a,b,X,Y,X+s,Y); e(b,c,X+s,Y,X+s,Y+s); e(c,d,X+s,Y+s,X,Y+s); e(d,a,X,Y+s,X,Y);
+      if (p.length >= 2){ ctx.moveTo(p[0][0],p[0][1]); ctx.lineTo(p[1][0],p[1][1]); }
+      if (p.length === 4){ ctx.moveTo(p[2][0],p[2][1]); ctx.lineTo(p[3][0],p[3][1]); }
+    }
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+}
+c1.addEventListener("pointerdown", ev => {
+  const p = pointerPos(c1, ev);
+  if (document.getElementById("showP").checked && Math.hypot(p.x-probe.x, p.y-probe.y) < 16) drag = {probe:true};
+  else { const c = charges.find(c => Math.hypot(p.x-c.x, p.y-c.y) < 16); if (c) drag = {c}; }
+  if (drag) c1.setPointerCapture(ev.pointerId);
+});
+c1.addEventListener("pointermove", ev => {
+  if (!drag) return; const p = pointerPos(c1, ev);
+  if (drag.probe) { probe.x = p.x; probe.y = p.y; } else { drag.c.x = p.x; drag.c.y = p.y; }
+  draw1();
+});
+c1.addEventListener("pointerup", ev => {
+  if (drag && drag.c){ const c = drag.c; if (c.x < 0 || c.y < 0 || c.x > c1.width || c.y > c1.height) charges = charges.filter(x => x !== c); }
+  drag = null; draw1();
+});
+document.getElementById("addP").onclick = () => { charges.push({x: c1.width/2 + (Math.random()-0.5)*200, y: c1.height/2 + (Math.random()-0.5)*160, q: 1}); draw1(); };
+document.getElementById("addM").onclick = () => { charges.push({x: c1.width/2 + (Math.random()-0.5)*200, y: c1.height/2 + (Math.random()-0.5)*160, q: -1}); draw1(); };
+document.getElementById("clr").onclick = () => { charges = []; draw1(); };
+document.querySelectorAll("[data-pre]").forEach(b => b.onclick = () => preset(b.dataset.pre));
+["showL","showE","showP"].forEach(id => document.getElementById(id).onchange = draw1);
+
+/* ---------- Modus 2: Plattenkondensator ---------- */
+const c2 = document.getElementById("c2"), x2 = c2.getContext("2d");
+const $ = id => document.getElementById(id);
+let part = {x: 450, fy: 0.5}, drag2 = false, Qfix = null;
+function vals(){
+  const er = +$("er").value, d = +$("d").value/100, A = +$("A").value/1e4;
+  const C = EPS0*er*A/d;
+  let U = +$("U").value;
+  if ($("detach").checked){ if (Qfix === null) Qfix = C*U; U = Qfix/C; } else Qfix = null;
+  const Q = C*U, E = U/d;
+  return {er, d, A, C, U, Q, E};
+}
+function draw2(){
+  const v = vals(), ctx = x2, W = c2.width, H = c2.height;
+  $("oU").textContent = $("detach").checked ? eng(v.U,"V") + " (fest: Q)" : eng(+$("U").value,"V");
+  $("U").disabled = $("detach").checked;
+  $("od").textContent = de(+$("d").value) + " cm"; $("oA").textContent = $("A").value + " cm²";
+  $("oq").textContent = $("q").value + " pC"; $("om").textContent = de(+$("m").value) + " mg";
+  ctx.clearRect(0,0,W,H); ctx.fillStyle = css("--paper"); ctx.fillRect(0,0,W,H);
+  const gap = 40 + (+$("d").value)*40, top = H/2 - gap/2, bot = H/2 + gap/2;
+  const wPl = 220 + (+$("A").value)*1.0, x0 = W/2 - wPl/2, x1p = W/2 + wPl/2;
+  const flip = $("flip").checked, topPlus = !flip;
+  if (v.er > 1){ ctx.fillStyle = css("--line"); ctx.fillRect(x0, top, wPl, gap); ctx.fillStyle = css("--muted"); ctx.font = "13px sans-serif"; ctx.textAlign = "right"; ctx.fillText("Dielektrikum εr = " + String(v.er).replace(".",","), x1p-6, bot-8); }
+  // Feldlinien: Anzahl ~ E
+  const n = Math.max(0, Math.min(40, Math.round(v.E/1500)));
+  ctx.lineWidth = 1.3;
+  for (let i=0;i<n;i++){
+    const x = x0 + (i+0.5)*wPl/n;
+    ctx.strokeStyle = css("--field"); ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, bot); ctx.stroke();
+    const ym = (top+bot)/2, s = topPlus ? 1 : -1;
+    arrow(ctx, x, ym - 6*s, x, ym + 6*s, css("--field"), 1.3, 8);
+  }
+  // Äquipotenziallinien
+  ctx.setLineDash([6,5]); ctx.strokeStyle = css("--eq"); ctx.lineWidth = 1.2; ctx.font = "12px sans-serif"; ctx.textAlign = "left"; ctx.fillStyle = css("--muted");
+  for (const f of [0.25, 0.5, 0.75]){
+    const y = bot - f*gap; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1p, y); ctx.stroke();
+    const phi = topPlus ? f*v.U : (1-f)*v.U;
+    ctx.fillText(eng(phi,"V",3), x1p + 8, y + 4);
+  }
+  ctx.setLineDash([]);
+  ctx.fillText(eng(topPlus ? v.U : 0, "V", 3), x1p + 8, top + 4); ctx.fillText(eng(topPlus ? 0 : v.U, "V", 3), x1p + 8, bot + 4);
+  // Platten
+  for (const [y, plus] of [[top-8, topPlus], [bot, !topPlus]]){
+    ctx.fillStyle = plus ? css("--plus") : css("--minus"); ctx.fillRect(x0, y, wPl, 8);
+    ctx.fillStyle = plus ? css("--plus") : css("--minus"); ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center";
+    for (let i=0;i<9;i++) ctx.fillText(plus ? "+" : "−", x0 + (i+0.5)*wPl/9, plus === topPlus ? y - 6 : y + 24);
+  }
+  // Abstandspfeil
+  ctx.strokeStyle = css("--muted"); ctx.lineWidth = 1; arrow(ctx, x0-24, H/2, x0-24, top+2, css("--muted"), 1, 7); arrow(ctx, x0-24, H/2, x0-24, bot-2, css("--muted"), 1, 7);
+  ctx.fillStyle = css("--muted"); ctx.font = "14px sans-serif"; ctx.textAlign = "right"; ctx.fillText("d", x0-32, H/2+5);
+  // Probeteilchen
+  part.x = Math.max(x0+14, Math.min(x1p-14, part.x));
+  const py = top + part.fy*gap, q = +$("q").value*1e-12, m = +$("m").value*1e-6;
+  const Fel = q*v.E*(topPlus ? 1 : -1);          // positiv = nach unten
+  const FG = $("grav").checked ? m*G : 0;
+  const Fnet = Fel + FG;
+  const sc = F => Math.sign(F)*Math.min(110, 25*Math.log10(1+Math.abs(F)/1e-9));
+  if (Math.abs(Fel) > 0) arrow(ctx, part.x-8, py, part.x-8, py + sc(Fel), css("--ok"), 3, 11);
+  if (FG) arrow(ctx, part.x+8, py, part.x+8, py + sc(FG), css("--muted"), 3, 11);
+  ctx.fillStyle = css("--paper"); ctx.strokeStyle = q >= 0 ? css("--plus") : css("--minus"); ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(part.x, py, 9, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = q >= 0 ? css("--plus") : css("--minus"); ctx.font = "bold 13px sans-serif"; ctx.textAlign = "center"; ctx.fillText(q > 0 ? "+" : q < 0 ? "−" : "0", part.x, py+5);
+  ctx.font = "13px sans-serif"; ctx.textAlign = "left"; ctx.fillStyle = css("--ok"); if (Fel) ctx.fillText("F_el", part.x+16, py + sc(Fel)/2);
+  if (FG){ ctx.fillStyle = css("--muted"); ctx.fillText("F_G", part.x+16, py + sc(FG)/2 + 16); }
+  // Messwerte
+  $("r2").innerHTML = `<dt>Spannung U</dt><dd>${eng(v.U,"V")}</dd><dt>Feldstärke E = U/d</dt><dd>${sci(v.E,"V/m")}</dd><dt>Kapazität C</dt><dd>${eng(v.C,"F")}</dd><dt>Ladung Q = C·U</dt><dd>${eng(v.Q,"C")}</dd>`;
+  $("r3").innerHTML = `<dt>F_el = q·E</dt><dd>${sci(Math.abs(Fel),"N")} ${Fel>0?"↓":Fel<0?"↑":""}</dd>` + (FG ? `<dt>F_G = m·g</dt><dd>${sci(FG,"N")} ↓</dd>` : "");
+  const st = $("st");
+  if (FG){
+    const rel = Math.abs(Fnet)/FG;
+    st.innerHTML = rel < 0.03 ? `<span class="state ok">schwebt (q·E ≈ m·g)</span>` : Fnet < 0 ? `<span class="state up">steigt</span>` : `<span class="state down">sinkt</span>`;
+  } else st.innerHTML = "";
+  $("mRow").hidden = !$("grav").checked;
+}
+c2.addEventListener("pointerdown", ev => { drag2 = true; c2.setPointerCapture(ev.pointerId); move2(ev); });
+c2.addEventListener("pointermove", ev => { if (drag2) move2(ev); });
+c2.addEventListener("pointerup", () => { drag2 = false; });
+function move2(ev){
+  const p = pointerPos(c2, ev), gap = 40 + (+$("d").value)*40, top = c2.height/2 - gap/2;
+  part.x = p.x; part.fy = Math.max(0.08, Math.min(0.92, (p.y - top)/gap)); draw2();
+}
+["U","d","A","q","m"].forEach(id => $(id).addEventListener("input", draw2));
+["er","detach","flip","grav"].forEach(id => $(id).addEventListener("change", draw2));
+
+/* ---------- Modus 3: Grießkörner ---------- */
+const c3 = document.getElementById("c3"), x3 = c3.getContext("2d");
+const DX = 450, DY = 300, DR = 280;          // Petrischale
+let gEl = [], grains = [], gOn = false, gPreset = "dipol", gRaf = null;
+function gPresetSet(n){
+  gPreset = n; gEl = [];
+  const add = (x, y, q) => gEl.push({x, y, q});
+  if (n === "dipol"){ add(DX-130, DY, 1); add(DX+130, DY, -1); }
+  if (n === "gleich"){ add(DX-130, DY, 1); add(DX+130, DY, 1); }
+  if (n === "platten"){ for (let i=0;i<15;i++){ add(DX-110, DY-140+i*20, 1); add(DX+110, DY-140+i*20, -1); } }
+  if (n === "punktplatte"){ add(DX-120, DY, 1); for (let i=0;i<17;i++) add(DX+110, DY-160+i*20, -1); }
+  if (n === "ring"){ add(DX, DY, 1); for (let i=0;i<36;i++){ const a = i*Math.PI/18; add(DX+170*Math.cos(a), DY+170*Math.sin(a), -2/36*3); } }
+  if (n === "kaefig"){ for (let i=0;i<36;i++){ const a = i*Math.PI/18; add(DX+60+90*Math.cos(a), DY+90*Math.sin(a), 1/12); } add(DX-200, DY, -3); }
+  gShake(); drawG();
+}
+function gField(x, y){
+  if (gPreset === "kaefig" && Math.hypot(x-DX-60, y-DY) < 86) return {ex:0, ey:0};   // leitender Ring schirmt ab (Faraday-Käfig)
+  let ex = 0, ey = 0;
+  for (const c of gEl){ const dx = x-c.x, dy = y-c.y, r2 = dx*dx+dy*dy; if (r2 < 25) continue; const r = Math.sqrt(r2); ex += c.q*dx/(r2*r); ey += c.q*dy/(r2*r); }
+  return {ex, ey};
+}
+function gNear(x, y){ return gEl.some(c => Math.hypot(x-c.x, y-c.y) < 16) || (gPreset === "platten" && Math.abs(Math.abs(x-DX)-110) < 8 && Math.abs(y-DY) < 150); }
+function gShake(){
+  grains = [];
+  while (grains.length < 1500){
+    const r = DR*Math.sqrt(Math.random())-6, a = Math.random()*2*Math.PI, x = DX+r*Math.cos(a), y = DY+r*Math.sin(a);
+    if (!gNear(x, y)) grains.push({x, y, th: Math.random()*Math.PI});
+  }
+}
+function drawG(){
+  const ctx = x3, W = c3.width, H = c3.height;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle = css("--paper"); ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = css("--oil"); ctx.strokeStyle = css("--muted"); ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(DX, DY, DR+8, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
+  if ($("gLines").checked){
+    ctx.strokeStyle = css("--eq"); ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+    const src = gEl.filter(c => c.q > 0);
+    for (const c of src){ const n = gPreset === "platten" || gPreset === "kaefig" ? 2 : 16;
+      for (let k=0;k<n;k++){ const a = 2*Math.PI*(k+0.5)/n; let x = c.x+12*Math.cos(a), y = c.y+12*Math.sin(a); ctx.beginPath(); ctx.moveTo(x,y);
+        for (let i=0;i<600;i++){ const f = gField(x,y), m = Math.hypot(f.ex,f.ey); if (!m) break; x += 3*f.ex/m; y += 3*f.ey/m; ctx.lineTo(x,y);
+          if (Math.hypot(x-DX,y-DY) > DR || gEl.some(e => e.q < 0 && Math.hypot(x-e.x,y-e.y) < 10)) break; }
+        ctx.stroke(); } }
+    ctx.setLineDash([]);
+  }
+  ctx.strokeStyle = css("--grain"); ctx.lineWidth = 2; ctx.lineCap = "round";
+  ctx.beginPath();
+  for (const g of grains){ const dx = 3.5*Math.cos(g.th), dy = 3.5*Math.sin(g.th); ctx.moveTo(g.x-dx, g.y-dy); ctx.lineTo(g.x+dx, g.y+dy); }
+  ctx.stroke();
+  // Elektroden
+  const elCol = q => q > 0 ? css("--plus") : css("--minus");
+  if (gPreset === "platten" || gPreset === "punktplatte"){
+    if (gPreset === "platten"){ ctx.fillStyle = css("--plus"); ctx.fillRect(DX-116, DY-150, 12, 300); }
+    ctx.fillStyle = css("--minus"); ctx.fillRect(DX+104, DY-(gPreset==="platten"?150:170), 12, gPreset==="platten"?300:340);
+  }
+  if (gPreset === "ring" || gPreset === "kaefig"){
+    const cx = gPreset === "ring" ? DX : DX+60, rr = gPreset === "ring" ? 170 : 90;
+    ctx.strokeStyle = elCol(gPreset === "ring" ? -1 : 1); ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(cx, DY, rr, 0, 2*Math.PI); ctx.stroke();
+  }
+  for (const c of gEl){
+    if (gPreset === "platten" || (gPreset === "punktplatte" && c.q < 0) || ((gPreset === "ring" || gPreset === "kaefig") && Math.abs(c.q) < 1)) continue;
+    ctx.fillStyle = elCol(c.q); ctx.beginPath(); ctx.arc(c.x, c.y, 11, 0, 2*Math.PI); ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(c.q > 0 ? "+" : "−", c.x, c.y+1);
+  }
+  $("oG").textContent = String($("gU").value).replace(".", ",") + " kV";
+  $("gState").textContent = gOn && +$("gU").value > 0 ? "Spannung ein – Körner richten sich aus" : "Spannung aus";
+  $("gOn").textContent = gOn ? "Spannung aus" : "Spannung ein";
+}
+function stepG(){
+  const U = +$("gU").value / 10;
+  if (gOn && U > 0){
+    for (const g of grains){
+      const f = gField(g.x, g.y), m = Math.hypot(f.ex, f.ey); if (!m) continue;
+      const strength = Math.min(1, m*9000) * U;            // schwaches Feld → langsame Ausrichtung
+      let target = Math.atan2(f.ey, f.ex), d = target - g.th;
+      d = ((d + Math.PI/2) % Math.PI + Math.PI) % Math.PI - Math.PI/2;   // Dipolachse: modulo π
+      g.th += d * 0.12 * strength;
+    }
+  }
+  drawG();
+  gRaf = !$("m3").hidden ? requestAnimationFrame(stepG) : null;
+}
+document.querySelectorAll("[data-g]").forEach(b => b.onclick = () => gPresetSet(b.dataset.g));
+$("gOn").onclick = () => { gOn = !gOn; drawG(); };
+$("gShake").onclick = () => { gShake(); drawG(); };
+$("gU").addEventListener("input", drawG); $("gLines").addEventListener("change", drawG);
+gPresetSet("dipol");
+
+/* ---------- Tabs ---------- */
+function tab(n){
+  [1,2,3].forEach(k => { $("tab"+k).setAttribute("aria-selected", n===k); $("m"+k).hidden = n !== k; });
+  if (n===1) draw1(); else if (n===2) draw2(); else { drawG(); if (!gRaf) gRaf = requestAnimationFrame(stepG); }
+  try { localStorage.setItem("feldlabor-tab", n); } catch(_){}
+}
+$("tab1").onclick = () => tab(1); $("tab2").onclick = () => tab(2); $("tab3").onclick = () => tab(3);
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => { draw1(); draw2(); drawG(); });
+new MutationObserver(() => { draw1(); draw2(); drawG(); }).observe(document.documentElement, {attributes:true, attributeFilter:["data-theme"]});
+preset("dipol");
+let t = 1; try { t = +localStorage.getItem("feldlabor-tab") || 1; } catch(_){}
+if (location.hash === "#kondensator") t = 2;
+if (location.hash === "#griess") t = 3;
+if (![1,2,3].includes(t)) t = 1;
+tab(t);
+})();
+</script>
+
+</body></html>

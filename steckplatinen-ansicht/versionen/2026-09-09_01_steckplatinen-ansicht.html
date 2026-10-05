@@ -1,0 +1,336 @@
+<!doctype html><html><head><meta charset=utf8><meta name="robots" content="noindex, nofollow"><title>Steckplatinen-Ansicht</title><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+
+:root{
+  --bg:#F4F6F5; --surface:#FFFFFF; --ink:#1B2422; --ink-muted:#55625E;
+  --rule:#D8DEDB; --accent:#2F6F62; --accent-copper:#A15C32;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14181A; --surface:#1C2224; --ink:#E7EEEC; --ink-muted:#9BA8A3;
+    --rule:#313B39; --accent:#6FBFAE; --accent-copper:#D08A55;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14181A; --surface:#1C2224; --ink:#E7EEEC; --ink-muted:#9BA8A3;
+  --rule:#313B39; --accent:#6FBFAE; --accent-copper:#D08A55;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;padding:48px 20px 64px;}
+.page{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:24px;}
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+h1{font-size:clamp(24px,4vw,32px);line-height:1.15;margin:6px 0 0;font-weight:700;text-wrap:balance;}
+.subtitle{margin:10px 0 0;color:var(--ink-muted);font-size:15px;max-width:66ch;line-height:1.55;}
+.sheet{background:var(--surface);border:1px solid var(--rule);border-radius:6px;overflow:hidden;}
+.sheet-inner{padding:18px 10px 6px;}
+figure{margin:0;}
+svg.pict{width:100%;height:auto;display:block;}
+figcaption{padding:14px 24px 20px;font-size:13.5px;color:var(--ink-muted);line-height:1.6;border-top:1px solid var(--rule);}
+figcaption b{color:var(--ink);font-weight:600;}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;padding:6px 24px 18px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;color:var(--ink-muted);}
+.legend span.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;border:1px solid var(--rule);}
+footer{font-size:11.5px;color:var(--ink-muted);border-top:1px solid var(--rule);padding-top:14px;}
+.dms{color:var(--accent-copper);font-weight:600;}
+
+</style>
+
+<div class="page">
+
+  <div>
+    <div class="eyebrow">NWT · Fahrrad-Trittleistungsmessung</div>
+    <h1>Steckplatinen-Ansicht: die komplette Messkette</h1>
+    <p class="subtitle">Dieselbe Schaltung wie im Schaltplan, jetzt so gezeichnet, wie sie auf einem echten Steckbrett verdrahtet würde (im Stil von Tinkercads Steckplatinen-Ansicht) – mit Arduino Uno, Steckbrett, Jumperkabeln, dem HX711-Modul und dem 16×2-LCD über den I²C-Adapter.</p>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-inner">
+      <figure>
+        <svg class="pict" viewBox="0 0 1500 700" role="img" aria-label="Steckplatinen-Ansicht: Arduino Uno links, verbunden mit einem Steckbrett rechts, auf dem zwei Widerstands-Spannungsteiler (R1/R2 und R3/R4-DMS) aufgebaut sind, sowie ein HX711-Modul, dessen Anschlüsse mit den Spannungsschienen, den Abgriffen der Teiler und den Analogeingängen A0/A1 des Arduino verbunden sind. Unterhalb ist ein 16×2-LCD über einen I²C-Adapter an die Analogeingänge A4/A5 und die untere Spannungsschiene angeschlossen; ein Brücken-Jumper verbindet die untere mit der oberen (mit dem Arduino verbundenen) Spannungsschiene, damit der Adapter auch tatsächlich Strom bekommt.">
+          <defs>
+            <pattern id="holes" width="18" height="18" patternUnits="userSpaceOnUse">
+              <circle cx="9" cy="9" r="1.6" fill="currentColor" opacity="0.28"></circle>
+            </pattern>
+            <marker id="dot" markerWidth="8" markerHeight="8" refX="4" refY="4">
+              <circle cx="4" cy="4" r="3.2" fill="context-fill"></circle>
+            </marker>
+          </defs>
+
+          <!-- ======================= ARDUINO UNO ======================= -->
+          <g>
+            <rect x="30" y="160" width="400" height="280" rx="10" fill="#0C7C92"></rect>
+            <rect x="30" y="160" width="400" height="280" rx="10" fill="none" stroke="#075A6B" stroke-width="2"></rect>
+
+            <!-- USB connector -->
+            <rect x="12" y="190" width="26" height="42" rx="3" fill="#C9CCCE"></rect>
+            <rect x="16" y="196" width="18" height="30" rx="1.5" fill="#8B9092"></rect>
+            <!-- power jack -->
+            <rect x="10" y="270" width="30" height="38" rx="7" fill="#232323"></rect>
+            <circle cx="25" cy="289" r="8" fill="#3a3a3a"></circle>
+
+            <!-- reset button -->
+            <circle cx="395" cy="185" r="9" fill="#2c2c2c"></circle>
+            <circle cx="395" cy="185" r="5" fill="#555"></circle>
+
+            <!-- chip -->
+            <rect x="175" y="255" width="120" height="42" rx="2" fill="#161616"></rect>
+            <text x="235" y="280" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#cfd3d4">ATMEGA328P</text>
+
+            <!-- silkscreen -->
+            <text x="235" y="215" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="20" font-weight="700" fill="#EAF7F8">ARDUINO</text>
+            <text x="235" y="235" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" letter-spacing="2" fill="#BEE7EA">UNO</text>
+
+            <!-- top digital header (unused) -->
+            <rect x="70" y="152" width="330" height="14" rx="2" fill="#161616"></rect>
+            <g fill="#555">
+              <circle cx="85" cy="159" r="2"></circle><circle cx="102" cy="159" r="2"></circle><circle cx="119" cy="159" r="2"></circle>
+              <circle cx="136" cy="159" r="2"></circle><circle cx="153" cy="159" r="2"></circle><circle cx="170" cy="159" r="2"></circle>
+              <circle cx="187" cy="159" r="2"></circle><circle cx="204" cy="159" r="2"></circle>
+              <circle cx="235" cy="159" r="2"></circle>
+              <circle cx="266" cy="159" r="2"></circle><circle cx="283" cy="159" r="2"></circle><circle cx="300" cy="159" r="2"></circle>
+              <circle cx="317" cy="159" r="2"></circle><circle cx="334" cy="159" r="2"></circle><circle cx="351" cy="159" r="2"></circle><circle cx="368" cy="159" r="2"></circle>
+            </g>
+            <text x="235" y="145" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#EAF7F8" opacity="0.75">DIGITAL I/O (nicht belegt)</text>
+
+            <!-- bottom header: power + analog -->
+            <rect x="60" y="434" width="360" height="14" rx="2" fill="#161616"></rect>
+            <g fill="#777">
+              <circle cx="75" cy="441" r="2"></circle>
+              <circle cx="99" cy="441" r="2"></circle>
+              <circle cx="186" cy="441" r="2"></circle>
+              <circle cx="210" cy="441" r="2"></circle>
+              <circle cx="313" cy="441" r="2"></circle>
+              <circle cx="337" cy="441" r="2"></circle>
+            </g>
+            <!-- used pins highlighted -->
+            <circle cx="128" cy="441" r="3" fill="#D6483C"></circle>
+            <circle cx="157" cy="441" r="3" fill="#2B2B2B" stroke="#fff" stroke-width="0.6"></circle>
+            <circle cx="260" cy="441" r="3" fill="#E08A2C"></circle>
+            <circle cx="289" cy="441" r="3" fill="#8B5FBF"></circle>
+            <circle cx="386" cy="441" r="3" fill="#1E88A8"></circle>
+            <circle cx="410" cy="441" r="3" fill="#C2478D"></circle>
+
+            <g font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#EAF7F8" opacity="0.7" text-anchor="middle">
+              <text x="75" y="430">RESET</text>
+              <text x="99" y="430">3V3</text>
+              <text x="186" y="430">GND</text>
+              <text x="210" y="430">VIN</text>
+              <text x="313" y="430">A2</text>
+              <text x="337" y="430">A3</text>
+            </g>
+            <g font-family="IBM Plex Mono, monospace" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">
+              <text x="128" y="430">5V</text>
+              <text x="157" y="430">GND</text>
+              <text x="260" y="430">A0</text>
+              <text x="289" y="430">A1</text>
+              <text x="386" y="430">A4</text>
+              <text x="410" y="430">A5</text>
+            </g>
+            <text x="235" y="470" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#EAF7F8" opacity="0.75">POWER + ANALOG IN</text>
+          </g>
+
+          <!-- ======================= BREADBOARD ======================= -->
+          <g>
+            <rect x="470" y="60" width="980" height="430" rx="8" fill="#F1EEE3"></rect>
+            <rect x="470" y="60" width="980" height="430" rx="8" fill="none" stroke="#CFC9B4" stroke-width="2"></rect>
+
+            <!-- top power rails -->
+            <rect x="490" y="66" width="940" height="46" fill="url(#holes)" color="#8a8370"></rect>
+            <line x1="490" y1="80" x2="1430" y2="80" stroke="#C0392B" stroke-width="2"></line>
+            <line x1="490" y1="102" x2="1430" y2="102" stroke="#2E5FA3" stroke-width="2"></line>
+            <text x="1435" y="83" font-family="IBM Plex Mono, monospace" font-size="12" fill="#C0392B">+</text>
+            <text x="1435" y="106" font-family="IBM Plex Mono, monospace" font-size="12" fill="#2E5FA3">–</text>
+
+            <!-- upper terminal block -->
+            <rect x="490" y="140" width="940" height="112" fill="url(#holes)" color="#8a8370"></rect>
+            <!-- gutter -->
+            <rect x="470" y="256" width="980" height="18" fill="#E4DFCE"></rect>
+            <!-- lower terminal block -->
+            <rect x="490" y="278" width="940" height="112" fill="url(#holes)" color="#8a8370"></rect>
+
+            <!-- bottom power rails (versorgen den I2C-Adapter/LCD) -->
+            <rect x="490" y="404" width="940" height="46" fill="url(#holes)" color="#8a8370"></rect>
+            <line x1="490" y1="418" x2="1430" y2="418" stroke="#2E5FA3" stroke-width="2"></line>
+            <line x1="490" y1="440" x2="1430" y2="440" stroke="#C0392B" stroke-width="2"></line>
+            <text x="1435" y="421" font-family="IBM Plex Mono, monospace" font-size="12" fill="#2E5FA3">–</text>
+            <text x="1435" y="444" font-family="IBM Plex Mono, monospace" font-size="12" fill="#C0392B">+</text>
+
+            <!-- resistor R1 -->
+            <line x1="560" y1="170" x2="650" y2="170" stroke="#8a8370" stroke-width="2"></line>
+            <rect x="578" y="163" width="54" height="14" rx="4" fill="#E4C9A0" stroke="#8a6a3a"></rect>
+            <rect x="588" y="163" width="4" height="14" fill="#7a4a2a"></rect>
+            <rect x="600" y="163" width="4" height="14" fill="#c0392b"></rect>
+            <rect x="612" y="163" width="4" height="14" fill="#3a3a3a"></rect>
+            <text x="605" y="150" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11">R1 · 1 kΩ</text>
+
+            <!-- resistor R2 -->
+            <line x1="650" y1="200" x2="740" y2="200" stroke="#8a8370" stroke-width="2"></line>
+            <rect x="668" y="193" width="54" height="14" rx="4" fill="#E4C9A0" stroke="#8a6a3a"></rect>
+            <rect x="678" y="193" width="4" height="14" fill="#7a4a2a"></rect>
+            <rect x="690" y="193" width="4" height="14" fill="#c0392b"></rect>
+            <rect x="702" y="193" width="4" height="14" fill="#3a3a3a"></rect>
+            <text x="695" y="222" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11">R2 · 1 kΩ</text>
+
+            <!-- resistor R3 -->
+            <line x1="900" y1="170" x2="990" y2="170" stroke="#8a8370" stroke-width="2"></line>
+            <rect x="918" y="163" width="54" height="14" rx="4" fill="#E4C9A0" stroke="#8a6a3a"></rect>
+            <rect x="928" y="163" width="4" height="14" fill="#7a4a2a"></rect>
+            <rect x="940" y="163" width="4" height="14" fill="#c0392b"></rect>
+            <rect x="952" y="163" width="4" height="14" fill="#3a3a3a"></rect>
+            <text x="945" y="150" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11">R3 · 1 kΩ</text>
+
+            <!-- resistor R4 / DMS -->
+            <line x1="990" y1="200" x2="1080" y2="200" stroke="#8a8370" stroke-width="2"></line>
+            <rect x="1008" y="193" width="54" height="14" rx="4" fill="#E4C9A0" stroke="var(--accent-copper)" stroke-width="1.6"></rect>
+            <line x1="1002" y1="212" x2="1068" y2="188" stroke="var(--accent-copper)" stroke-width="2.2" stroke-linecap="round"></line>
+            <polygon points="1068,188 1058,192 1062,201" fill="var(--accent-copper)"></polygon>
+            <text x="1035" y="222" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--accent-copper)" font-weight="600">R4 · DMS</text>
+
+            <!-- jumpers rail -> resistor legs -->
+            <path d="M 560 80 V 163" fill="none" stroke="#C0392B" stroke-width="2.4"></path>
+            <path d="M 900 80 V 163" fill="none" stroke="#C0392B" stroke-width="2.4"></path>
+            <path d="M 740 102 V 207" fill="none" stroke="#2E5FA3" stroke-width="2.4"></path>
+            <path d="M 1080 102 V 207" fill="none" stroke="#2E5FA3" stroke-width="2.4"></path>
+
+            <!-- Brücken-Jumper: obere Schiene -> untere Schiene (versorgt den I2C-Adapter/LCD mit Spannung) -->
+            <path d="M 1395 80 V 440" fill="none" stroke="#C0392B" stroke-width="2.4"></path>
+            <path d="M 1413 102 V 418" fill="none" stroke="#2E5FA3" stroke-width="2.4"></path>
+
+            <!-- tap labels -->
+            <text x="650" y="245" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#3E8E5B" font-weight="600">A+ Abgriff</text>
+            <text x="990" y="245" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#B58B00" font-weight="600">A– Abgriff</text>
+
+            <!-- HX711 module -->
+            <rect x="1120" y="140" width="210" height="100" rx="6" fill="#2E7D5B"></rect>
+            <rect x="1120" y="140" width="210" height="100" rx="6" fill="none" stroke="#1F5A40" stroke-width="2"></rect>
+            <text x="1225" y="180" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="700" fill="#F2FFF8">HX711</text>
+            <text x="1225" y="196" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#CDEEDF">24-Bit-Verstärker</text>
+            <g fill="#DDD">
+              <rect x="1132" y="234" width="4" height="10"></rect>
+              <rect x="1157" y="234" width="4" height="10"></rect>
+              <rect x="1182" y="234" width="4" height="10"></rect>
+              <rect x="1207" y="234" width="4" height="10"></rect>
+              <rect x="1242" y="234" width="4" height="10"></rect>
+              <rect x="1267" y="234" width="4" height="10"></rect>
+              <rect x="1292" y="234" width="4" height="10"></rect>
+              <rect x="1317" y="234" width="4" height="10"></rect>
+            </g>
+            <g font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#F2FFF8" text-anchor="middle">
+              <text x="1134" y="228">E+</text>
+              <text x="1159" y="228">E–</text>
+              <text x="1184" y="228">A+</text>
+              <text x="1209" y="228">A–</text>
+              <text x="1244" y="228">VCC</text>
+              <text x="1269" y="228">GND</text>
+              <text x="1294" y="228">DT</text>
+              <text x="1319" y="228">SCK</text>
+            </g>
+          </g>
+
+          <!-- ======================= LCD 16x2 + I2C-ADAPTER ======================= -->
+          <g>
+            <!-- LCD-Platine -->
+            <rect x="520" y="520" width="500" height="120" rx="6" fill="#2B4C8C"></rect>
+            <rect x="520" y="520" width="500" height="120" rx="6" fill="none" stroke="#1B3768" stroke-width="2"></rect>
+            <!-- Anzeige (Glas) -->
+            <rect x="545" y="540" width="450" height="55" rx="2" fill="#16294F"></rect>
+            <text x="770" y="562" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="#8FE3A8">TRITTLEISTUNG</text>
+            <text x="770" y="583" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="#8FE3A8">123.4 W</text>
+            <text x="770" y="612" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" font-weight="700" fill="#EAF0FA">LCD 16×2 (HD44780-kompatibel)</text>
+
+            <!-- I2C-Adapter (auf der Rückseite aufgesteckt) -->
+            <rect x="560" y="624" width="120" height="40" rx="4" fill="#2E7D5B"></rect>
+            <rect x="560" y="624" width="120" height="40" rx="4" fill="none" stroke="#1F5A40" stroke-width="1.6"></rect>
+            <text x="620" y="648" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#F2FFF8">I²C-Adapter</text>
+
+            <!-- 4 Anschluss-Pins des I2C-Adapters -->
+            <g fill="#DDD">
+              <rect x="576" y="664" width="4" height="12"></rect>
+              <rect x="596" y="664" width="4" height="12"></rect>
+              <rect x="616" y="664" width="4" height="12"></rect>
+              <rect x="636" y="664" width="4" height="12"></rect>
+            </g>
+            <g font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.75" text-anchor="middle">
+              <text x="578" y="690">GND</text>
+              <text x="598" y="690">VCC</text>
+              <text x="618" y="690">SDA</text>
+              <text x="638" y="690">SCL</text>
+            </g>
+          </g>
+
+          <!-- ======================= WIRES ======================= -->
+          <g fill="none" stroke-width="3.2" stroke-linecap="round">
+            <!-- Arduino 5V -> top rail (+) -->
+            <path d="M 128 441 C 128 500, 500 520, 500 88 C 500 84, 505 82, 510 82" stroke="#D6483C"></path>
+            <!-- Arduino GND -> top rail (-) -->
+            <path d="M 157 441 C 157 508, 520 528, 520 110 C 520 107, 524 105, 529 105" stroke="#2B2B2B"></path>
+            <!-- Arduino A0 -> HX711 DT -->
+            <path d="M 260 441 C 260 512, 900 545, 1294 250 C 1294 244, 1294 240, 1294 236" stroke="#E08A2C"></path>
+            <!-- Arduino A1 -> HX711 SCK -->
+            <path d="M 289 441 C 289 516, 950 552, 1319 250 C 1319 244, 1319 240, 1319 236" stroke="#8B5FBF"></path>
+
+            <!-- HX711 VCC -> top rail (+) -->
+            <path d="M 1244 236 C 1244 260, 1150 260, 1150 90 C 1150 86, 1146 83, 1141 82" stroke="#D6483C"></path>
+            <!-- HX711 GND -> top rail (-) -->
+            <path d="M 1269 236 C 1269 268, 1170 268, 1170 112 C 1170 109, 1166 106, 1161 105" stroke="#2B2B2B"></path>
+            <!-- HX711 E+ -> top rail (+) -->
+            <path d="M 1134 236 C 1134 250, 1100 250, 1100 88 C 1100 84, 1096 82, 1091 82" stroke="#D6483C" opacity="0.85"></path>
+            <!-- HX711 E- -> top rail (-) -->
+            <path d="M 1159 236 C 1159 258, 1115 258, 1115 110 C 1115 107, 1111 105, 1106 105" stroke="#2B2B2B" opacity="0.85"></path>
+            <!-- HX711 A+ -> col B tap -->
+            <path d="M 1184 236 C 1184 300, 700 330, 650 235 C 650 230, 650 226, 650 222" stroke="#3E8E5B"></path>
+            <!-- HX711 A- -> col E tap -->
+            <path d="M 1209 236 C 1209 296, 1050 320, 990 235 C 990 230, 990 226, 990 222" stroke="#B58B00"></path>
+
+            <!-- Arduino A4 -> I2C-Adapter SDA -->
+            <path d="M 386 441 C 386 620, 420 665, 500 668 C 550 668, 590 672, 618 676" stroke="#1E88A8"></path>
+            <!-- Arduino A5 -> I2C-Adapter SCL -->
+            <path d="M 410 441 C 410 626, 440 668, 520 671 C 570 671, 610 674, 638 676" stroke="#C2478D"></path>
+            <!-- I2C-Adapter GND -> untere Schiene (-) -->
+            <path d="M 578 676 V 418" stroke="#2B2B2B"></path>
+            <!-- I2C-Adapter VCC -> untere Schiene (+) -->
+            <path d="M 598 676 V 440" stroke="#D6483C"></path>
+          </g>
+
+          <!-- Pin-Beschriftungen erneut oben aufgetragen, damit Leitungen sie nicht verdecken -->
+          <g>
+            <circle cx="128" cy="441" r="3" fill="#D6483C"></circle>
+            <circle cx="157" cy="441" r="3" fill="#2B2B2B" stroke="#fff" stroke-width="0.6"></circle>
+            <circle cx="260" cy="441" r="3" fill="#E08A2C"></circle>
+            <circle cx="289" cy="441" r="3" fill="#8B5FBF"></circle>
+            <circle cx="386" cy="441" r="3" fill="#1E88A8"></circle>
+            <circle cx="410" cy="441" r="3" fill="#C2478D"></circle>
+            <g font-family="IBM Plex Mono, monospace" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">
+              <text x="128" y="430">5V</text>
+              <text x="157" y="430">GND</text>
+              <text x="260" y="430">A0</text>
+              <text x="289" y="430">A1</text>
+              <text x="386" y="430">A4</text>
+              <text x="410" y="430">A5</text>
+            </g>
+          </g>
+
+          <!-- legend text for excitation simplification -->
+          <text x="1225" y="270" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.55">E+/E– vereinfacht an dieselbe Schiene gelegt</text>
+
+        </svg>
+      </figure>
+      <figcaption><b>Abb.</b> Steckplatinen-Ansicht der kompletten Messkette: Arduino Uno (5V, GND, A0, A1, A4, A5), Steckbrett mit zwei Widerstands-Spannungsteilern (R1/R2 links, R3/R4 rechts – R4 ist der DMS), dem HX711-Modul und einem 16×2-LCD mit I²C-Adapter. Die obere Spannungsschiene versorgt die Teiler und den HX711; die Abgriffe zwischen den Widerständen gehen als A+/A– an den HX711, der über DT/SCK mit A0/A1 des Arduino kommuniziert. Der I²C-Adapter hängt an der unteren Spannungsschiene und ist über SDA/SCL mit A4/A5 des Arduino verbunden; ein Brücken-Jumper am rechten Rand verbindet obere und untere Schiene, damit die untere auch wirklich Spannung führt.</figcaption>
+      <div class="legend">
+        <div><span class="sw" style="background:#D6483C"></span>5V / Anregung + / VCC</div>
+        <div><span class="sw" style="background:#2B2B2B"></span>GND / Anregung −</div>
+        <div><span class="sw" style="background:#E08A2C"></span>DT</div>
+        <div><span class="sw" style="background:#8B5FBF"></span>SCK</div>
+        <div><span class="sw" style="background:#3E8E5B"></span>A+ (Messsignal)</div>
+        <div><span class="sw" style="background:#B58B00"></span>A– (Messsignal)</div>
+        <div><span class="sw" style="background:#1E88A8"></span>SDA (I²C)</div>
+        <div><span class="sw" style="background:#C2478D"></span>SCL (I²C)</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Schematisch-realistische Steckplatinen-Darstellung (Fritzing-/Tinkercad-typischer Stil), kein Export aus Tinkercad selbst. R4 (DMS) und die HX711-Anregung (E+/E−) sind zur besseren Lesbarkeit vereinfacht direkt an die Spannungsschiene gelegt. Der I²C-Adapter (PCF8574-Baustein) reduziert den 16-poligen LCD-Anschluss auf 4 Leitungen (GND, VCC, SDA, SCL) und hängt an der unteren Spannungsschiene; ein zusätzlicher Brücken-Jumper (rechts am Steckbrett) verbindet diese mit der oberen, vom Arduino versorgten Schiene, sodass der Adapter tatsächlich Spannung erhält.</footer>
+
+</div>
+
+</body></html>

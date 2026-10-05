@@ -1,0 +1,326 @@
+<!doctype html><html><head><meta charset=utf8><meta name="robots" content="noindex, nofollow"><title>Signalkette Wheatstone-Brücke</title><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F4F6F5;
+  --surface:#FFFFFF;
+  --ink:#1B2422;
+  --ink-muted:#55625E;
+  --rule:#D8DEDB;
+  --grid-line:#E4E9E7;
+  --accent:#2F6F62;
+  --accent-copper:#A15C32;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14181A;
+    --surface:#1C2224;
+    --ink:#E7EEEC;
+    --ink-muted:#9BA8A3;
+    --rule:#313B39;
+    --grid-line:#232B29;
+    --accent:#6FBFAE;
+    --accent-copper:#D08A55;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14181A;
+  --surface:#1C2224;
+  --ink:#E7EEEC;
+  --ink-muted:#9BA8A3;
+  --rule:#313B39;
+  --grid-line:#232B29;
+  --accent:#6FBFAE;
+  --accent-copper:#D08A55;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  padding:48px 20px 64px;
+}
+.page{
+  max-width:880px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:28px;
+}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:12px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--accent);
+  font-weight:600;
+}
+h1{
+  font-size:clamp(26px,4vw,34px);
+  line-height:1.15;
+  margin:6px 0 0;
+  font-weight:700;
+  text-wrap:balance;
+}
+.subtitle{
+  margin:10px 0 0;
+  color:var(--ink-muted);
+  font-size:15px;
+  max-width:62ch;
+  line-height:1.55;
+}
+.sheet{
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-radius:6px;
+  padding:0;
+  overflow:hidden;
+}
+.sheet-inner{
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size:24px 24px;
+  padding:20px 12px 8px;
+}
+figure{margin:0;}
+svg.schematic{
+  width:100%;
+  height:auto;
+  display:block;
+  color:var(--ink);
+}
+figcaption{
+  padding:14px 24px 22px;
+  font-size:13.5px;
+  color:var(--ink-muted);
+  line-height:1.6;
+  border-top:1px solid var(--rule);
+}
+figcaption b{color:var(--ink);font-weight:600;}
+.label-sm{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11.5px;
+}
+.groups{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+@media (max-width:640px){ .groups{grid-template-columns:1fr;} }
+.group h2{
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--ink-muted);
+  margin:0 0 10px;
+  font-weight:600;
+}
+.rows{display:flex;flex-direction:column;gap:0;}
+.row{
+  display:flex;
+  gap:14px;
+  padding:9px 0;
+  border-top:1px solid var(--rule);
+  align-items:baseline;
+}
+.row:first-child{border-top:none;}
+.row .name{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:12.5px;
+  color:var(--ink);
+  white-space:nowrap;
+  min-width:88px;
+}
+.row .desc{
+  font-size:13px;
+  color:var(--ink-muted);
+  line-height:1.5;
+}
+.dms{color:var(--accent-copper);font-weight:600;}
+footer{
+  font-size:11.5px;
+  color:var(--ink-muted);
+  border-top:1px solid var(--rule);
+  padding-top:14px;
+}
+</style>
+<div class="page">
+
+  <div>
+    <div class="eyebrow">NWT · Fahrrad-Trittleistungsmessung</div>
+    <h1>Die komplette Messkette: Brücke, HX711, Arduino und LCD</h1>
+    <p class="subtitle">Der Dehnungsmessstreifen (R4) verändert den Widerstand der Brücke minimal, der HX711 verstärkt die winzige Spannungsdifferenz und wandelt sie in ein digitales Signal, das der Arduino über A0/A1 ausliest. Zusätzlich zeigt der Arduino den Messwert über A4 (SDA) und A5 (SCL) auf einem 16×2-LCD an, das per I²C-Adapter (4 Leitungen statt 16) angeschlossen ist.</p>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-inner">
+      <figure>
+        <svg class="schematic" viewBox="0 0 1100 580" role="img" aria-label="Schaltskizze: Arduino Uno verbunden über 5V, GND, SCK und DT mit dem HX711; der HX711 versorgt über E+ und E- eine Wheatstone-Brücke aus drei festen 1-Kiloohm-Widerständen und dem veränderlichen DMS-Widerstand R4, und liest über A+ und A- deren Messsignal aus. Zusätzlich verbindet der Arduino über A4 (SDA) und A5 (SCL) ein 16x2-LCD über einen I2C-Adapter, der mit Strom vom HX711 versorgt wird.">
+          <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square">
+
+            <!-- Arduino box -->
+            <rect x="40" y="170" width="180" height="280" rx="2"></rect>
+            <!-- HX711 box -->
+            <rect x="400" y="150" width="180" height="240" rx="2"></rect>
+
+            <!-- Arduino <-> HX711 wires -->
+            <line x1="220" y1="220" x2="400" y2="220"></line>
+            <line x1="220" y1="260" x2="400" y2="260"></line>
+            <line x1="220" y1="300" x2="400" y2="300"></line>
+            <line x1="220" y1="340" x2="400" y2="340"></line>
+
+            <!-- Arduino A4 (SDA) -> I2C adapter -->
+            <path d="M 220 380 H 330 V 430"></path>
+            <!-- Arduino A5 (SCL) -> I2C adapter -->
+            <path d="M 220 420 H 300 V 430"></path>
+
+            <!-- HX711 VCC-out -> I2C adapter -->
+            <path d="M 430 390 V 410 H 370 V 430"></path>
+            <!-- HX711 GND-out -> I2C adapter -->
+            <path d="M 460 390 V 425 H 350 V 430"></path>
+
+            <!-- I2C adapter box -->
+            <rect x="285" y="430" width="110" height="28" rx="2"></rect>
+            <!-- LCD box -->
+            <rect x="190" y="458" width="310" height="85" rx="2"></rect>
+
+            <!-- E+ path -->
+            <path d="M 580 210 H 680 V 110 H 780"></path>
+            <!-- E- path -->
+            <path d="M 580 250 H 1010 V 460 H 960"></path>
+            <!-- A+ path -->
+            <path d="M 580 310 H 700 V 285 H 780"></path>
+            <!-- A- path -->
+            <path d="M 580 350 H 900 V 285 H 960"></path>
+
+            <!-- top rail / bottom rail + branches -->
+            <path d="M 780 110 H 960"></path>
+            <path d="M 780 460 H 960"></path>
+            <path d="M 780 110 V 460"></path>
+            <path d="M 960 110 V 460"></path>
+
+            <!-- resistor bodies (mask the branch line behind them) -->
+            <rect x="771" y="181" width="18" height="34" fill="var(--surface,white)"></rect>
+            <rect x="771" y="181" width="18" height="34"></rect>
+
+            <rect x="771" y="355" width="18" height="34" fill="var(--surface,white)"></rect>
+            <rect x="771" y="355" width="18" height="34"></rect>
+
+            <rect x="951" y="181" width="18" height="34" fill="var(--surface,white)"></rect>
+            <rect x="951" y="181" width="18" height="34"></rect>
+
+            <rect x="951" y="355" width="18" height="34" fill="var(--surface,white)"></rect>
+            <rect x="951" y="355" width="18" height="34"></rect>
+
+          </g>
+
+          <!-- DMS variable-resistor arrow (the one accent color) -->
+          <g stroke="var(--accent-copper)" stroke-width="2.25" stroke-linecap="round" fill="var(--accent-copper)">
+            <line x1="942" y1="398" x2="978" y2="346"></line>
+            <polygon points="978,346 969,350 973,359"></polygon>
+          </g>
+
+          <!-- junction dots -->
+          <g fill="currentColor">
+            <circle cx="780" cy="110" r="3.6"></circle>
+            <circle cx="960" cy="460" r="3.6"></circle>
+            <circle cx="780" cy="285" r="3.6"></circle>
+            <circle cx="960" cy="285" r="3.6"></circle>
+            <circle cx="330" cy="430" r="3.6"></circle>
+            <circle cx="300" cy="430" r="3.6"></circle>
+            <circle cx="370" cy="430" r="3.6"></circle>
+            <circle cx="350" cy="430" r="3.6"></circle>
+          </g>
+
+          <!-- labels -->
+          <g font-family="IBM Plex Sans, sans-serif" fill="currentColor">
+            <text x="130" y="196" font-size="16" font-weight="700" text-anchor="middle">Arduino Uno</text>
+            <text x="490" y="176" font-size="16" font-weight="700" text-anchor="middle">HX711</text>
+            <text x="490" y="194" font-size="11" fill="currentColor" opacity=".65" text-anchor="middle">24-Bit-Verstärker · ADC</text>
+            <text x="340" y="448" font-size="11" font-weight="700" text-anchor="middle">I²C-Adapter</text>
+            <text x="340" y="504" font-size="15" font-weight="700" text-anchor="middle">LCD 16×2</text>
+            <text x="340" y="520" font-size="10.5" fill="currentColor" opacity=".65" text-anchor="middle">HD44780-kompatibel</text>
+          </g>
+
+          <g font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor">
+            <!-- Arduino pin labels -->
+            <text x="228" y="215" >5V</text>
+            <text x="228" y="255">GND</text>
+            <text x="228" y="295">A1 (SCK)</text>
+            <text x="228" y="335">A0 (DT)</text>
+            <text x="228" y="375">A4 (SDA)</text>
+            <text x="228" y="415">A5 (SCL)</text>
+
+            <!-- HX711 left pin labels -->
+            <text x="392" y="215" text-anchor="end">VCC</text>
+            <text x="392" y="255" text-anchor="end">GND</text>
+            <text x="392" y="295" text-anchor="end">SCK</text>
+            <text x="392" y="335" text-anchor="end">DT</text>
+
+            <!-- HX711 right pin labels -->
+            <text x="588" y="205">E+</text>
+            <text x="588" y="245">E–</text>
+            <text x="588" y="305">A+</text>
+            <text x="588" y="345">A–</text>
+
+            <!-- resistor labels -->
+            <text x="745" y="193" text-anchor="end">R1 · 1 kΩ</text>
+            <text x="745" y="367" text-anchor="end">R2 · 1 kΩ</text>
+            <text x="995" y="193" text-anchor="start">R3 · 1 kΩ</text>
+            <text x="995" y="367" text-anchor="start">R4 · DMS</text>
+            <text x="995" y="381" text-anchor="start" fill="var(--accent-copper)">(veränderlich)</text>
+
+            <!-- HX711 bottom stub labels -->
+            <text x="430" y="404" text-anchor="middle" font-size="10">VCC</text>
+            <text x="460" y="404" text-anchor="middle" font-size="10">GND</text>
+
+            <!-- I2C adapter pin labels -->
+            <text x="300" y="424" text-anchor="middle" font-size="10">SCL</text>
+            <text x="330" y="424" text-anchor="middle" font-size="10">SDA</text>
+            <text x="350" y="424" text-anchor="middle" font-size="10">GND</text>
+            <text x="370" y="424" text-anchor="middle" font-size="10">VCC</text>
+          </g>
+
+          <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".7">
+            <text x="615" y="150" text-anchor="middle">Anregung</text>
+            <text x="880" y="475" text-anchor="middle">Anregung</text>
+            <text x="640" y="330" text-anchor="middle">Messsignal</text>
+          </g>
+        </svg>
+      </figure>
+      <figcaption><b>Abb.</b> Arduino Uno liest den HX711 digital aus (SCK/DT); der HX711 versorgt die Wheatstone-Brücke (E+/E−) und misst deren winziges Differenzsignal (A+/A−). R1–R3 sind feste 1-kΩ-Widerstände, R4 ist der Dehnungsmessstreifen (DMS) – sein Widerstand ändert sich bei Belastung und verstimmt die Brücke. Zusätzlich zeigt ein 16×2-LCD den Messwert an, angeschlossen über einen I²C-Adapter (GND, VCC, SDA, SCL) an A4/A5 des Arduino; seine Stromversorgung ist zur besseren Lesbarkeit vom HX711 abgegriffen (dieselbe 5V/GND-Versorgung).</figcaption>
+    </div>
+  </div>
+
+  <div class="groups">
+    <div class="group">
+      <h2>Bauteile</h2>
+      <div class="rows">
+        <div class="row"><div class="name">Arduino Uno</div><div class="desc">steuert den HX711 an und liest das digitale Messsignal aus</div></div>
+        <div class="row"><div class="name">HX711</div><div class="desc">24-Bit-Verstärker/ADC speziell für Wheatstone-Brücken mit sehr kleinen Differenzspannungen</div></div>
+        <div class="row"><div class="name">R1, R2, R3</div><div class="desc">feste Brückenwiderstände, je 1 kΩ</div></div>
+        <div class="row"><div class="name"><span class="dms">R4 (DMS)</span></div><div class="desc">Dehnungsmessstreifen – Widerstand ändert sich bei Verformung durch die Trittkraft</div></div>
+        <div class="row"><div class="name">I²C-Adapter</div><div class="desc">PCF8574-Modul, reduziert die 16-polige LCD-Ansteuerung auf 4 Leitungen</div></div>
+        <div class="row"><div class="name">LCD 16×2</div><div class="desc">zeigt den gemessenen Wert direkt am Aufbau an</div></div>
+      </div>
+    </div>
+    <div class="group">
+      <h2>Anschlüsse</h2>
+      <div class="rows">
+        <div class="row"><div class="name">VCC / GND</div><div class="desc">Stromversorgung des HX711 (und darüber des LCD) durch den Arduino</div></div>
+        <div class="row"><div class="name">SCK / DT</div><div class="desc">Takt- und Datenleitung zwischen Arduino (A1/A0) und HX711</div></div>
+        <div class="row"><div class="name">E+ / E–</div><div class="desc">Anregungsspannung, die der HX711 an die Brücke liefert</div></div>
+        <div class="row"><div class="name">A+ / A–</div><div class="desc">Messsignal der Brücke, das der HX711 verstärkt</div></div>
+        <div class="row"><div class="name">SDA / SCL</div><div class="desc">I²C-Datenleitungen zwischen Arduino (A4/A5) und dem LCD-Adapter</div></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Schultypische Darstellung nach dem Symbolstil von leifiphysik.de („Vom Stromkreis zum Schaltplan") · Arduino, HX711, I²C-Adapter und LCD als beschriftete Blackbox-Symbole, da hierfür keine Schulnorm existiert · DMS als veränderlicher Widerstand.</footer>
+
+</div>
+
+</body></html>
