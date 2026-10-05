@@ -1,0 +1,1980 @@
+<!doctype html><html><head><meta charset=utf8><meta name="robots" content="noindex, nofollow"><title>Bewegungslabor</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: Kopfleiste (Modus + Objekt) · links Bühne (Bahn, Stroboskop, Diagramme) · rechts Bedienfeld. Schmal: gestapelt. */
+:root {
+  --bg: #F3F6F9;          /* Papier mit leichtem Blaustich */
+  --panel: #FFFFFF;
+  --ink: #16222F;         /* Text */
+  --muted: #5B6B7C;
+  --line: #CBD6E2;        /* Rahmen */
+  --grid: #D9E3EE;        /* Karoraster */
+  --grid2: #EDF2F7;
+  --accent: #1F3A5F;      /* Dunkelblau wie im AB-Design */
+  --accent2: #2E5C8A;
+  --objA: #16222F;
+  --objB: #B4541B;        /* zweites Objekt: warmes Rostorange */
+  --target: #8A9BB0;
+  --tunnel: rgba(46, 92, 138, 0.15); --tunnelEdge: #2E5C8A; --hit: rgba(192, 57, 43, 0.18);
+  --ref: rgba(46, 125, 50, 0.13); --refEdge: #2E7D32;
+  --ring: rgba(31, 58, 95, 0.45);
+  --water: rgba(52, 120, 190, 0.13); --vec: #B4541B; --avg: #2B7BBF; --raw: #A3B1C0;
+  --good: #2E7D32; --warn: #B7791F; --bad: #C0392B;
+  --font: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0F1720; --panel: #16212D; --ink: #E4ECF4; --muted: #93A4B7; --line: #2A3A4C; --grid: #243446; --grid2: #1B2836;
+  --accent: #8DB4E2; --accent2: #6E9BCF; --objA: #E4ECF4; --objB: #F0A06B; --target: #6C7F95;
+  --tunnel: rgba(141, 180, 226, 0.17); --tunnelEdge: #8DB4E2; --hit: rgba(239, 123, 110, 0.22);
+  --ref: rgba(107, 194, 116, 0.16); --refEdge: #6BC274;
+  --ring: rgba(141, 180, 226, 0.55);
+  --water: rgba(110, 165, 225, 0.15); --vec: #F0A06B; --avg: #8DB4E2; --raw: #4A5E73;
+  --good: #6BC274; --warn: #E0B04F; --bad: #EF7B6E; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0F1720; --panel: #16212D; --ink: #E4ECF4; --muted: #93A4B7; --line: #2A3A4C; --grid: #243446; --grid2: #1B2836;
+  --accent: #8DB4E2; --accent2: #6E9BCF; --objA: #E4ECF4; --objB: #F0A06B; --target: #6C7F95;
+  --tunnel: rgba(141, 180, 226, 0.17); --tunnelEdge: #8DB4E2; --hit: rgba(239, 123, 110, 0.22);
+  --ref: rgba(107, 194, 116, 0.16); --refEdge: #6BC274;
+  --ring: rgba(141, 180, 226, 0.55);
+  --water: rgba(110, 165, 225, 0.15); --vec: #F0A06B; --avg: #8DB4E2; --raw: #4A5E73;
+  --good: #6BC274; --warn: #E0B04F; --bad: #EF7B6E; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; margin: 0; }
+.wrap { padding-inline: 16px; padding-block: 12px 28px; max-width: 1400px; margin: 0 auto; }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-bottom: 12px; }
+h1 { font-size: 1.35rem; margin: 0; letter-spacing: .01em; text-wrap: balance; }
+h1 small { font-weight: 400; color: var(--muted); font-size: .85rem; margin-left: 6px; white-space: nowrap; display: inline-block; }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+.tabs button { border: 0; background: transparent; color: var(--ink); font: inherit; padding: 7px 14px; border-radius: 999px; cursor: pointer; }
+.tabs button[aria-pressed="true"] { background: var(--accent); color: var(--panel); font-weight: 700; }
+.objpick { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.objpick button { width: 46px; height: 40px; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; cursor: pointer; padding: 2px; }
+.objpick button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+.objpick canvas { width: 40px; height: 34px; display: block; }
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 12px; align-items: start; }
+@media (max-width: 899px) { .main { grid-template-columns: minmax(0, 1fr); } .objpick { margin-left: 0; } }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; min-width: 0; }
+.stage { display: grid; gap: 10px; }
+.stage canvas { width: 100%; display: block; touch-action: none; }
+#track { height: 130px; cursor: grab; }
+#track.dragging { cursor: grabbing; }
+#strobe { height: 78px; margin-top: 4px; }
+.charts { display: flex; flex-direction: column; gap: 8px; }
+.ctool { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.chip { font: inherit; font-size: .88rem; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); font-weight: 700; }
+.chip:disabled { opacity: .35; cursor: default; }
+.plots { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.plot { display: flex; flex-direction: column; min-width: 0; min-height: 0; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px 4px; }
+.plot .lbl { margin: 0 0 2px; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.plot canvas { height: 240px; }
+#stBox { grid-column: 1 / -1; }
+#stBox canvas { height: 300px; }
+.plots.one-sub .sub { grid-column: 1 / -1; }
+@media (min-width: 900px) and (min-height: 560px) {
+  html, body { height: 100%; }
+  .wrap { height: 100%; display: flex; flex-direction: column; padding-block: 8px 8px; }
+  header { margin-bottom: 8px; }
+  .main { flex: 1; min-height: 0; grid-template-columns: minmax(0, 1fr) 330px; }
+  .stage { min-height: 0; height: 100%; display: flex; flex-direction: column; gap: 8px; }
+  .stage > .card:first-child { flex: none; padding: 8px 12px; }
+  .charts { flex: 1; min-height: 0; padding: 8px 10px; }
+  .plots { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1.25fr) minmax(0, 1fr); }
+  .plots.no-sub { grid-template-rows: minmax(0, 1fr); }
+  .plot canvas, #stBox canvas { flex: 1; height: auto; min-height: 0; }
+  .panel { height: 100%; overflow-y: auto; }
+  #track { height: 112px; } #strobe { height: 66px; }
+}
+.readout { display: flex; flex-wrap: wrap; gap: 6px 10px; font-variant-numeric: tabular-nums; font-size: .92rem; align-items: center; }
+.readout .ro { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 8px; padding: 3px 8px; white-space: nowrap; }
+.readout .ro .nm { font-weight: 700; }
+.readout .ro .num { font-family: var(--mono); }
+.readout .sep { display: inline-block; width: 1.1em; }
+.readout i { font-family: var(--font); font-weight: 700; color: var(--muted); }
+.lbl { font-size: .9rem; letter-spacing: .01em; color: var(--muted); font-weight: 700; margin: 2px 0 6px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+.btn:hover { border-color: var(--accent2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--panel); font-weight: 700; }
+.btn.small { padding: 5px 9px; font-size: .88rem; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--accent2); outline-offset: 2px; }
+.panel { display: grid; gap: 12px; min-width: 0; align-content: start; }
+.panel > * { min-width: 0; }
+.panel select { max-width: 100%; }
+#presetSel { flex: 1 1 200px; min-width: 0; }
+.sec { border-top: 1px solid var(--line); padding-top: 10px; }
+.sec:first-child { border-top: 0; padding-top: 0; }
+label.chk { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+select, input[type=number], input[type=text] { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 5px 6px; }
+input[type=number] { width: 74px; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.segs { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.segs { table-layout: fixed; }
+.segs th { text-align: left; font-size: .78rem; color: var(--muted); font-weight: 700; padding: 2px 3px; }
+.segs th:nth-child(1) { width: 26px; } .segs th:nth-child(5) { width: 38px; }
+.segs tr.kindrow td { padding-top: 0; padding-bottom: 6px; }
+.segs td { padding: 3px; vertical-align: middle; }
+.segs input[type=number] { width: 100%; padding: 4px 4px; -moz-appearance: textfield; appearance: textfield; text-align: right; }
+.segs input[type=number]::-webkit-inner-spin-button, .segs input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.kind { white-space: normal !important; line-height: 1.2; }
+.kind { font-size: .78rem; color: var(--muted); white-space: nowrap; }
+.pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .78rem; border: 1px solid var(--line); }
+.desc { font-size: .92rem; line-height: 1.45; background: var(--bg); border: 1px dashed var(--line); border-radius: 8px; padding: 8px 10px; }
+.tbl { overflow-x: auto; }
+.tbl table { border-collapse: collapse; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: .88rem; }
+.tbl td, .tbl th { border: 1px solid var(--line); padding: 3px 8px; text-align: center; white-space: nowrap; }
+.tbl th { font-family: var(--font); background: var(--bg); }
+.score { font-size: 1.05rem; }
+.score .v { font-family: var(--mono); font-weight: 600; }
+.note { font-size: .82rem; color: var(--muted); line-height: 1.4; }
+.tabsB { display: flex; gap: 4px; }
+.tabsB button { flex: 1; min-width: 0; }
+.tabsB button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); font-weight: 700; }
+.swatch { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 4px; }
+dialog { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); max-width: min(760px, calc(100vw - 32px)); width: 100%; padding: 16px; }
+dialog::backdrop { background: rgba(10, 20, 30, .45); }
+#expPreview { max-width: 100%; border: 1px solid var(--line); background: #fff; display: block; margin-top: 8px; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 14px; border-radius: 8px; font-size: .9rem; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+[hidden] { display: none !important; }
+details.sec > summary { cursor: pointer; font-size: .9rem; color: var(--muted); font-weight: 700; }
+details.sec[open] > summary { margin-bottom: 8px; }
+.hud { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
+.hud div { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; min-width: 0; }
+.hud b { display: block; font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.hud span { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 1.15rem; font-weight: 600; }
+.hud .hearts { color: var(--bad); letter-spacing: .08em; }
+/* 2D-Modus: links die Ebene, rechts x-t und y-t (mit v: zusätzlich vx-t und vy-t) */
+.plots.d2 { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
+.plots.d2.d2v { grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr) minmax(0, .8fr); }
+#fieldBox { grid-column: 1; grid-row: 1 / span 2; }
+.plots.d2 #xtBox { grid-column: 2; grid-row: 1; } .plots.d2 #ytBox { grid-column: 2; grid-row: 2; }
+.plots.d2 #vxBox { grid-column: 3; grid-row: 1; } .plots.d2 #vyBox { grid-column: 3; grid-row: 2; }
+#fieldBox canvas { height: 420px; cursor: crosshair; }
+.plots.d2 .plot canvas { height: 205px; }
+@media (min-width: 900px) and (min-height: 560px) { #fieldBox canvas, .plots.d2 .plot canvas { flex: 1; height: auto; min-height: 0; } }
+@media (max-width: 899px) {
+  .plots.d2, .plots.d2.d2v { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+  #fieldBox, .plots.d2 #xtBox, .plots.d2 #ytBox, .plots.d2 #vxBox, .plots.d2 #vyBox { grid-column: auto; grid-row: auto; }
+  #fieldBox canvas { height: 360px; } .plots.d2 .plot canvas { height: 220px; }
+}
+.d2tab td:first-child { font-weight: 700; text-align: center; }
+/* Spiel: Zuordnen */
+.quiz { display: grid; gap: 8px; grid-template-rows: auto auto minmax(0, .9fr) minmax(0, 1.6fr); }
+.qtop { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+.qtext { font-weight: 700; font-size: 1.05rem; text-wrap: balance; min-width: 0; }
+.qtimer { height: 8px; border-radius: 4px; background: var(--grid2); overflow: hidden; }
+#qBar { height: 100%; width: 100%; background: var(--accent); }
+#qBar.low { background: var(--bad); }
+.qprompt { border: 1px solid var(--line); border-radius: 8px; display: flex; min-height: 0; overflow: hidden; }
+.qprompt canvas { width: 100%; height: 210px; display: block; }
+.qdesc { padding: 12px 16px; font-size: 1.02rem; line-height: 1.5; overflow: auto; align-self: center; }
+.qopts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; min-height: 0; }
+.qopt { font: inherit; color: var(--ink); background: var(--panel); border: 2px solid var(--line); border-radius: 10px; padding: 4px 6px 6px; cursor: pointer; display: flex; flex-direction: column; min-height: 0; min-width: 0; text-align: left; position: relative; }
+.qopt:hover { border-color: var(--accent2); }
+.qopt .qk { position: absolute; top: 4px; right: 8px; font-weight: 700; color: var(--muted); font-size: .85rem; }
+.qopt canvas { width: 100%; height: 170px; display: block; }
+.qopt .qtx { font-size: .86rem; line-height: 1.38; overflow: auto; padding: 4px 22px 2px 4px; }
+.qopt.ok { border-color: var(--good); box-shadow: inset 0 0 0 2px var(--good); }
+.qopt.bad { border-color: var(--bad); box-shadow: inset 0 0 0 2px var(--bad); }
+@media (min-width: 900px) and (min-height: 560px) { .stage > .quiz { flex: 1; min-height: 0; } .qprompt canvas, .qopt canvas { height: auto; flex: 1; min-height: 0; } }
+@media (max-width: 899px) { .qopts { grid-template-columns: minmax(0, 1fr); } .quiz { grid-template-rows: none; } .qprompt canvas { height: 180px; } }
+#trackCard > .row > .readout { flex: 1 1 0; min-width: 0; }
+/* Hinweise: aktiver Ziehbereich und Start-Knopf */
+#trackCard.active, #field.active { outline: 2px dashed var(--accent2); outline-offset: 3px; }
+#field.active { border-radius: 8px; }
+.btn.cue { box-shadow: 0 0 0 3px var(--panel), 0 0 0 6px var(--ring); }
+.btn.pulse { animation: ring 1.6s ease-out infinite; }
+@keyframes ring { 0% { box-shadow: 0 0 0 3px var(--panel), 0 0 0 4px var(--ring); } 70% { box-shadow: 0 0 0 3px var(--panel), 0 0 0 14px transparent; } 100% { box-shadow: 0 0 0 3px var(--panel), 0 0 0 4px transparent; } }
+@media (prefers-reduced-motion: reduce) { .btn.pulse { animation: none; } }
+.hud .bestrow { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: baseline; border-color: var(--good); border-width: 2px; }
+.hud .bestrow span { color: var(--good); font-size: 1.7rem; font-weight: 700; }
+.qside { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex: none; }
+#qRead { min-height: 48px; display: inline-flex; align-items: center; gap: 8px; font-size: 1rem; font-weight: 700; color: var(--accent2); white-space: nowrap; }
+#qRead svg { width: 48px; height: 48px; }
+.zoom { display: inline-flex; gap: 3px; flex: none; }
+.zoom button { width: 30px; height: 24px; padding: 3px 6px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); border-radius: 6px; cursor: pointer; display: grid; place-items: center; }
+.zoom button svg { width: 16px; height: 16px; display: block; }
+.zoom button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.zoom button:hover { border-color: var(--accent2); }
+
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Bewegungslabor <small>Diagramme zur Bewegung · Kinematik</small></h1>
+    <div class="tabs" role="group" aria-label="Modus">
+      <button id="m-live" aria-pressed="true">Live ziehen</button>
+      <button id="m-prog" aria-pressed="false">Programmieren</button>
+      <button id="m-ueb" aria-pressed="false">Übung</button>
+      <button id="m-game" aria-pressed="false">Spiel: Graph-Tunnel</button>
+      <button id="m-quiz" aria-pressed="false">Spiel: Zuordnen</button>
+      <button id="m-2d" aria-pressed="false">2D</button>
+    </div>
+    <div class="objpick" id="objpick" role="group" aria-label="Objekt wählen"></div>
+  </header>
+
+  <div class="main">
+    <div class="stage">
+      <div class="card" id="trackCard">
+        <canvas id="track" aria-label="Bahn: Objekt nach links oder rechts ziehen"></canvas>
+        <canvas id="strobe" aria-label="Stroboskop-Spur"></canvas>
+        <div class="row" style="justify-content: space-between; margin-top: 6px;">
+          <div class="readout" id="readout"></div>
+          <div class="row">
+            <button class="btn primary" id="btnStart">Start</button>
+            <button class="btn" id="btnReplay" title="Aufnahme noch einmal abspielen">Wiederholung</button>
+            <button class="btn" id="btnReset">Zurücksetzen</button>
+          </div>
+        </div>
+      </div>
+      <div class="card quiz" id="quizCard" hidden>
+        <div class="qtop">
+          <div class="qtext" id="qText">Zuordnen: Welche Antwort passt?</div>
+          <div class="qside"><button class="btn primary" id="qStart">Start</button><span id="qRead" style="visibility: hidden;"></span></div>
+        </div>
+        <div class="qtimer" aria-hidden="true"><div id="qBar"></div></div>
+        <div class="qprompt"><canvas id="qPrompt" aria-label="Aufgabe"></canvas><div class="qdesc" id="qPromptTxt" hidden></div></div>
+        <div class="qopts" id="qOpts" role="group" aria-label="Antworten"></div>
+      </div>
+      <div class="card charts" id="chartsCard">
+        <div class="ctool">
+          <span class="lbl" style="margin: 0;">Diagramme</span>
+          <button class="chip" id="tgVT" aria-pressed="false">v-t</button>
+          <button class="chip" id="tgAT" aria-pressed="false">a-t</button>
+          <button class="chip" id="tgStrobe" aria-pressed="false">Punktspur</button>
+          <button class="chip" id="tgAvg" aria-pressed="false" title="Nach der Aufnahme: Abschnitte mit (fast) gleicher Geschwindigkeit als Mittelwert anzeigen">v gemittelt</button>
+          <span class="row note" id="legend" style="margin-left: auto;"></span>
+        </div>
+        <div class="plots" id="plots">
+          <div class="plot" id="stBox"><div class="lbl">s-t-Diagramm</div><canvas id="stChart"></canvas></div>
+          <div class="plot sub" id="vtCard" hidden><div class="lbl">v-t-Diagramm<span class="zoom" data-k="v" role="group" aria-label="Bereich der v-Achse"></span></div><canvas id="vtChart"></canvas></div>
+          <div class="plot sub" id="atCard" hidden><div class="lbl">a-t-Diagramm<span class="zoom" data-k="a" role="group" aria-label="Bereich der a-Achse"></span></div><canvas id="atChart"></canvas></div>
+          <div class="plot" id="fieldBox" hidden><div class="lbl"><span id="fieldTitle">Bewegung in der Ebene</span><span class="note" id="fieldHint"></span></div><canvas id="field" aria-label="Ebene: Punkt in x- und y-Richtung ziehen"></canvas></div>
+          <div class="plot" id="xtBox" hidden><div class="lbl">x-t-Diagramm</div><canvas id="xtChart"></canvas></div>
+          <div class="plot" id="ytBox" hidden><div class="lbl">y-t-Diagramm</div><canvas id="ytChart"></canvas></div>
+          <div class="plot" id="vxBox" hidden><div class="lbl">v-t-Diagramm (x-Richtung)<span class="zoom" data-k="v" data-d2="1" role="group" aria-label="Bereich der v-Achse"></span></div><canvas id="vxChart"></canvas></div>
+          <div class="plot" id="vyBox" hidden><div class="lbl">v-t-Diagramm (y-Richtung)<span class="zoom" data-k="v" data-d2="1" role="group" aria-label="Bereich der v-Achse"></span></div><canvas id="vyChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="panel card" id="panel">
+      <!-- Modus-spezifisch -->
+      <div class="sec" id="p-live">
+        <div class="lbl">Live ziehen</div>
+        <label class="chk" style="margin: 0 0 6px;"><input type="checkbox" id="liveTwo"> Zweites Objekt (zwei Graphen, z. B. Treffpunkt suchen)</label>
+        <p class="note" style="margin: 0;">Objekt an die Startstelle ziehen, „Start“ drücken (oder Leertaste). Nach „2 … 1 … los“ läuft die Aufnahme: Objekt mit Finger oder Maus nach links und rechts ziehen. Die Aufnahme endet bei t<sub>max</sub>.</p>
+        <p class="note" id="liveTwoNote" hidden style="margin: 6px 0 0;">Nacheinander aufnehmen: Zuerst Objekt A (obere Spur) aufnehmen. Danach „Start“: Jetzt wird Objekt B (untere Spur) gezogen, A läuft dabei als Wiederholung mit. „Wiederholung“ spielt beide ab; „Zurücksetzen“ löscht beide.</p>
+      </div>
+
+      <div class="sec" id="p-prog" hidden>
+        <div class="lbl">Bewegung programmieren</div>
+        <div class="row" style="margin-bottom: 8px;">
+          <select id="presetSel" aria-label="Beispiel laden"></select>
+          <button class="btn small" id="btnPreset">Laden</button>
+        </div>
+        <label class="chk" style="margin-bottom: 8px;"><input type="checkbox" id="twoObj"> Zweites Objekt (Vergleich, Begegnung)</label>
+        <div class="tabsB" id="abTabs" hidden>
+          <button class="btn small" id="tabA" aria-pressed="true"><span class="swatch" style="background: var(--objA)"></span>Objekt A</button>
+          <button class="btn small" id="tabB" aria-pressed="false"><span class="swatch" style="background: var(--objB)"></span>Objekt B</button>
+        </div>
+        <div class="row" style="margin: 8px 0;">
+          <label>Objekt <select id="objSelProg" aria-label="Objekt für dieses Programm"></select></label>
+          <label>Start bei <input type="number" id="s0" step="0.5" value="0"> m</label>
+        </div>
+        <table class="segs" aria-label="Abschnitte">
+          <thead><tr><th>#</th><th>Δt in s</th><th>v Anfang in m/s</th><th>v Ende in m/s</th><th></th></tr></thead>
+          <tbody id="segBody"></tbody>
+        </table>
+        <div class="row" style="margin-top: 6px;">
+          <button class="btn small" id="btnAddSeg">+ Abschnitt</button>
+          <button class="btn small" id="btnFit">Achsen einmalig an Bewegung anpassen</button>
+          <label class="note">Tempo <select id="speed"><option value="0.5">0,5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="5">5×</option></select></label>
+        </div>
+        <div class="lbl" style="margin-top: 10px;">Beschreibung (zum Kopieren)</div>
+        <div class="desc" id="descText"></div>
+        <div class="row" style="margin-top: 6px;"><button class="btn small" id="btnCopyDesc">Text kopieren</button></div>
+      </div>
+
+      <div class="sec" id="p-ueb" hidden>
+        <div class="lbl">Übung: Diagramm nachfahren</div>
+        <p class="note" style="margin: 0 0 6px;">Das graue Zieldiagramm mit dem Objekt nachfahren. Nach Ablauf der Zeit erscheint die mittlere Abweichung.</p>
+        <div class="row">
+          <select id="uebLevel" aria-label="Schwierigkeit"><option value="1">leicht (nur gleichförmig)</option><option value="2">mittel (mit Richtungswechsel)</option><option value="3">schwer (mit Beschleunigung)</option><option value="4">unmöglich? Teleportation</option><option value="5">unmöglich? Zeitreise</option></select>
+          <button class="btn small" id="btnNewTarget">Neues Zieldiagramm</button>
+        </div>
+        <div class="score" id="uebScore" style="margin-top: 8px;"></div>
+        <div id="uebImp" hidden style="margin-top: 8px;">
+          <div class="desc" id="uebImpQ"></div>
+          <details style="margin-top: 6px;"><summary class="note" style="cursor: pointer;">Erklärung</summary><p class="note" id="uebImpA" style="margin: 6px 0 0;"></p></details>
+        </div>
+      </div>
+
+      <div class="sec" id="p-game" hidden>
+        <div class="lbl">Spiel: Graph-Tunnel</div>
+        <p class="note" style="margin: 0 0 6px;">„Start“ drücken und nach dem Countdown das Objekt so ziehen, dass dein Graph im Tunnel bleibt. Drei Leben: Wer den Tunnel verlässt, verliert eins. Mit jedem Level wird es schneller und enger.</p>
+        <label>Tunnel im <select id="gameKind"><option value="st">s-t-Diagramm</option><option value="vt">v-t-Diagramm (Profi)</option></select></label>
+        <div class="hud" id="gameHud"></div>
+      </div>
+
+      <div class="sec" id="p-quiz" hidden>
+        <div class="lbl">Spiel: Zuordnen</div>
+        <p class="note" style="margin: 0 0 8px;">Zu jeder Aufgabe passt genau eine der vier Antworten. Text: 10 s Lesezeit, Bewegung: erst zuschauen – dann läuft die Antwortzeit. Am Anfang 20 s, nach je zwei richtigen Antworten 2 s weniger – bis 1 s. Jede Bewegung läuft genau einmal. Drei Leben. Pro richtige Antwort 100 Punkte × Stufe. Tasten 1–4 gehen auch.</p>
+        <label>Stufe <select id="qLvl"><option value="1">1: Ort (s-t)</option><option value="2">2: Ort und Geschwindigkeit</option><option value="3">3: mit Beschleunigung</option></select></label>
+        <div class="hud" id="qHud"></div>
+      </div>
+
+      <div class="sec" id="p-2d" hidden>
+        <div class="lbl">2D: Bewegung in der Ebene</div>
+        <div class="tabsB" style="margin-bottom: 8px;">
+          <button class="btn small" id="d2Live" aria-pressed="true">Selbst ziehen</button>
+          <button class="btn small" id="d2Par" aria-pressed="false">Mit Startwerten</button>
+        </div>
+        <p class="note" id="d2NoteLive" style="margin: 0;">Punkt anfassen (er springt nicht) und an die Startstelle ziehen, „Start“ drücken. Nach „2 … 1 … los“ den Punkt in der Ebene bewegen. Rechts entstehen das x-t- und das y-t-Diagramm getrennt.</p>
+        <div id="d2ParBox" hidden>
+          <div class="row" style="margin-bottom: 8px;">
+            <select id="d2Preset" aria-label="Beispiel laden" style="flex: 1 1 200px; min-width: 0;"></select>
+            <button class="btn small" id="d2Load">Laden</button>
+          </div>
+          <table class="segs d2tab" aria-label="Startwerte">
+            <thead><tr><th></th><th>Start in m</th><th>v₀ in m/s</th><th>a in m/s²</th></tr></thead>
+            <tbody>
+              <tr><td>x</td><td><input type="number" step="0.5" id="d2x0"></td><td><input type="number" step="0.5" id="d2vx"></td><td><input type="number" step="0.5" id="d2ax"></td></tr>
+              <tr><td>y</td><td><input type="number" step="0.5" id="d2y0"></td><td><input type="number" step="0.5" id="d2vy"></td><td><input type="number" step="0.5" id="d2ay"></td></tr>
+            </tbody>
+          </table>
+          <div class="row" style="margin-top: 6px;">
+            <label>Dauer <input type="number" step="0.5" min="0" id="d2T"> s</label>
+            <label class="note">Tempo <select id="d2Speed"><option value="0.25">¼×</option><option value="0.5">½×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>
+          </div>
+          <div class="desc" id="d2Desc" style="margin-top: 8px;"></div>
+        </div>
+        <label class="chk" style="margin-top: 8px;"><input type="checkbox" id="d2Arrow" checked> Geschwindigkeitspfeil mit Komponenten</label>
+        <div class="row" style="margin-top: 8px;">
+          <label>x von <input type="number" id="d2xMin" step="1" value="-5"></label>
+          <label>bis <input type="number" id="d2xMax" step="1" value="5"> m</label>
+        </div>
+        <div class="row" style="margin-top: 6px;">
+          <label>y von <input type="number" id="d2yMin" step="1" value="-5"></label>
+          <label>bis <input type="number" id="d2yMax" step="1" value="5"> m</label>
+          <label>t<sub>max</sub> <input type="number" id="d2tMax" step="1" value="10"> s</label>
+        </div>
+      </div>
+
+      <details class="sec">
+        <summary>Achsen und Punktspur</summary>
+        <div class="row">
+          <label class="note">Punktspur alle <select id="strobeDt"><option value="0.1">0,1 s</option><option value="0.3333333333">⅓ s</option><option value="0.5" selected>0,5 s</option><option value="1">1 s</option></select></label>
+        </div>
+        <div class="row" style="margin-top: 8px;">
+          <label>s von <input type="number" id="sMin" step="1" value="-5"></label>
+          <label>bis <input type="number" id="sMax" step="1" value="5"> m</label>
+          <label>t<sub>max</sub> <input type="number" id="tMax" step="1" value="12"> s</label>
+        </div>
+        <div class="row" style="margin-top: 8px;">
+          <label>v von <input type="number" id="vMin" step="1" value="-8"></label>
+          <label>bis <input type="number" id="vMax" step="1" value="8"> m/s</label>
+        </div>
+        <div class="row" style="margin-top: 8px;">
+          <label>a von <input type="number" id="aMin" step="1" value="-6"></label>
+          <label>bis <input type="number" id="aMax" step="1" value="6"> m/s²</label>
+        </div>
+        <p class="note" style="margin: 6px 0 0;">Die Achsen bleiben während der Bewegung fest. Liegt eine programmierte Bewegung außerhalb, werden sie erweitert; die normale Bahn bleibt grün markiert.</p>
+        <div>
+        </div>
+        <div class="row" style="margin-top: 8px;">
+          <label class="chk"><input type="checkbox" id="showRoman"> Abschnitte I, II, … markieren</label>
+        </div>
+      </details>
+
+      <details class="sec">
+        <summary>Exportieren</summary>
+        <div class="row">
+          <button class="btn" id="btnExport">Diagramm als Bild …</button>
+          <button class="btn" id="btnTable">Messwerte …</button>
+        </div>
+      </details>
+    </aside>
+  </div>
+</div>
+
+<dialog id="dlgExport" aria-labelledby="expTitle">
+  <h2 id="expTitle" style="margin: 0 0 8px; font-size: 1.1rem;">Diagramm als Bild</h2>
+  <div class="row">
+    <label>Diagramm <select id="expWhat"><option value="st">s-t-Diagramm</option><option value="vt">v-t-Diagramm</option><option value="at">a-t-Diagramm</option><option value="strobe">Punktspur (Stroboskop)</option></select></label>
+    <label>Inhalt <select id="expMode"><option value="graph">mit Graph (schwarz)</option><option value="empty">leeres Raster (zum Zeichnen)</option><option value="solution">Lösung (Graph rot)</option></select></label>
+  </div>
+  <div class="row" style="margin-top: 8px;">
+    <label>Breite <select id="expWidth"><option value="15">15 cm</option><option value="12">12 cm</option><option value="8">8 cm</option><option value="17">17 cm</option></select></label>
+    <label>Höhe <select id="expHeight"><option value="8">8 cm</option><option value="6">6 cm</option><option value="10">10 cm</option><option value="5">5 cm</option></select></label>
+    <label class="chk"><input type="checkbox" id="expPoints"> Messpunkte (×) statt Linie</label>
+    <label class="chk"><input type="checkbox" id="expRoman"> Abschnitte I, II, …</label>
+  </div>
+  <p class="note">Druckfertig: weißer Grund, hellblaues Karoraster, Achsen „t in s“ / „s in m“, Dezimalkomma. PNG mit 300 dpi, SVG verlustfrei für Word.</p>
+  <img id="expPreview" alt="Vorschau des exportierten Diagramms">
+  <div class="row" style="margin-top: 10px; justify-content: flex-end;">
+    <span class="note" id="expHint"></span>
+    <button class="btn" id="expCopy">Bild kopieren</button>
+    <button class="btn" id="expSvg">SVG speichern</button>
+    <button class="btn primary" id="expPng">PNG speichern</button>
+    <button class="btn" id="expClose">Schließen</button>
+  </div>
+</dialog>
+
+<dialog id="dlgTable" aria-labelledby="tblTitle">
+  <h2 id="tblTitle" style="margin: 0 0 8px; font-size: 1.1rem;">Messwerte</h2>
+  <div class="row">
+    <label>Abstand <select id="tblDt"><option value="1">1 s</option><option value="0.5">0,5 s</option><option value="2">2 s</option><option value="0.2">0,2 s</option><option value="10">10 s</option></select></label>
+    <label>Streuung <select id="tblNoise"><option value="0">keine (exakt)</option><option value="0.01">± 1 cm</option><option value="0.05">± 5 cm</option><option value="rel2">± 2 %</option><option value="rel5">± 5 %</option></select></label>
+    <label>Stellen <select id="tblDec"><option value="1">1 Nachkommastelle</option><option value="2">2 Nachkommastellen</option><option value="0">ganze Zahlen</option></select></label>
+    <span class="row" role="group" aria-label="Größen"><label class="chk"><input type="checkbox" id="tblS" checked> Ort</label><label class="chk"><input type="checkbox" id="tblV"> Geschwindigkeit</label><label class="chk"><input type="checkbox" id="tblA"> Beschleunigung</label></span>
+    <button class="btn small" id="tblReroll">Neu würfeln</button>
+  </div>
+  <div class="tbl" id="tblOut" style="margin-top: 10px;"></div>
+  <p class="note">„Kopieren“ legt die Tabelle mit Tabulatoren in die Zwischenablage – in Word oder Excel einfach einfügen.</p>
+  <div class="row" style="justify-content: flex-end;">
+    <button class="btn" id="tblCopy">Tabelle kopieren</button>
+    <button class="btn" id="tblCsv">CSV speichern</button>
+    <button class="btn" id="tblClose">Schließen</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+"use strict";
+// ================= Hilfen =================
+const $ = (id) => document.getElementById(id);
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const de = (x, d = 2) => {
+  if (!isFinite(x)) return "–";
+  let s = (Math.round(x * 10 ** d) / 10 ** d).toFixed(d);
+  if (d > 0) s = s.replace(/0+$/, "").replace(/\.$/, "");
+  if (s === "-0") s = "0";
+  return s.replace(".", ",").replace("-", "−");
+};
+const deFix = (x, d) => { let s = x.toFixed(d); if (s.startsWith("-") && Number(s) === 0) s = s.slice(1); return s.replace(".", ",").replace("-", "−"); };
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const toast = (msg) => { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 2200); };
+function niceStep(range, target = 10) {
+  const raw = range / target, p = 10 ** Math.floor(Math.log10(raw)), f = raw / p;
+  return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p;
+}
+const ROM = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+
+// ================= Objekte (eigene, einfache Strichfiguren) =================
+// Jede Figur wird in einer Box von ca. 60×40 Einheiten gezeichnet, Blickrichtung nach rechts.
+const OBJ = {
+  maus:   { name: "Maus", art: "die", pron: "sie", verb: "läuft", range: [-5, 5], tmax: 12, vr: [-8, 8], ar: [-6, 6], draw: drawMaus },
+  auto:   { name: "Auto", kurz: "Auto", art: "das", pron: "es", verb: "fährt", range: [-50, 50], tmax: 12, vr: [-80, 80], ar: [-60, 60], draw: drawAuto,
+            // echtes Auto: Lupe = realistische Werte (bis 108 km/h, ±10 m/s²), Auge = Bahn-Maßstab ×10 der Maus, Fernglas = schnelle Fingerbewegungen
+            lvFix: [{ v: 30, a: 10 }, { v: 80, a: 60 }, { v: 200, a: 400 }] },
+  schnecke: { name: "Schnecke", art: "die", pron: "sie", verb: "kriecht", range: [-0.05, 0.05], tmax: 40, vr: [-0.004, 0.004], ar: [-0.001, 0.001], draw: drawSchnecke },
+  gepard: { name: "Gepard", art: "der", pron: "er", verb: "rennt", range: [-150, 150], tmax: 10, vr: [-10, 40], ar: [-15, 15], draw: drawGepard },
+  laeufer:{ name: "Läufer", art: "der", pron: "er", verb: "läuft", range: [-50, 50], tmax: 20, vr: [-12, 12], ar: [-5, 5], draw: drawLaeufer },
+};
+const OBJ_KEYS = Object.keys(OBJ);
+// Achsenstufen für v und a: Mit dem Finger läuft man die ganze Bahn leicht in 1 s ab. Bahnlänge L pro Sekunde ist deshalb das Maß.
+// Stufe 0 (Lupe): typische Bewegungen · 1 (Auge): mittlerer Bereich · 2 (Fernglas): auch die größten Spitzen
+function niceUp(x) { const p = 10 ** Math.floor(Math.log10(x)), f = x / p; for (const m of [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (f <= m + 1e-9) return m * p; return 10 * p; }
+function levelsFor(range) { const L = Math.abs(range[1] - range[0]); return [[0.8, 3], [1.6, 8], [3, 20]].map(([fv, fa]) => ({ v: niceUp(fv * L), a: niceUp(fa * L) })); }
+OBJ_KEYS.forEach((k) => { const o = OBJ[k]; o.lv = o.lvFix || levelsFor(o.range); o.vr = [-o.lv[0].v, o.lv[0].v]; o.ar = [-o.lv[0].a, o.lv[0].a]; });
+const lvV = (k) => { const l = OBJ[k].lv[S.vLvl]; return [-l.v, l.v]; }, lvA = (k) => { const l = OBJ[k].lv[S.aLvl]; return [-l.a, l.a]; };
+const ZOOM_ICONS = [
+  '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9.7 9.7 14.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 8C3.5 3.6 12.5 3.6 15 8 12.5 12.4 3.5 12.4 1 8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="8" cy="8" r="2.2" fill="currentColor"/></svg>',
+  '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.4" y="3.2" width="5" height="7" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="9.6" y="3.2" width="5" height="7" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="3.9" cy="11.6" r="2.6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12.1" cy="11.6" r="2.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6.4 6.2h3.2" stroke="currentColor" stroke-width="1.5"/></svg>'];
+const ZOOM_TIPS = ["Lupe: typische Bewegungen", "Auge: mittlerer Bereich", "Fernglas: auch die größten Spitzen"];
+function lw(ctx, w) { ctx.lineWidth = w; ctx.lineCap = "round"; ctx.lineJoin = "round"; }
+function drawMaus(ctx, c) {
+  // Körper und Kopf werden so gezeichnet, dass sich keine Linien überschneiden: jede Form wird außerhalb der vorderen Form geclippt.
+  const body = new Path2D(); body.ellipse(25, 27.5, 15.5, 9.5, 0, 0, Math.PI * 2);
+  const head = new Path2D(); head.moveTo(35.5, 21); head.bezierCurveTo(39, 15.5, 49, 16, 57.5, 25.5); head.bezierCurveTo(51.5, 30.5, 42, 32, 36, 30.5); head.closePath();
+  const ear = new Path2D(); ear.arc(43, 15.8, 5.2, 0, Math.PI * 2);
+  const outside = (...ps) => { const p = new Path2D(); p.rect(-200, -200, 500, 500); ps.forEach((q) => p.addPath(q)); ctx.clip(p, "evenodd"); };
+  lw(ctx, 2.4); ctx.strokeStyle = c;
+  ctx.save(); outside(head); ctx.stroke(body); ctx.restore();                 // Körper (hinter dem Kopf)
+  ctx.save(); outside(head); ctx.stroke(ear); ctx.restore();                  // Ohr (hinter dem Kopf)
+  ctx.stroke(head);                                                           // Kopf mit spitzer Schnauze
+  ctx.fillStyle = c; ctx.beginPath(); ctx.arc(48.3, 21.8, 1.5, 0, Math.PI * 2); ctx.fill();                  // Auge
+  ctx.beginPath(); ctx.arc(57.3, 25.5, 1.7, 0, Math.PI * 2); ctx.fill();                                     // Nase
+  lw(ctx, 0.9); ctx.beginPath(); ctx.moveTo(54, 27.2); ctx.lineTo(61, 28.6); ctx.moveTo(53.6, 28.2); ctx.lineTo(60, 31); ctx.stroke();   // Schnurrhaare
+  lw(ctx, 2.4); ctx.beginPath(); ctx.moveTo(9.6, 28.5); ctx.bezierCurveTo(2, 29.5, 5, 38, -3, 36.5); ctx.stroke();                        // Schwanz
+  ctx.beginPath(); ctx.moveTo(19, 36.3); ctx.lineTo(18, 39.5); ctx.moveTo(31.5, 36.2); ctx.lineTo(32.5, 39.5); ctx.stroke();              // Beine
+}
+function drawAuto(ctx, c) {   // Kombi von der Seite, Fahrtrichtung nach rechts (Motorhaube und schräge Frontscheibe vorne, steiles Heck hinten)
+  lw(ctx, 2.4); ctx.strokeStyle = c;
+  ctx.beginPath(); ctx.moveTo(9, 31); ctx.lineTo(3, 31); ctx.lineTo(3, 15); ctx.quadraticCurveTo(3, 11, 7, 11); ctx.lineTo(37, 11); ctx.lineTo(46, 19);
+  ctx.lineTo(56, 21); ctx.quadraticCurveTo(60, 22, 60, 26); ctx.lineTo(60, 31); ctx.lineTo(53, 31); ctx.moveTo(41, 31); ctx.lineTo(21, 31); ctx.stroke();   // Karosserie mit Radausschnitten
+  lw(ctx, 1.8); ctx.beginPath(); ctx.moveTo(7, 14); ctx.lineTo(36, 14); ctx.lineTo(42, 19); ctx.lineTo(7, 19); ctx.closePath(); ctx.stroke();                     // Fensterband
+  ctx.beginPath(); ctx.moveTo(18, 14); ctx.lineTo(18, 19); ctx.moveTo(29, 14); ctx.lineTo(29, 19); ctx.stroke();                                                 // Fenstersäulen
+  lw(ctx, 2.4); for (const x of [15, 47]) { ctx.beginPath(); ctx.arc(x, 31, 5.5, 0, Math.PI * 2); ctx.stroke(); }
+  ctx.fillStyle = c; for (const x of [15, 47]) { ctx.beginPath(); ctx.arc(x, 31, 1.6, 0, Math.PI * 2); ctx.fill(); }
+  ctx.beginPath(); ctx.ellipse(57.5, 23.5, 2, 1.4, 0, 0, Math.PI * 2); ctx.fill();                                                                            // Scheinwerfer vorne
+  ctx.fillRect(3, 17, 2.4, 4);                                                                                                                                 // Rücklicht
+}
+function drawSchnecke(ctx, c) {
+  lw(ctx, 2.4); ctx.strokeStyle = c;
+  ctx.beginPath(); ctx.moveTo(0, 37); ctx.lineTo(50, 37); ctx.quadraticCurveTo(58, 37, 57, 28); ctx.lineTo(54, 26); ctx.stroke();   // Fuß und Kopf
+  ctx.beginPath(); ctx.arc(26, 23, 14, 0, Math.PI * 2); ctx.stroke();                                                                 // Haus (rund, liegt auf dem Fuß)
+  ctx.beginPath(); for (let a = 0; a <= Math.PI * 4; a += 0.1) { const r = 1.5 + a * 0.85; const x = 26 + r * Math.cos(a), y = 23 + r * Math.sin(a); a ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); // Spirale
+  ctx.beginPath(); ctx.moveTo(55, 27); ctx.lineTo(57, 15); ctx.moveTo(57, 27); ctx.lineTo(63, 18); ctx.stroke();                   // Fühler
+  ctx.fillStyle = c; ctx.beginPath(); ctx.arc(57, 14, 1.8, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(63, 17, 1.8, 0, Math.PI * 2); ctx.fill();
+}
+function drawGepard(ctx, c) {   // geschlossener, gestreckter Körper im Sprung, kleiner Kopf mit Tränenstreifen, langer Schwanz mit Schwung
+  lw(ctx, 2.3); ctx.strokeStyle = c;
+  ctx.beginPath(); ctx.moveTo(45, 13.5); ctx.bezierCurveTo(37, 9.5, 24, 10.5, 14, 13.5); ctx.bezierCurveTo(8, 15.5, 8, 22, 13, 23);   // Rücken, Hüfte
+  ctx.bezierCurveTo(18, 23.5, 22, 20.5, 27, 21.5); ctx.bezierCurveTo(32, 23, 35, 27.5, 39, 26.5); ctx.bezierCurveTo(43, 25.5, 45, 22, 46, 18.5); ctx.closePath(); ctx.stroke(); // schmale Taille, tiefe Brust
+  ctx.beginPath(); ctx.ellipse(49.5, 14.5, 5.8, 4.4, 0.15, 0, Math.PI * 2); ctx.stroke();                                                                         // Kopf
+  ctx.beginPath(); ctx.moveTo(45.5, 11.2); ctx.lineTo(46.5, 7.5); ctx.lineTo(49, 10.3); ctx.stroke();                                                           // Ohr
+  ctx.beginPath(); ctx.moveTo(42, 25); ctx.lineTo(49, 30); ctx.lineTo(57, 30.5); ctx.moveTo(38, 26.5); ctx.lineTo(40, 33); ctx.lineTo(46, 37.5); ctx.stroke();      // Vorderbeine (gestreckt)
+  ctx.beginPath(); ctx.moveTo(12, 22); ctx.lineTo(5, 29); ctx.lineTo(-2, 31); ctx.moveTo(16, 23); ctx.lineTo(16, 31); ctx.lineTo(10, 37); ctx.stroke();           // Hinterbeine
+  ctx.beginPath(); ctx.moveTo(10, 15.5); ctx.quadraticCurveTo(4, 12.5, 0, 15); ctx.quadraticCurveTo(-2.5, 17, -1.5, 19.5); ctx.stroke();                              // Schwanz
+  lw(ctx, 1.4); ctx.beginPath(); ctx.moveTo(51.5, 14); ctx.quadraticCurveTo(52, 17, 54.5, 18.2); ctx.stroke();                                                  // Tränenstreifen
+  ctx.fillStyle = c; ctx.beginPath(); ctx.arc(51.5, 13, 1.2, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(55.3, 15.3, 1.1, 0, Math.PI * 2); ctx.fill();
+  for (const [x, y] of [[17, 16], [23, 14.5], [29, 14], [35, 14.5], [41, 16.5], [14, 19.5], [20, 18.5], [26, 18], [32, 18.5], [38, 20.5], [35, 23.5], [41, 22]]) { ctx.beginPath(); ctx.arc(x, y, 1.35, 0, Math.PI * 2); ctx.fill(); }
+}
+function drawBall(ctx, c) {
+  lw(ctx, 2.4); ctx.strokeStyle = c;
+  ctx.beginPath(); ctx.arc(30, 22, 16, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(14, 22); ctx.quadraticCurveTo(30, 12, 46, 22); ctx.moveTo(30, 6); ctx.quadraticCurveTo(22, 22, 30, 38); ctx.stroke();
+}
+function drawWagen(ctx, c) {
+  lw(ctx, 2.4); ctx.strokeStyle = c;
+  ctx.strokeRect(6, 16, 50, 14);
+  for (const x of [14, 48]) { ctx.beginPath(); ctx.arc(x, 33, 4.5, 0, Math.PI * 2); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(31, 16); ctx.lineTo(31, 3); ctx.lineTo(41, 6); ctx.lineTo(31, 9); ctx.stroke();       // Fähnchen
+  ctx.beginPath(); ctx.moveTo(6, 23); ctx.lineTo(0, 23); ctx.stroke();                                               // Haken
+}
+function drawRad(ctx, c) {
+  lw(ctx, 2.2); ctx.strokeStyle = c;
+  for (const x of [12, 48]) { ctx.beginPath(); ctx.arc(x, 30, 9, 0, Math.PI * 2); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(12, 30); ctx.lineTo(24, 18); ctx.lineTo(42, 18); ctx.lineTo(48, 30); ctx.moveTo(24, 18); ctx.lineTo(30, 30); ctx.lineTo(42, 18); ctx.moveTo(42, 18); ctx.lineTo(40, 12); ctx.lineTo(45, 12); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(27, 16); ctx.lineTo(33, 3); ctx.lineTo(41, 12); ctx.moveTo(27, 16); ctx.lineTo(30, 30); ctx.stroke(); // Person
+  ctx.beginPath(); ctx.arc(35, -2, 3.8, 0, Math.PI * 2); ctx.stroke();
+}
+function drawLaeufer(ctx, c) {
+  lw(ctx, 2.6); ctx.strokeStyle = c;
+  ctx.beginPath(); ctx.arc(36, 2, 4.5, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(34, 8); ctx.lineTo(28, 22); ctx.moveTo(28, 22); ctx.lineTo(38, 29); ctx.lineTo(36, 39); ctx.moveTo(28, 22); ctx.lineTo(20, 30); ctx.lineTo(10, 28); ctx.moveTo(32, 12); ctx.lineTo(42, 18); ctx.lineTo(46, 12); ctx.moveTo(32, 12); ctx.lineTo(24, 16); ctx.lineTo(20, 10); ctx.stroke();
+}
+function drawObj(ctx, key, x, y, scale, color, dir) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(scale * (dir < 0 ? -1 : 1), scale); ctx.translate(-30, -40); OBJ[key].draw(ctx, color); ctx.restore();
+}
+
+// ================= Zustand =================
+const S = {
+  mode: "live", obj: "maus",
+  sMin: -5, sMax: 5, tMax: 12, vMin: -8, vMax: 8, aMin: -30, aMax: 30, vScaleF: 1, vLvl: 0, aLvl: 0, cd: 0,
+  running: false, t: 0, lastTs: 0,
+  live: { rec: [], pos: 0, dragging: false, started: false, two: false, recB: [], posB: 2.5, ptr: {}, recMode: "A" }, flyT0: -1e9, rp: false,
+  prog: { A: { obj: "maus", s0: 0, segs: [] }, B: { obj: "auto", s0: 4, segs: [] }, two: false, edit: "A", speed: 1 },
+  ueb: { target: null, score: null },
+  views: {}, strobeDt: 0.5, showVT: false, showAT: false, showStrobe: false, showRoman: false, showAvg: false,
+};
+
+// ---- Programm: Segmente -> s(t), v(t) ----
+function compile(p) {
+  let t = 0, s = p.s0; const out = [];
+  for (const g of p.segs) {
+    const dt = Math.max(0, +g.dt || 0), v0 = +g.v0 || 0, v1 = +g.v1 || 0; if (dt <= 0) continue;
+    const a = (v1 - v0) / dt; out.push({ t0: t, t1: t + dt, s0: s, v0, v1, a });
+    s += v0 * dt + 0.5 * a * dt * dt; t += dt;
+  }
+  return { segs: out, T: t, sEnd: s, s0: p.s0 };
+}
+function progAt(c, t) {
+  if (!c.segs.length) return { s: c.s0, v: 0, a: 0 };
+  if (t <= 0) return { s: c.s0, v: c.segs[0].v0, a: c.segs[0].a };
+  for (const g of c.segs) if (t <= g.t1) { const u = t - g.t0; return { s: g.s0 + g.v0 * u + 0.5 * g.a * u * u, v: g.v0 + g.a * u, a: g.a }; }
+  return { s: c.sEnd, v: 0, a: 0 };
+}
+function kindOf(g) {
+  const v0 = +g.v0, v1 = +g.v1;
+  if (v0 === 0 && v1 === 0) return "Ruhe";
+  if (v0 === v1) return v0 > 0 ? "gleichförmig →" : "gleichförmig ←";
+  if (Math.abs(v1) > Math.abs(v0) && Math.sign(v0 || v1) === Math.sign(v1)) return "wird schneller";
+  if (Math.abs(v1) < Math.abs(v0) && (v1 === 0 || Math.sign(v0) === Math.sign(v1))) return "wird langsamer";
+  return "Richtungswechsel";
+}
+
+// ---- Beispiele ----
+const PRESETS = [
+  { name: "Maus: rechts – Pause – zurück – rechts (KA V1)", A: { obj: "maus", s0: 0, segs: [[2, 1.5, 1.5], [2, 0, 0], [1, -4, -4], [3, 1, 1]] }, range: [-5, 5], tmax: 10, roman: true },
+  { name: "Auto: gleichförmig mit 54 km/h", A: { obj: "auto", s0: -45, segs: [[6, 15, 15]] }, range: [-50, 50], tmax: 10 },
+  { name: "Auto: anfahren – fahren – bremsen", A: { obj: "auto", s0: -45, segs: [[4, 0, 12], [3, 12, 12], [2, 12, 0], [1, 0, 0]] }, range: [-50, 50], tmax: 10, roman: true, vr: [0, 15] },
+  { name: "Gepard: Sprint aus dem Stand", A: { obj: "gepard", s0: -90, segs: [[3, 0, 30], [3, 30, 30], [2, 30, 10]] }, range: [-150, 150], tmax: 10, vr: [0, 40] },
+  { name: "Schnecke: 1 mm pro Sekunde", A: { obj: "schnecke", s0: -0.02, segs: [[40, 0.001, 0.001]] }, range: [-0.05, 0.05], tmax: 40, vr: [0, 0.002] },
+  { name: "Wettrennen: zwei Läufer (B startet 4 s später)", A: { obj: "laeufer", s0: -50, segs: [[20, 5, 5]] }, B: { obj: "laeufer", s0: -50, segs: [[4, 0, 0], [10, 8, 8], [6, 0, 0]] }, range: [-60, 60], tmax: 24, vr: [0, 12] },
+  { name: "Begegnung: zwei Läufer auf einem Weg", A: { obj: "laeufer", s0: -10, segs: [[8, 2, 2]] }, B: { obj: "laeufer", s0: 10, segs: [[6, -3, -3], [2, 0, 0]] }, range: [-12, 12], tmax: 8, vr: [-4, 4] },
+];
+// Achse passend zum Programm (für Beispiele): symmetrisch, etwas Luft
+function fitRange(p, kind) {
+  let m = 0; [p.A, p.B].filter(Boolean).forEach((x) => x.segs.forEach(([dt, v0, v1]) => { m = Math.max(m, kind === "v" ? Math.max(Math.abs(v0), Math.abs(v1)) : Math.abs((v1 - v0) / dt)); }));
+  if (m <= 0) return kind === "v" ? lvV(p.A.obj) : [-1, 1]; const u = niceUp(m * 1.25); return [-u, u];
+}
+function loadPreset(i) {
+  const p = PRESETS[i]; const mk = (x) => ({ obj: x.obj, s0: x.s0, segs: x.segs.map(([dt, v0, v1]) => ({ dt, v0, v1 })) });
+  S.prog.A = mk(p.A); S.prog.two = !!p.B; if (p.B) S.prog.B = mk(p.B);
+  S.prog.edit = "A"; S.vScaleF = 1; S.refR = p.range.slice(); setRange(p.range[0], p.range[1], p.tmax, p.vr || fitRange(p, "v"), fitRange(p, "a")); S.showRoman = !!p.roman; $("showRoman").checked = S.showRoman;
+  S.obj = S.prog.A.obj; autoRangeProg(); buildVScale(); resetRun(); syncUI();
+}
+
+// ================= Zeichnen: Bahn =================
+const cv = { track: $("track"), strobe: $("strobe"), st: $("stChart"), vt: $("vtChart"), at: $("atChart") };
+function fit(c) {
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(10, Math.round(r.width * dpr)), h = Math.max(10, Math.round(r.height * dpr));
+  if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+  const ctx = c.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); return { ctx, w: r.width, h: r.height };
+}
+const PADX = 34;
+function sToX(s, w) { return PADX + (s - S.sMin) / (S.sMax - S.sMin) * (w - 2 * PADX); }
+function xToS(x, w) { return S.sMin + (x - PADX) / (w - 2 * PADX) * (S.sMax - S.sMin); }
+function currentPositions() {
+  if (S.mode === "prog") {
+    const a = progAt(compile(S.prog.A), S.t);
+    const out = [{ key: S.prog.A.obj, s: a.s, v: a.v, color: css("--objA") }];
+    if (S.prog.two) { const b = progAt(compile(S.prog.B), S.t); out.push({ key: S.prog.B.obj, s: b.s, v: b.v, color: css("--objB") }); }
+    return out;
+  }
+  const rec = S.live.rec; const v = S.mode === "game" ? G.vNow : (rec.length ? rec[rec.length - 1].v : 0);
+  if (S.rp) {   // Wiederholung: beide Objekte bewegen sich wie aufgenommen
+    const a = recAt(S.live.rec, S.t), out = [{ key: S.obj, s: a.s, v: a.v, color: css("--objA") }];
+    if (liveTwo() && S.live.recB.length > 1) { const b = recAt(S.live.recB, S.t); out.push({ key: S.obj, s: b.s, v: b.v, color: css("--objB") }); }
+    return out;
+  }
+  const out = [{ key: S.obj, s: S.live.pos, v: recB() ? recAt(S.live.rec, S.t).v : S.live.dragging || S.running ? v : 0, color: css("--objA") }];
+  if (liveTwo()) { const rb = S.live.recB; out.push({ key: S.obj, s: S.live.posB, v: S.running && rb.length ? rb[rb.length - 1].v : 0, color: css("--objB") }); }
+  return out;
+}
+function drawTrack() {
+  const { ctx, w, h } = fit(cv.track); ctx.clearRect(0, 0, w, h);
+  const pos = currentPositions(); const lanes = pos.length;
+  const step = niceStep(S.sMax - S.sMin, 10);
+  const baseY = (i) => lanes === 1 ? h - 34 : (i === 0 ? h * 0.46 : h - 30);
+  ctx.font = `12px ${css("--mono")}`; ctx.textAlign = "center"; ctx.fillStyle = css("--muted");
+  for (let i = 0; i < lanes; i++) {
+    const y = baseY(i);
+    if (refShown()) { const r = refRange(); const xa = sToX(r[0], w), xb = sToX(r[1], w); ctx.fillStyle = css("--ref"); ctx.fillRect(xa, y - 7, xb - xa, 7); ctx.strokeStyle = css("--refEdge"); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(xa, y - 7); ctx.lineTo(xa, y + 3); ctx.moveTo(xb, y - 7); ctx.lineTo(xb, y + 3); ctx.stroke();
+      if (i === lanes - 1) { ctx.save(); ctx.fillStyle = css("--refEdge"); ctx.font = `11px ${css("--font")}`; ctx.textAlign = "left"; ctx.fillText(`normale Bahn: ${de(r[0], 3)} … ${de(r[1], 3)} m`, xa + 4, y - 11); ctx.restore(); } }
+    ctx.fillStyle = css("--muted");
+    ctx.strokeStyle = css("--ink"); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(PADX - 10, y); ctx.lineTo(w - PADX + 10, y); ctx.stroke();
+    if (i === lanes - 1) {
+      const k0 = Math.ceil(S.sMin / step - 1e-9), k1 = Math.floor(S.sMax / step + 1e-9), lab = (k) => `${de(k * step, 3)} m`;
+      const wMax = Math.max(...[k0, k1].map((k) => ctx.measureText(lab(k)).width)), every = sToX(step, w) - sToX(0, w) >= wMax + 8 ? 1 : 2;
+      for (let k = k0; k <= k1; k++) {
+        const sv = k * step, x = sToX(sv, w); ctx.strokeStyle = css("--muted"); ctx.lineWidth = k === 0 ? 2 : 1;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + (k === 0 ? 9 : 6)); ctx.stroke();
+        if ((k - k0) % every === 0) ctx.fillText(lab(k), x, y + 21);
+      }
+      ctx.textAlign = "right"; ctx.fillText("Ort s", w - 4, y - 12); ctx.textAlign = "center";
+    }
+  }
+  pos.forEach((p, i) => {
+    const y = baseY(i); let x = sToX(p.s, w); const out = x < PADX - 12 || x > w - PADX + 12; x = clamp(x, PADX - 12, w - PADX + 12);
+    const dir = p.v < -1e-6 ? -1 : p.v > 1e-6 ? 1 : (p.lastDir || 1);
+    const sc = Math.min(1.25, (h / (lanes === 1 ? 110 : 150)));
+    drawObj(ctx, p.key, x, y - 2, sc, p.color, dir);
+    if (out) { ctx.save(); ctx.fillStyle = css("--bad"); ctx.font = `12px ${css("--font")}`; ctx.textAlign = x < w / 2 ? "left" : "right"; ctx.fillText("außerhalb der Bahn", x < w / 2 ? 4 : w - 4, Math.max(14, y - 46 * sc)); ctx.restore(); }
+  });
+  if (S.cd > 0) {
+    ctx.save(); ctx.fillStyle = css("--accent"); ctx.font = `700 ${Math.round(h * 0.42)}px ${css("--font")}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(S.cd > 1 ? "2" : "1", w / 2, h * 0.36); ctx.restore();
+  } else if (S.mode !== "prog" && !S.running && !S.live.rec.length) {
+    ctx.fillStyle = css("--muted"); ctx.font = `13px ${css("--font")}`; ctx.textAlign = "left";
+    ctx.fillText(S.mode === "ueb" ? "Objekt an den Start ziehen, dann „Start“: das graue Diagramm nachfahren" : S.mode === "game" ? "„Start“ drücken, nach dem Countdown das Objekt ziehen" : "Objekt an die Startstelle ziehen, dann „Start“ drücken", PADX, 16);
+  }
+}
+
+// ================= Datenquellen =================
+// Live-Aufnahme: v und a werden beim Aufnehmen einmal berechnet (nur aus vergangenen Werten) und danach nicht mehr verändert.
+// v = Steigung der Ausgleichsgeraden durch die letzten 0,3 s (glättet das Zittern von Finger und Maus), a entsprechend aus v über 0,4 s.
+function lsSlope(rec, key, t, cur, win) {
+  let n = 1, su = 0, sv = cur, suu = 0, suv = 0;
+  for (let i = rec.length - 1; i >= 0 && rec[i].t >= t - win; i--) { const u = rec[i].t - t, b = rec[i][key]; n++; su += u; sv += b; suu += u * u; suv += u * b; }
+  const den = n * suu - su * su; if (n < 3 || den <= 1e-12) return null;
+  return (n * suv - su * sv) / den;
+}
+function pushSmooth(rec, t, vals, keys) {
+  const e = Object.assign({ t }, vals), prev = rec[rec.length - 1];
+  keys.forEach(([p, v, a]) => {
+    if (!prev) { e[v] = 0; e[a] = 0; return; }
+    const vr = lsSlope(rec, p, t, e[p], 0.3); e[v] = vr === null ? prev[v] : prev[v] + 0.5 * (vr - prev[v]);
+    const ar = lsSlope(rec, v, t, e[v], 0.4); e[a] = ar === null ? prev[a] : prev[a] + 0.3 * (ar - prev[a]);
+  });
+  rec.push(e);
+}
+// ---- Bewegungsmodell (Live-Aufnahme) ----
+// Das Objekt ist mit dem Finger über eine kritisch gedämpfte „Gummischnur“ verbunden: a = ω²·(Ziel − s) − 2ω·v.
+// s, v und a sind damit EIN Bewegungszustand: v ist die zeitliche Änderung von s, a die von v (numerisch integriert,
+// v_neu = v + a·h, s_neu = s + v_neu·h). Folge: Nullstelle von v ⇔ Extremum von s, Nullstelle von a ⇔ Extremum von v –
+// ohne Zeitversatz zwischen den Graphen. Das Objekt folgt dem Finger fast unmittelbar (ca. 0,05 s) und kann nicht „springen“.
+const PH = { w: 45, tau: 0.008 };   // kurze, straffe Schnur: Nachlauf des Objekts ca. 0,05 s (2/ω + τ)
+function phInit(s) { return { g1: s, x: s, v: 0 }; }
+function phStep(p, fin, dt) {
+  const n = Math.max(1, Math.ceil(dt * 480)), h = dt / n, k = 1 - Math.exp(-h / PH.tau);
+  for (let i = 0; i < n; i++) { p.g1 += (fin - p.g1) * k; const a = PH.w * PH.w * (p.g1 - p.x) - 2 * PH.w * p.v; p.v += a * h; p.x += p.v * h; }
+}
+// Für die Diagramme werden s, v und a mit DEMSELBEN symmetrischen Glättungsfenster (Gauß, σ = 0,06 s) geglättet.
+// Weil das Fenster symmetrisch ist, entsteht kein Zeitversatz, und weil s, v, a gleich behandelt werden, bleibt
+// v = ds/dt und a = dv/dt erhalten. Während der Aufnahme wird ein Punkt erst gezeichnet, wenn sein Fenster vollständig ist
+// (Graph-Spitze ca. 0,15 s hinter der Uhr) – so verrutscht nachträglich nichts.
+const SM = { sig: 0.06, half: 0.15 };
+function smoothRec(rec, keys, final) {
+  const c = rec._sm; if (c && c.n === rec.length && c.final === final) return c.out;
+  const n = rec.length, out = []; if (!n) return out; const tEnd = rec[n - 1].t;
+  let lo = 0, hi = 0;
+  for (let i = 0; i < n; i++) {
+    const t = rec[i].t; if (!final && t > tEnd - SM.half) break;
+    while (rec[lo].t < t - SM.half) lo++; while (hi < n - 1 && rec[hi + 1].t <= t + SM.half) hi++;
+    const e = { t }; let wS = 0; keys.forEach((k) => { e[k] = 0; });
+    for (let j = lo; j <= hi; j++) { const u = (rec[j].t - t) / SM.sig, w = Math.exp(-0.5 * u * u); wS += w; keys.forEach((k) => { e[k] += w * rec[j][k]; }); }
+    keys.forEach((k) => { e[k] /= wS; }); out.push(e);
+  }
+  rec._sm = { n, final, out }; return out;
+}
+const sm1 = (rec, final = true) => smoothRec(rec, ["s", "v", "a"], final);
+const recording = () => S.running && S.live.started;
+function phPush(rec, p, fin, t, dt) { const v0 = p.v; phStep(p, fin, dt); rec.push({ t, s: p.x, v: p.v, a: dt > 0 ? (p.v - v0) / dt : 0 }); }
+function recStep(t, dt) {
+  if (recB()) { S.live.pos = recAt(S.live.rec, t).s; phPush(S.live.recB, S.live.phB, S.live.finB, t, dt); S.live.posB = S.live.phB.x; }   // A läuft als Wiederholung mit
+  else { phPush(S.live.rec, S.live.ph, S.live.fin, t, dt); S.live.pos = S.live.ph.x; }
+}
+// Wert einer Aufnahme zum Zeitpunkt t (linear zwischen den Messpunkten; nach dem Ende bleibt der letzte Wert)
+function recAt(rec, t) {
+  if (!rec.length) return { s: 0, v: 0 }; if (t >= rec[rec.length - 1].t) { const l = rec[rec.length - 1]; return { s: l.s, v: 0 }; }
+  let lo = 0, hi = rec.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (rec[m].t <= t) lo = m; else hi = m; }
+  const a = rec[lo], b = rec[hi], f = b.t > a.t ? clamp((t - a.t) / (b.t - a.t), 0, 1) : 0; return { s: a.s + (b.s - a.s) * f, v: a.v + (b.v - a.v) * f };
+}
+function recB() { return liveTwo() && S.live.recMode === "B" && (S.running || S.cd > 0); }   // gerade wird Objekt B aufgenommen
+function hasA() { return S.live.rec.length > 1; }
+function liveTwo() { return S.mode === "live" && S.live.two; }
+// Nach der Aufnahme: Abschnitte mit (fast) gleicher Geschwindigkeit finden (Ausgleichs-Streckenzug im s-t-Diagramm)
+// und je Abschnitt die mittlere Geschwindigkeit v = Δs/Δt angeben.
+// v gemittelt: Der v-Graph wird in Abschnitte zerlegt, in denen v (fast) konstant ist. Je Abschnitt: v̄ = Δs/Δt
+// (= Mittelwert von v, weil v exakt die Änderung von s ist). Feste Grenzen an jedem Richtungswechsel (v = 0, Umkehrpunkt im s-t).
+function avgSteps(pts, key, _tol, vMerge) {
+  const n = pts.length; if (n < 8) return [];
+  const vk = key === "s" ? "v" : "v" + key, vr = vMerge / 0.02, tolV = 0.07 * vr, eps = 0.03 * vr, minDur = 0.3;
+  const mean = (i, j) => (pts[j][key] - pts[i][key]) / ((pts[j].t - pts[i].t) || 1);
+  // 1) Richtungswechsel: v wechselt das Vorzeichen (mit Schwelle gegen Zittern)
+  const fixed = [0]; let sg = 0;
+  for (let k = 1; k < n; k++) { const v = pts[k][vk], ns = v > eps ? 1 : v < -eps ? -1 : 0; if (ns && sg && ns !== sg) { let z = k; while (z > fixed[fixed.length - 1] + 1 && Math.sign(pts[z - 1][vk]) === ns) z--; fixed.push(z); } if (ns) sg = ns; }
+  fixed.push(n - 1);
+  // 2) Zerlegen, solange v im Abschnitt zu weit vom Mittelwert abweicht (Teilung dort, wo sie den Fehler am stärksten verkleinert)
+  const cuts = new Set(fixed), stack = [];
+  for (let m = 0; m < fixed.length - 1; m++) stack.push([fixed[m], fixed[m + 1]]);
+  while (stack.length) {
+    const [i, j] = stack.pop(); if (pts[j].t - pts[i].t < 2 * minDur) continue;
+    const m0 = mean(i, j); let dev = 0; for (let k = i; k <= j; k++) dev = Math.max(dev, Math.abs(pts[k][vk] - m0)); if (dev <= tolV) continue;
+    let S1 = 0, S2 = 0; for (let k = i; k < j; k++) { S1 += pts[k][vk]; S2 += pts[k][vk] ** 2; }
+    let a1 = 0, a2 = 0, best = -1, bestE = Infinity;
+    for (let k = i; k < j - 1; k++) {
+      a1 += pts[k][vk]; a2 += pts[k][vk] ** 2; const nl = k - i + 1, nr = j - i - nl;
+      if (pts[k + 1].t - pts[i].t < minDur || pts[j].t - pts[k + 1].t < minDur) continue;
+      const e = (a2 - a1 * a1 / nl) + ((S2 - a2) - (S1 - a1) ** 2 / nr); if (e < bestE) { bestE = e; best = k + 1; }
+    }
+    if (best < 0) continue; cuts.add(best); stack.push([i, best], [best, j]);
+  }
+  const idx = [...cuts].sort((x, y) => x - y), fx = new Set(fixed);
+  const mk = (i, j) => ({ t0: pts[i].t, t1: pts[j].t, i0: i, i1: j, v: mean(i, j) });
+  const segs = []; for (let m = 0; m < idx.length - 1; m++) if (pts[idx[m + 1]].t > pts[idx[m]].t) segs.push(mk(idx[m], idx[m + 1]));
+  // 3) Nachbarn mit fast gleichem Mittelwert zusammenfassen (nie über einen Richtungswechsel)
+  for (let m = 0; m < segs.length - 1;) { if (!fx.has(segs[m].i1) && Math.abs(segs[m].v - segs[m + 1].v) < tolV * 0.6) segs.splice(m, 2, mk(segs[m].i0, segs[m + 1].i1)); else m++; }
+  return segs;
+}
+function avgOn1D() { return S.showAvg && (S.mode === "live" || S.mode === "ueb") && !S.running && !S.rp && S.cd === 0 && S.live.rec.length > 10; }
+function avg1D() {
+  if (!avgOn1D()) return null; const f = (r) => avgSteps(sm1(r), "s", 0.02 * (S.sMax - S.sMin), 0.02 * (S.vMax - S.vMin));
+  return liveTwo() ? [f(S.live.rec), f(S.live.recB)] : [f(S.live.rec)];
+}
+function refRange() { return S.refR || OBJ[S.obj].range; }
+function refShown() { const r = refRange(); return S.sMin < r[0] - 1e-9 || S.sMax > r[1] + 1e-9; }
+// Liefert Serien fürs Diagramm: [{pts:[{t,s,v}], color, dash, label}]
+function series(forExport = false) {
+  const out = [];
+  if (S.mode === "prog") {
+    const mk = (p, color, dash, label) => {
+      const c = compile(p); const T = Math.min(forExport ? Math.max(c.T, 0) : S.t, S.tMax); const pts = [];
+      const n = Math.max(2, Math.ceil(T / 0.02)); for (let k = 0; k <= n; k++) { const t = T * k / n; const r = progAt(c, t); pts.push({ t, s: r.s, v: r.v, a: r.a }); }
+      // Knicke exakt
+      return { pts, color, dash, label, comp: c };
+    };
+    out.push(mk(S.prog.A, "--objA", null, OBJ[S.prog.A.obj].kurz || OBJ[S.prog.A.obj].name));
+    if (S.prog.two) out.push(mk(S.prog.B, "--objB", [7, 4], OBJ[S.prog.B.obj].kurz || OBJ[S.prog.B.obj].name));
+  } else {
+    const cut = S.rp || recB() ? S.t : Infinity, take = (rec, fin) => sm1(rec, fin).filter((r) => r.t <= cut + 1e-9).map((r) => ({ t: r.t, s: r.s, v: r.v, a: r.a }));
+    const pts = take(S.live.rec, !(recording() && !recB())), nm = OBJ[S.obj].kurz || OBJ[S.obj].name;
+    out.push({ pts, color: "--objA", dash: null, label: liveTwo() ? `Objekt A (${nm})` : nm });
+    if (liveTwo()) out.push({ pts: take(S.live.recB, !recB()), color: "--objB", dash: [7, 4], label: `Objekt B (${nm})` });
+  }
+  return out;
+}
+function romanBreaks() { // Abschnittsgrenzen für I, II, …
+  if (S.mode === "prog") return compile(S.prog.A).segs.map((g) => [g.t0, g.t1]);
+  if (S.mode === "ueb" && S.ueb.target && !S.ueb.target.special) return compile(S.ueb.target).segs.map((g) => [g.t0, g.t1]);
+  return [];
+}
+
+// ================= Diagramm-Zeichner (Bildschirm + Export über denselben Code) =================
+// Pen-Schnittstelle: line, poly, text, circle, rect
+class CanvasPen {
+  constructor(ctx) { this.c = ctx; }
+  line(x1, y1, x2, y2, st) { const c = this.c; c.save(); c.strokeStyle = st.color; c.lineWidth = st.w || 1; c.setLineDash(st.dash || []); c.lineCap = "round"; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); c.restore(); }
+  poly(pts, st) { if (pts.length < 2) return; const c = this.c; c.save(); c.strokeStyle = st.color; c.lineWidth = st.w || 1; c.setLineDash(st.dash || []); c.lineJoin = "round"; c.lineCap = "round"; c.beginPath(); pts.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); c.restore(); }
+  text(s, x, y, st) { const c = this.c; c.save(); c.fillStyle = st.color; c.font = `${st.bold ? "700 " : ""}${st.size || 12}px ${st.font || "sans-serif"}`; c.textAlign = st.align || "left"; c.textBaseline = st.base || "alphabetic"; c.fillText(s, x, y); c.restore(); }
+  circle(x, y, r, st) { const c = this.c; c.save(); c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); if (st.fill) { c.fillStyle = st.fill; c.fill(); } if (st.color) { c.strokeStyle = st.color; c.lineWidth = st.w || 1; c.stroke(); } c.restore(); }
+  cross(x, y, r, st) { this.line(x - r, y - r, x + r, y + r, st); this.line(x - r, y + r, x + r, y - r, st); }
+  rect(x, y, w, h, st) { const c = this.c; c.save(); c.fillStyle = st.fill; c.fillRect(x, y, w, h); c.restore(); }
+}
+class SvgPen {
+  constructor(w, h) { this.w = w; this.h = h; this.p = []; }
+  esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+  line(x1, y1, x2, y2, st) { this.p.push(`<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="${st.color}" stroke-width="${st.w || 1}" stroke-linecap="round"${st.dash ? ` stroke-dasharray="${st.dash.join(" ")}"` : ""}/>`); }
+  poly(pts, st) { if (pts.length < 2) return; this.p.push(`<polyline fill="none" points="${pts.map(([x, y]) => x.toFixed(2) + "," + y.toFixed(2)).join(" ")}" stroke="${st.color}" stroke-width="${st.w || 1}" stroke-linejoin="round" stroke-linecap="round"${st.dash ? ` stroke-dasharray="${st.dash.join(" ")}"` : ""}/>`); }
+  text(s, x, y, st) { const anchor = { left: "start", center: "middle", right: "end" }[st.align || "left"]; const db = st.base === "middle" ? ' dominant-baseline="middle"' : st.base === "top" ? ' dominant-baseline="hanging"' : ""; this.p.push(`<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" fill="${st.color}" font-family="Calibri, Arial, sans-serif" font-size="${st.size || 12}"${st.bold ? ' font-weight="bold"' : ""} text-anchor="${anchor}"${db}>${this.esc(s)}</text>`); }
+  circle(x, y, r, st) { this.p.push(`<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r}" fill="${st.fill || "none"}"${st.color ? ` stroke="${st.color}" stroke-width="${st.w || 1}"` : ""}/>`); }
+  cross(x, y, r, st) { this.line(x - r, y - r, x + r, y + r, st); this.line(x - r, y + r, x + r, y - r, st); }
+  rect(x, y, w, h, st) { this.p.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${st.fill}"/>`); }
+  out() { return `<svg xmlns="http://www.w3.org/2000/svg" width="${this.w}" height="${this.h}" viewBox="0 0 ${this.w} ${this.h}">${this.p.join("")}</svg>`; }
+}
+// Palette: Bildschirm (Theme) oder Druck
+function palette(print, mode) {
+  if (print) return { bg: "#FFFFFF", grid: "#9DB4CC", grid2: "#D5E0EB", axis: "#000000", text: "#000000", muted: "#333333",
+    A: mode === "solution" ? "#C00000" : "#000000", B: mode === "solution" ? "#C00000" : "#000000", target: "#888888", font: "Calibri, Arial, sans-serif", mono: "Calibri, Arial, sans-serif" };
+  return { bg: null, grid: css("--grid"), grid2: css("--grid2"), axis: css("--ink"), text: css("--ink"), muted: css("--muted"), A: css("--objA"), B: css("--objB"), target: css("--target"), font: css("--font"), mono: css("--mono") };
+}
+// kind: "st" | "vt"
+function drawPlot(pen, W, H, kind, o) {
+  const P = o.pal, fs = o.fs || 12;
+  const series_ = o.series, t1 = o.t1 || S.tMax;
+  let y0, y1;
+  if (o.range) { y0 = o.range[0]; y1 = o.range[1]; }
+  else if (kind === "st") { y0 = S.sMin; y1 = S.sMax; }
+  else if (kind === "vt") { y0 = S.vMin; y1 = S.vMax; }
+  else { y0 = S.aMin; y1 = S.aMax; }   // feste Skalierung: nie während der Bewegung an die Daten anpassen
+  const colW = o.strobe && kind === "st" && !o.print ? fs * 1.5 : 0;   // Spalte links neben der s-Achse für die Punktspur
+  const L = fs * 3.4 + colW, R = fs * 1.2, T = fs * 1.9, B = fs * 2.8;
+  const X = (t) => L + t / t1 * (W - L - R), Y = (v) => T + (y1 - v) / (y1 - y0) * (H - T - B);
+  const avgs = (o.avgs || (o.avg ? [o.avg] : [])).map((a) => (a && a.length ? a : null));
+  if (P.bg) pen.rect(0, 0, W, H, { fill: P.bg });
+  // feste Teilung: hängt nur vom eingestellten Bereich ab, nicht von Fenstergröße oder Daten
+  const xs = niceStep(t1, 12), ys = niceStep(y1 - y0, kind === "st" ? 10 : 8);
+  if (kind === "st" && !o.print && !o.range && refShown()) { const r = refRange(); pen.rect(X(0), Y(r[1]), X(t1) - X(0), Y(r[0]) - Y(r[1]), { fill: css("--ref") }); pen.text("normale Bahn", X(t1) - fs * 0.3, Y(r[1]) + fs * 1.1, { color: css("--refEdge"), size: fs * 0.85, align: "right", font: P.font }); }
+  // Nebengitter
+  for (let t = 0; t <= t1 + 1e-9; t += xs / 2) pen.line(X(t), Y(y0), X(t), Y(y1), { color: P.grid2, w: 0.6 });
+  for (let v = Math.ceil(y0 / (ys / 2)) * ys / 2; v <= y1 + 1e-9; v += ys / 2) pen.line(X(0), Y(v), X(t1), Y(v), { color: P.grid2, w: 0.6 });
+  for (let t = 0; t <= t1 + 1e-9; t += xs) pen.line(X(t), Y(y0), X(t), Y(y1), { color: P.grid, w: 0.9 });
+  for (let v = Math.ceil(y0 / ys) * ys; v <= y1 + 1e-9; v += ys) pen.line(X(0), Y(v), X(t1), Y(v), { color: P.grid, w: 0.9 });
+  // Achsen
+  const yAxisT = Y(Math.max(y0, Math.min(y1, 0)));
+  pen.line(X(0), Y(y0), X(0), Y(y1) - fs * 0.6, { color: P.axis, w: 1.6 });
+  pen.line(X(0), yAxisT, X(t1) + fs * 0.4, yAxisT, { color: P.axis, w: 1.6 });
+  if (y0 < 0) pen.line(X(0), Y(y0), X(t1), Y(y0), { color: P.axis, w: 1.1 });
+  // Pfeilspitzen
+  pen.poly([[X(0) - fs * 0.35, Y(y1) - fs * 0.1], [X(0), Y(y1) - fs * 0.8], [X(0) + fs * 0.35, Y(y1) - fs * 0.1]], { color: P.axis, w: 1.6 });
+  pen.poly([[X(t1) + fs * 0.1, yAxisT - fs * 0.35], [X(t1) + fs * 0.8, yAxisT], [X(t1) + fs * 0.1, yAxisT + fs * 0.35]], { color: P.axis, w: 1.6 });
+  const dec = (st) => { let d = 0; while (d < 4 && Math.abs(Math.round(st * 10 ** d) - st * 10 ** d) > 1e-6) d++; return d; };
+  const thin = (st, px, need) => { for (const m of [1, 2, 5, 10]) if (px * m >= need) return st * m; return st * 10; };
+  const xl = thin(xs, X(xs) - X(0), fs * (dec(xs) ? 2.9 : 1.9)), yl2 = thin(ys, Y(0) - Y(ys), fs * 1.25);
+  for (let t = 0; t <= t1 + 1e-9; t += xl) pen.text(de(t, dec(xl)), X(t), Y(y0) + fs * 1.3, { color: P.text, size: fs, align: "center", font: P.mono });
+  for (let v = Math.ceil(y0 / yl2 - 1e-9) * yl2; v <= y1 + 1e-9; v += yl2) pen.text(de(v, dec(yl2)), X(0) - fs * 0.5 - colW, Y(v) + fs * 0.35, { color: P.text, size: fs, align: "right", font: P.mono });
+  pen.text("t in s", X(t1), Y(y0) + fs * 2.4, { color: P.text, size: fs, align: "right", font: P.font });
+  const yl = o.ylab || (kind === "st" ? "s in m" : kind === "vt" ? "v in m/s" : "a in m/s²");
+  if (Array.isArray(yl)) subText(pen, yl[0], yl[1], yl[2], X(0) + fs * 0.6, T - fs * 0.5, { color: P.text, size: fs, align: "left", font: P.font });
+  else pen.text(yl, X(0) + fs * 0.6, T - fs * 0.5, { color: P.text, size: fs, align: "left", font: P.font });
+  // Abschnitte
+  if (o.roman) { const br = romanBreaks(); br.forEach(([a, b], i) => { if (i > 0 && a < t1) pen.line(X(a), Y(y0), X(a), Y(y1), { color: P.muted, w: 0.9, dash: [5, 4] }); if ((a + b) / 2 < t1) pen.text(ROM[i] || String(i + 1), X((a + b) / 2), Y(y1) + fs * 1.2, { color: P.text, size: fs, bold: true, align: "center", font: P.font }); }); }
+  // Zielkurve (Übung)
+  if (o.target && o.target.special) { if (kind === "st") pen.poly(o.target.pts.map(([t, sv]) => [X(Math.min(t, t1)), Y(clamp(sv, y0, y1))]), { color: P.target, w: fs * 0.55, dash: [fs * 0.8, fs * 0.5] }); }
+  else if (o.target) { const c = compile(o.target); const pts = []; const n = 400; for (let k = 0; k <= n; k++) { const t = Math.min(c.T, t1) * k / n; const r = progAt(c, t); pts.push([X(t), Y(clamp(kind === "st" ? r.s : kind === "vt" ? r.v : r.a, y0, y1))]); } pen.poly(pts, { color: P.target, w: fs * 0.55, dash: [fs * 0.8, fs * 0.5] }); }
+  if (o.mode === "empty") return;
+  // Serien
+  series_.forEach((sr, i) => {
+    const col = i === 0 ? P.A : P.B; const val = (p) => kind === "st" ? p.s : kind === "vt" ? p.v : p.a;
+    if (o.points && o.pointTimes) { o.pointTimes[i].forEach((p) => pen.cross(X(p.t), Y(p.s), fs * 0.35, { color: col, w: fs * 0.14 })); return; }
+    const pts = sr.pts.filter((p) => p.t <= t1 + 1e-9).map((p) => [X(p.t), Y(clamp(val(p), y0 - (y1 - y0) * 0.02, y1 + (y1 - y0) * 0.02))]);
+    const faint = false;
+    pen.poly(pts, { color: faint ? (o.print ? "#AAAAAA" : css("--raw")) : col, w: faint ? fs * 0.13 : fs * 0.2, dash: sr.dash && o.print ? sr.dash.map((d) => d * fs / 10) : sr.dash });
+    if (!o.print && !o.noDot && pts.length && !faint) { const [x, y] = pts[pts.length - 1]; pen.circle(x, y, 4, { fill: col });
+      if (o.icons && o.icons[i] && pen.c && kind === "st") { const lp = sr.pts[sr.pts.length - 1]; drawObj(pen.c, o.icons[i], x, y - 5, clamp(H / 420, 0.3, 0.5), col, lp && lp.v < -1e-6 ? -1 : 1); } }
+  });
+  // Punktspur: Punkte entstehen in der Spalte links neben der s-Achse (nur Ort!) und fliegen nach dem Ende
+  // chronologisch an ihren Zeitpunkt auf den Graphen (alles in 2 s)
+  if (o.strobe && kind === "st") {
+    const all = []; o.strobe.lanes.forEach((ln, li) => ln.forEach((p) => all.push({ t: p.t, s: p.s, li }))); all.sort((a, b) => a.t - b.t);
+    const n = all.length, ft = 0.6, f0 = o.strobe.fly, el = f0 == null ? -1 : (performance.now() - f0) / 1000, nl = o.strobe.lanes.length;
+    if (colW) pen.line(X(0) - colW / 2, Y(y0), X(0) - colW / 2, Y(y1), { color: P.grid2, w: 1 });
+    all.forEach((p, i) => {
+      if (p.t > t1 + 1e-9 || p.s < y0 - 1e-9 || p.s > y1 + 1e-9) return;
+      let e = 1; if (colW) { const q = el < 0 ? 0 : clamp((el - (n > 1 ? i / (n - 1) : 0) * (2 - ft)) / ft, 0, 1); e = 1 - (1 - q) ** 3; }
+      const cx = X(0) - colW / 2 + (nl > 1 ? (p.li ? 1 : -1) * fs * 0.28 : 0);
+      pen.circle(cx + (X(p.t) - cx) * e, Y(p.s), fs * 0.34, { fill: timeColor(p.t / o.strobe.Tref), color: p.li ? P.B : P.text, w: p.li ? 1.2 : 0.6 });
+    });
+  }
+  // gemittelte Geschwindigkeit je Abschnitt (Treppe) mit Werten
+  if (kind === "vt") avgs.forEach((segs, si) => {
+    if (!segs) return;
+    const col = o.print ? (si ? P.B : P.A) : css(si ? "--objB" : "--avg"), rng = y1 - y0, d = rng < 0.05 ? 4 : rng < 0.5 ? 3 : rng < 5 ? 2 : 1;
+    segs.forEach((g, k) => {
+      if (g.t0 >= t1) return; const tb = Math.min(g.t1, t1), yv = Y(clamp(g.v, y0, y1));
+      pen.line(X(g.t0), yv, X(tb), yv, { color: col, w: fs * 0.3 });
+      const nx = segs[k + 1]; if (nx && nx.t0 < t1) pen.line(X(tb), yv, X(tb), Y(clamp(nx.v, y0, y1)), { color: col, w: 0.8, dash: [2, 3] });
+    });
+  });
+}
+// Text mit tiefgestelltem Zeichen, z. B. v + x + " in m/s"
+function subText(pen, a, sub, rest, x, y, st) {
+  const fs = st.size || 12; pen.text(a, x, y, st);
+  pen.text(sub, x + fs * 0.58, y + fs * 0.28, Object.assign({}, st, { size: fs * 0.72 }));
+  if (rest) pen.text(rest, x + fs * 0.58 + fs * 0.45, y, st);
+}
+// Punktspur im s-t-Diagramm (Spalte neben der s-Achse, nach dem Ende Flug auf den Graphen)
+function strobeOnPlot() {
+  if (!S.showStrobe || !["live", "ueb", "prog"].includes(S.mode)) return null;
+  if (S.mode !== "prog" && S.live.rec.length < 2) return null;
+  return { lanes: strobeData().map((d) => d.pts), Tref: strobeTref(), fly: S.flyT0 };
+}
+function flyStart() { S.flyT0 = performance.now(); const loop = () => { if (S.running || S.flyT0 == null) return; render(); if (performance.now() - S.flyT0 < 2300) requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+function drawCharts() {
+  const pal = palette(false);
+  const ser = series();
+  const tgt = S.mode === "ueb" ? S.ueb.target : null;
+  { const { ctx, w, h } = fit(cv.st); ctx.clearRect(0, 0, w, h); drawPlot(new CanvasPen(ctx), w, h, "st", { pal, fs: 12.5, series: ser, target: tgt, roman: S.showRoman, strobe: strobeOnPlot(),
+    icons: S.rp || recB() ? ser.map(() => S.obj) : S.mode === "prog" && S.running ? [S.prog.A.obj, S.prog.B.obj] : null }); }
+  if (S.showVT) { const { ctx, w, h } = fit(cv.vt); ctx.clearRect(0, 0, w, h); drawPlot(new CanvasPen(ctx), w, h, "vt", { pal, fs: 12, series: ser, target: tgt, roman: S.showRoman, avgs: avg1D() }); }
+  if (S.showAT) { const { ctx, w, h } = fit(cv.at); ctx.clearRect(0, 0, w, h); drawPlot(new CanvasPen(ctx), w, h, "at", { pal, fs: 12, series: ser, target: tgt, roman: S.showRoman }); }
+}
+
+// ================= Stroboskop =================
+function strobeData(forExport = false) {
+  const out = [];
+  const dt = S.strobeDt;
+  const times = (T) => { const r = []; for (let k = 0; k * dt <= T + 1e-9; k++) r.push(k * dt); return r; };
+  if (S.mode === "prog") {
+    const add = (p, col) => { const c = compile(p); const T = forExport ? c.T : Math.min(S.t, c.T); out.push({ pts: times(T).map((t) => ({ t, s: progAt(c, t).s })), col, key: p.obj }); };
+    add(S.prog.A, "A"); if (S.prog.two) add(S.prog.B, "B");
+  } else {
+    const lane = (rec0) => { const pts = [], rec = rec0.length ? sm1(rec0, !(recording() && (rec0 === S.live.recB) === recB())) : rec0; if (rec.length) { let k = 0; for (const t of times(Math.min(rec[rec.length - 1].t, S.rp || recB() ? S.t : Infinity))) { while (k < rec.length - 1 && rec[k + 1].t <= t) k++; pts.push({ t, s: rec[k].s }); } } return pts; };
+    out.push({ pts: lane(S.live.rec), col: "A", key: S.obj });
+    if (liveTwo()) out.push({ pts: lane(S.live.recB), col: "B", key: S.obj });
+  }
+  return out;
+}
+// Zeitfarbe: grün (Anfang) über gelb nach rot (Ende)
+// Farbskala „Turbo“ (blau – türkis – grün – gelb – orange – rot): jeder Zeitpunkt bekommt einen deutlich anderen Ton.
+function timeColor(f) {
+  const x = 0.1 + 0.85 * clamp(f, 0, 1);
+  const r = 34.61 + x * (1172.33 - x * (10793.56 - x * (33300.12 - x * (38394.49 - x * 14825.05))));
+  const g = 23.31 + x * (557.33 + x * (1225.33 - x * (3574.96 - x * (1073.77 + x * 707.56))));
+  const b = 27.2 + x * (3211.1 - x * (15327.97 - x * (27814 - x * (22569.18 - x * 6838.66))));
+  const c = (v) => clamp(Math.round(v), 0, 255); return `rgb(${c(r)}, ${c(g)}, ${c(b)})`;
+}
+function isDark() { return css("--bg").toLowerCase() === "#0f1720"; }
+function strobeTref() { if (S.mode === "prog") return Math.max(Math.min(progT(), S.tMax), 1e-9); const rec = S.live.rec; return rec.length > 1 && !S.running ? Math.max(rec[rec.length - 1].t, 1) : S.tMax; }
+// Liegen Punkte (fast) an derselben Stelle, werden sie als Jahresringe gezeichnet:
+// innen der früheste Zeitpunkt, jeder spätere Zeitpunkt als weiterer Ring in seiner Zeitfarbe, dazu „n×“.
+function drawStrobeTo(pen, W, H, pal, fs, forExport) {
+  const data = strobeData(forExport); const lanes = data.length; const dark = !forExport && isDark();
+  const Tref = strobeTref();
+  const L = forExport ? fs * 2.4 : PADX, R = forExport ? fs * 2.4 : PADX;
+  const X = (s) => L + (s - S.sMin) / (S.sMax - S.sMin) * (W - L - R);
+  const r = fs * 0.4, maxR = r * 2.2, outline = forExport ? "#333333" : pal.text;
+  if (pal.bg) pen.rect(0, 0, W, H, { fill: pal.bg });
+  const top = fs * 2.0, laneH = (H - top) / lanes;
+  data.forEach((d, i) => {
+    const y = top + laneH * (i + 0.55);
+    pen.line(L - 6, y + maxR + 2, W - R + 6, y + maxR + 2, { color: pal.grid, w: 1 });
+    if (lanes > 1) pen.text(d.col, L - fs * 1.3, y + fs * 0.35, { color: d.col === "A" ? pal.A : pal.B, size: fs, bold: true, align: "center", font: pal.font });
+    const cl = [];
+    d.pts.forEach((p) => { if (p.s < S.sMin - 1e-9 || p.s > S.sMax + 1e-9) return; const x = X(p.s); const c = cl.find((q) => Math.abs(q.x - x) < r * 0.35); if (c) c.items.push(p); else cl.push({ x, items: [p] }); });
+    cl.sort((a, b) => a.items[0].t - b.items[0].t).forEach((c) => {
+      const n = c.items.length;
+      if (n === 1) { pen.circle(c.x, y, r, { fill: timeColor(c.items[0].t / Tref, dark), color: outline, w: 0.7 }); return; }
+      const ringW = Math.min(r * 0.55, (maxR - r) / (n - 1));
+      for (let k = n - 1; k >= 0; k--) pen.circle(c.x, y, r + ringW * k, { fill: timeColor(c.items[k].t / Tref, dark), color: outline, w: 0.5 });
+      if (n >= 3) pen.text(`${n}×`, c.x, y - (r + ringW * (n - 1)) - fs * 0.3, { color: pal.text, size: fs * 0.8, align: "center", font: pal.font, bold: true });
+    });
+  });
+  // Legende: Farbverlauf der Zeit
+  const lx1 = W - R - fs * 12, lx2 = W - R, ly = fs * 0.9, steps = 24;
+  for (let k = 0; k < steps; k++) { const x1 = lx1 + (lx2 - lx1) * k / steps, x2 = lx1 + (lx2 - lx1) * (k + 1) / steps; pen.line(x1, ly, x2, ly, { color: timeColor((k + 0.5) / steps, dark), w: fs * 0.45 }); }
+  pen.text("0 s", lx1 - fs * 0.4, ly + fs * 0.35, { color: pal.text, size: fs * 0.8, align: "right", font: pal.font });
+  pen.text(`${de(Tref, 1)} s`, lx2 + fs * 0.4, ly + fs * 0.35, { color: pal.text, size: fs * 0.8, align: "left", font: pal.font });
+  pen.text(forExport ? `Position alle ${S.strobeDt < 0.4 ? "⅓" : de(S.strobeDt)} s · Bewegungsachse s in m (${de(S.sMin, 3)} … ${de(S.sMax, 3)})` : `Stroboskop: Position alle ${S.strobeDt < 0.4 ? "⅓" : de(S.strobeDt)} s · Ringe = mehrere Zeitpunkte an derselben Stelle`,
+    forExport ? L : 4, ly + fs * 0.35, { color: forExport ? pal.text : pal.muted, size: fs * 0.8, align: "left", font: pal.font });
+}
+function drawStrobe() {
+  if (!S.showStrobe) return;
+  const { ctx, w, h } = fit(cv.strobe); ctx.clearRect(0, 0, w, h);
+  drawStrobeTo(new CanvasPen(ctx), w, h, palette(false), 12, false);
+}
+
+// ================= Anzeige, Ablauf =================
+function readout() {
+  const pos = currentPositions(); const d = Math.abs(S.sMax - S.sMin) < 1 ? 3 : 2;
+  const nm = (i) => { const key = S.mode === "prog" ? (i ? S.prog.B.obj : S.prog.A.obj) : S.obj; const n = OBJ[key].kurz || OBJ[key].name; return (S.mode === "prog" && S.prog.two) || liveTwo() ? (i ? "B" : "A") : n; };
+  const sw = (i) => `<span class="swatch" style="background:var(${i ? "--objB" : "--objA"})"></span>`;
+  const two = pos.length > 1, ds = two ? Math.max(1, d - 1) : d;
+  $("readout").innerHTML = `<span class="ro"><i>t</i> = <span class="num">${deFix(S.t, 1)} s</span></span>` + pos.map((p, i) =>
+    `<span class="ro"><span class="nm"${two ? ` style="color:var(${i ? "--objB" : "--objA"})"` : ""}>${nm(i)}:</span> <i>s</i> = <span class="num">${deFix(p.s, ds)} m</span><span class="sep"></span><i>v</i> = <span class="num">${deFix(p.v, two ? 1 : 2)} m/s</span></span>`).join("");
+  const ser = series(); $("legend").innerHTML = S.mode === "game" ? "" : ser.map((sr) => `<span><span class="swatch" style="background:var(${sr.color})${sr.dash ? ";background:repeating-linear-gradient(90deg,var(" + sr.color + ") 0 6px,transparent 6px 9px)" : ""}"></span>${sr.label}</span>`).join(" ") + (S.mode === "ueb" ? ` <span><span class="swatch" style="background:var(--target)"></span>Ziel</span>` : "") + (S.showVT && avgOn1D() ? ` <span><span class="swatch" style="background:var(--avg);height:6px"></span>v gemittelt</span>` : "");
+}
+function cues() {
+  const live1 = S.mode === "live" || S.mode === "ueb" || S.mode === "game", live2 = S.mode === "2d" && D2.src === "live", idle = !S.running && S.cd === 0 && !S.rp;
+  const empty = S.mode === "2d" ? D2.rec.length < 2 : S.mode === "game" ? G.T === 0 || G.over : !hasA() || (liveTwo() && S.live.recB.length < 2);
+  $("trackCard").classList.toggle("active", live1 && !S.rp); cv.field.classList.toggle("active", live2);
+  const main = S.mode !== "quiz" && idle;   // Haupt-Knopf in allen Abschnitten betonen
+  $("btnStart").classList.toggle("cue", main); $("btnStart").classList.toggle("pulse", main && (empty || S.mode === "prog" || S.mode === "2d"));
+  $("qStart").classList.toggle("cue", S.mode === "quiz" && !Q.run); $("qStart").classList.toggle("pulse", S.mode === "quiz" && !Q.run);
+  $("btnReplay").hidden = !(S.mode === "live" || S.mode === "ueb"); $("btnReplay").disabled = !hasA() || S.running || S.cd > 0;
+}
+function render() {
+  cues();
+  if (S.mode === "quiz") { drawQuiz(true); return; }
+  if (S.mode === "2d") { render2D(); return; }
+  if (S.mode === "game") { drawTrack(); drawGamePlot(cv.st, "st"); if (S.showVT) drawGamePlot(cv.vt, "vt"); readout(); gameHud(); return; }
+  drawTrack(); drawStrobe(); drawCharts(); readout();
+}
+function progT() { const a = compile(S.prog.A).T, b = S.prog.two ? compile(S.prog.B).T : 0; return Math.max(a, b); }
+function tick(ts) {
+  if (!S.running) return;
+  const dt = S.lastTs ? (ts - S.lastTs) / 1000 : 0; S.lastTs = ts;
+  if (S.mode === "game") { gameTick(dt); render(); if (S.running) requestAnimationFrame(tick); else render(); return; }
+  if (S.mode === "2d") {
+    if (D2.src === "param") { S.t += dt * D2.speed; if (S.t >= D2.par.T) { S.t = D2.par.T; stop(); } }
+    else if (S.live.started) { S.t += dt; d2Push(Math.min(S.t, D2.tMax), dt); if (S.t >= D2.tMax) { S.t = D2.tMax; stop(); } }
+    render(); if (S.running) requestAnimationFrame(tick); return;
+  }
+  if (S.mode === "prog") {
+    S.t += dt * S.prog.speed; const T = Math.min(progT(), S.tMax);
+    if (S.t >= T) { S.t = T; stop(); }
+  } else {
+    if (!S.live.started) { requestAnimationFrame(tick); render(); return; }
+    S.t += dt; recStep(Math.min(S.t, S.tMax), dt);
+    if (S.t >= S.tMax) { S.t = S.tMax; stop(); if (S.mode === "ueb") evalUeb(); }
+  }
+  render(); if (S.running) requestAnimationFrame(tick);
+}
+function start() {
+  if (S.mode === "quiz") { quizStart(); return; }
+  if (S.cd > 0) return;
+  if (S.rp) replayStop();
+  if (!S.running) { S.live.recMode = liveTwo() && hasA() ? "B" : "A"; if (S.live.recMode === "B") S.live.pos = S.live.rec[0].s; }
+  if (S.mode === "game") { if (S.running) { S.running = false; $("btnStart").textContent = "Weiter"; render(); } else countdown(gameStart); return; }
+  if (S.running) { stop(); return; }
+  S.flyT0 = null;
+  if (S.mode === "2d" && D2.src === "param") { if (S.t >= D2.par.T - 1e-6) S.t = 0; S.running = true; S.lastTs = 0; $("btnStart").textContent = "Pause"; requestAnimationFrame(tick); return; }
+  if (S.mode === "prog") { if (S.t >= Math.min(progT(), S.tMax) - 1e-6) S.t = 0; S.running = true; S.lastTs = 0; $("btnStart").textContent = "Pause"; requestAnimationFrame(tick); return; }
+  countdown(() => {
+    S.t = 0; if (S.mode === "2d") { D2.rec = []; d2Push(0); } else if (liveTwo() && S.live.recMode === "B") { S.live.phB = phInit(S.live.posB); S.live.finB = S.live.posB; S.live.recB = [{ t: 0, s: S.live.posB, v: 0, a: 0 }]; } else { S.live.rec = []; S.live.recB = []; S.live.ph = phInit(S.live.pos); S.live.fin = S.live.pos; S.live.rec = [{ t: 0, s: S.live.pos, v: 0, a: 0 }]; } S.live.started = true; S.ueb.score = null; $("uebScore").textContent = "";
+    S.running = true; S.lastTs = 0; $("btnStart").textContent = "Stopp"; requestAnimationFrame(tick);
+  });
+}
+// Countdown 2 … 1 … los (auf dem Startknopf und groß auf der Bahn); in der Zeit kann das Objekt schon an den Start gezogen werden.
+function countdown(go) {
+  S.cd = 2; if (S.live.recMode !== "B" || !liveTwo()) S.live.rec = []; S.t = 0; let last = 0;
+  const step = (ts) => {
+    const dt = last ? (ts - last) / 1000 : 0; last = ts; S.cd -= dt;
+    if (S.cd <= 0) { S.cd = 0; $("btnStart").textContent = "Los!"; go(); render(); return; }
+    $("btnStart").textContent = S.cd > 1 ? "2 …" : "1 …"; render(); requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+// Wiederholung: alle aufgenommenen Objekte bewegen sich noch einmal, die Graphen entstehen mit, kleine Objektsymbole am Graphen
+function replayStart() {
+  if (S.running || S.cd > 0 || !hasA() || !(S.mode === "live" || S.mode === "ueb")) return;
+  const T = Math.max(S.live.rec[S.live.rec.length - 1].t, liveTwo() && S.live.recB.length ? S.live.recB[S.live.recB.length - 1].t : 0);
+  S.rp = true; S.flyT0 = null; S.t = 0; $("btnReplay").textContent = "Stopp"; let last = 0;
+  const step = (ts) => {
+    if (!S.rp) return; const dt = last ? (ts - last) / 1000 : 0; last = ts; S.t += dt;
+    if (S.t >= T) { S.t = T; S.rp = false; $("btnReplay").textContent = "Wiederholung"; flyStart(); return; }
+    render(); requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function replayStop() {
+  S.rp = false; $("btnReplay").textContent = "Wiederholung";
+  if (hasA()) S.t = Math.max(S.live.rec[S.live.rec.length - 1].t, S.live.recB.length ? S.live.recB[S.live.recB.length - 1].t : 0);
+  S.flyT0 = -1e9; render();
+}
+$("btnReplay").onclick = () => { if (S.rp) replayStop(); else replayStart(); };
+function stop() {
+  S.running = false;
+  const T = S.mode === "prog" ? Math.min(progT(), S.tMax) : S.mode === "2d" && D2.src === "param" ? D2.par.T : 0;
+  const paused = T && S.t > 0 && S.t < T - 1e-6;
+  $("btnStart").textContent = paused ? "Weiter" : "Start";
+  const has = S.mode === "2d" ? (D2.src === "param" || D2.rec.length > 1) : S.mode === "prog" || S.live.rec.length > 1;
+  if (!paused && has && S.mode !== "game") flyStart(); else render();
+}
+function resetRun() {
+  S.running = false; S.cd = 0; S.t = 0; S.rp = false; S.live.rec = []; S.live.recB = []; S.live.recMode = "A"; S.live.started = false; S.flyT0 = null; $("btnStart").textContent = "Start"; $("btnReplay").textContent = "Wiederholung";
+  if (S.mode === "ueb" && S.ueb.target) S.live.pos = S.ueb.target.s0;
+  else if (S.mode === "live") { const R = S.sMax - S.sMin; S.live.pos = liveTwo() ? S.sMin + R * 0.25 : clamp(0, S.sMin, S.sMax); S.live.posB = S.sMin + R * 0.75; }
+  S.ueb.score = null; if ($("uebScore")) $("uebScore").textContent = "";
+  if (S.mode === "game") gameReset();
+  if (S.mode === "2d") { D2.rec = []; }
+  render();
+}
+
+// ---- Ziehen auf der Bahn ----
+function pointerS(e) { const r = cv.track.getBoundingClientRect(); return clamp(xToS(e.clientX - r.left, r.width), S.sMin, S.sMax); }
+// Bei zwei Objekten: obere Spur = A, untere Spur = B; sie werden nacheinander aufgenommen (erst A, dann B).
+function laneOf(e) { return liveTwo() && hasA() ? 1 : 0; }   // erst A aufnehmen, danach wird nur noch B gezogen
+function setLanePos(l, s) {   // Finger = Ziel; während der Aufnahme folgt das Objekt dem Ziel über das Bewegungsmodell
+  if (l) S.live.finB = s; else S.live.fin = s;
+  if (!(S.running && S.live.started && (S.mode === "live" || S.mode === "ueb"))) { if (l) S.live.posB = s; else S.live.pos = s; }
+}
+cv.track.addEventListener("pointerdown", (e) => {
+  if (S.mode === "prog" || S.rp) return;
+  const l = laneOf(e); S.live.ptr[e.pointerId] = l; S.live.dragging = true; cv.track.classList.add("dragging"); cv.track.setPointerCapture(e.pointerId);
+  setLanePos(l, pointerS(e)); render();
+});
+cv.track.addEventListener("pointermove", (e) => {
+  const l = S.live.ptr[e.pointerId]; if (l === undefined) return;
+  setLanePos(l, pointerS(e)); if (!S.running) render();
+});
+const endDrag = (e) => { delete S.live.ptr[e.pointerId]; S.live.dragging = Object.keys(S.live.ptr).length > 0; if (!S.live.dragging) cv.track.classList.remove("dragging"); };
+cv.track.addEventListener("pointerup", endDrag); cv.track.addEventListener("pointercancel", endDrag);
+
+// ================= Übung =================
+// Aufhänger „unmögliche Graphen“: Zu jedem Zeitpunkt gehört genau ein Ort (s(t) ist eine Funktion) und der Ort ändert sich ohne Sprünge.
+function impossibleTarget(kind) {
+  const R = S.sMax - S.sMin, T = S.tMax, q = (f) => Math.round((S.sMin + R * f) * 2) / 2, tq = (f) => Math.round(T * f * 2) / 2;
+  if (kind === 4) {
+    const a = q(0.2), b = q(0.4), c = q(0.8), d = q(0.7), tj = tq(0.4);
+    return { obj: S.obj, special: "tele", s0: a, pts: [[0, a], [tj, b], [tj, c], [T, d]],
+      q: `Fahre dieses s-t-Diagramm mit ${OBJ[S.obj].art} ${OBJ[S.obj].kurz || OBJ[S.obj].name} nach. Was passiert bei t = ${de(tj)} s? Warum kann kein Körper diesen Graphen erzeugen?`,
+      a: `Bei t = ${de(tj)} s müsste der Körper ohne jede Zeit von ${de(b, 3)} m nach ${de(c, 3)} m kommen – das wäre unendlich schnell („Teleportation“). Ein echter Körper kommt nur nach und nach von Ort zu Ort: Der s-t-Graph hat keine Sprünge.` };
+  }
+  const a = q(0.15), b = q(0.65), c = q(0.75), d = q(0.9), t1 = tq(0.55), t2 = tq(0.35);
+  return { obj: S.obj, special: "zeit", s0: a, pts: [[0, a], [t1, b], [t2, c], [T * 0.85, d]],
+    q: `Fahre dieses s-t-Diagramm nach. Zwischen ${de(t2)} s und ${de(t1)} s läuft der Graph zurück. Warum kann kein Körper diesen Graphen erzeugen?`,
+    a: `Dann gehörten zu einem Zeitpunkt (z. B. t = ${de((t1 + t2) / 2)} s) mehrere Orte – der Körper wäre gleichzeitig an zwei oder drei Stellen, oder die Zeit müsste rückwärts laufen („Zeitreise“). Zu jedem Zeitpunkt gehört genau ein Ort: s(t) ist eine Funktion.` };
+}
+function randomTarget(level) {
+  if (level >= 4) return impossibleTarget(level);
+  const R = S.sMax - S.sMin, T = S.tMax; let s = S.sMin + R * (0.2 + Math.random() * 0.3); const s0 = Math.round(s * 2) / 2; s = s0;
+  const segs = []; let t = 0; const vs = level === 1 ? [0.5, 1, 1.5, 0] : [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2];
+  let tries = 0;
+  while (t < T - 0.5 && tries++ < 200) {
+    const dt = Math.min(T - t, [1, 1.5, 2, 2.5, 3][Math.floor(Math.random() * 5)]);
+    let v0, v1; const accel = level === 3 && Math.random() < 0.45;
+    if (accel) { v0 = segs.length ? segs[segs.length - 1].v1 : 0; v1 = vs[Math.floor(Math.random() * vs.length)] * (R / 9); }
+    else { v0 = v1 = vs[Math.floor(Math.random() * vs.length)] * (R / 9); if (segs.length && segs[segs.length - 1].v1 === v0) continue; }
+    const sN = s + (v0 + v1) / 2 * dt; if (sN < S.sMin + R * 0.05 || sN > S.sMax - R * 0.05) continue;
+    segs.push({ dt, v0: +v0.toFixed(3), v1: +v1.toFixed(3) }); s = sN; t += dt;
+  }
+  return { obj: S.obj, s0, segs };
+}
+function newTarget() { S.ueb.target = randomTarget(+$("uebLevel").value); uebImpUI(); uebImpUI(); resetRun(); }
+function uebImpUI() { const t = S.ueb.target, sp = !!(t && t.special); $("uebImp").hidden = !sp; if (sp) { $("uebImpQ").textContent = t.q; $("uebImpA").textContent = t.a; $("uebImp").querySelector("details").open = false; } }
+function evalUeb() {
+  if (S.ueb.target.special) { $("uebScore").textContent = ""; return; }
+  const c = compile(S.ueb.target); const rec = S.live.rec; if (rec.length < 5) return;
+  let sum = 0, n = 0; for (const r of rec) { if (r.t > c.T) break; sum += Math.abs(r.s - progAt(c, r.t).s); n++; }
+  const dev = sum / Math.max(1, n), rel = dev / (S.sMax - S.sMin);
+  const [txt, col] = rel < 0.03 ? ["sehr gut", "--good"] : rel < 0.06 ? ["gut", "--good"] : rel < 0.1 ? ["geht so", "--warn"] : ["noch einmal", "--bad"];
+  S.ueb.score = dev;
+  $("uebScore").innerHTML = `Mittlere Abweichung: <span class="v">${de(dev, 2)} m</span> · <span class="pill" style="border-color:var(${col});color:var(${col})">${txt}</span>`;
+}
+
+
+// ================= Spiel: Graph-Tunnel =================
+// Endlos-Tunnel im s-t- (oder v-t-) Diagramm. Abschnitte wie im Programm-Editor: s0, v0, a, Dauer.
+const GAME_PAST = 4, GAME_WIN = 10, LEVEL_T = 12;
+const G = { kind: "st", segs: [], T: 0, lives: 3, score: 0, level: 1, inv: 0, over: false, trail: [], best: 0, newBest: false, hit: 0, vNow: 0, inside: true, msgT: 0, start: 0 };
+const gR = () => S.sMax - S.sMin, gU = () => gR() / 9;
+const gLevelAt = (t) => Math.min(6, 1 + Math.floor(Math.max(0, t) / LEVEL_T));
+function gWidth(L, kind) { return kind === "st" ? gR() * Math.max(0.045, 0.1 - 0.013 * (L - 1)) : gU() * Math.max(0.45, 0.95 - 0.1 * (L - 1)); }
+// Profi (v-t): An Stellen, an denen sich v ändert, ist das Band breiter. Es umfasst alle Sollwerte im Zeitfenster
+// [t − 0,7 s; t + 0,2 s] – man hat also nach einem Sprung etwa 0,7 s Zeit, die neue Geschwindigkeit zu erreichen.
+const VT_BACK = 0.7, VT_FWD = 0.2;
+function gBand(t, kind, L) {
+  const w = gWidth(L, kind);
+  if (kind === "st") { const m = gAt(t).s; return [m - w, m + w]; }
+  let lo = Infinity, hi = -Infinity;
+  for (let x = t - VT_BACK; x <= t + VT_FWD + 1e-9; x += 0.05) { if (x < 0) continue; const v = gAt(x).v; lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  return [lo - w, hi + w];
+}
+function gSegEnd(g) { return { s: g.s0 + g.v0 * g.dt + 0.5 * g.a * g.dt * g.dt, v: g.v0 + g.a * g.dt, t: g.t0 + g.dt }; }
+function gAddSeg() {
+  const last = G.segs[G.segs.length - 1];
+  if (!last) { G.segs.push({ t0: 0, dt: 2.5, s0: G.start, v0: 0, a: 0 }); return; }
+  const e = gSegEnd(last), L = gLevelAt(e.t), u = gU(), w = gWidth(Math.min(6, L + 1), "st");
+  const lo = S.sMin + w + gR() * 0.03, hi = S.sMax - w - gR() * 0.03;
+  const speeds = L === 1 ? [1, 1.5, 2] : L === 2 ? [0, 1, 1.5, 2, 2.5, 3] : [0, 1, 1.5, 2, 2.5, 3, 3.5];
+  const dts = L <= 2 ? [1.5, 2, 2.5] : [1, 1.5, 2];
+  for (let k = 0; k < 60; k++) {
+    const dt = dts[Math.floor(Math.random() * dts.length)];
+    const vt = (Math.random() < 0.45 ? -1 : 1) * speeds[Math.floor(Math.random() * speeds.length)] * u;
+    let v0 = vt, a = 0;
+    if (L >= 3 && Math.random() < 0.4) { v0 = e.v; a = (vt - v0) / dt; if (Math.abs(a) < 0.25 * u) continue; }
+    else if (Math.abs(vt - e.v) < 1e-9) continue;
+    const s1 = e.s + v0 * dt + 0.5 * a * dt * dt; let mn = Math.min(e.s, s1), mx = Math.max(e.s, s1);
+    if (a !== 0) { const tx = -v0 / a; if (tx > 0 && tx < dt) { const sx = e.s + v0 * tx + 0.5 * a * tx * tx; mn = Math.min(mn, sx); mx = Math.max(mx, sx); } }
+    if (mn < lo || mx > hi) continue;
+    G.segs.push({ t0: e.t, dt, s0: e.s, v0, a }); return;
+  }
+  G.segs.push({ t0: e.t, dt: 1.5, s0: e.s, v0: 0, a: 0 });
+}
+function gFill(until) { while (!G.segs.length || gSegEnd(G.segs[G.segs.length - 1]).t < until) gAddSeg(); }
+function gAt(t) {
+  let g = G.segs[G.segs.length - 1]; for (const x of G.segs) if (t < x.t0 + x.dt) { g = x; break; }
+  const u = clamp(t - g.t0, 0, g.dt); return { s: g.s0 + g.v0 * u + 0.5 * g.a * u * u, v: g.v0 + g.a * u, seg: g };
+}
+function gTrailV(i) { const tr = G.trail, tN = tr[i].t; let j = i; while (j > 0 && tr[j].t > tN - 0.3) j--; const dt = tN - tr[j].t; return dt > 0.05 ? (tr[i].s - tr[j].s) / dt : 0; }
+const bestKey = () => `bewegungslabor.best.${G.kind}`;
+function loadBest() { try { return +(localStorage.getItem(bestKey()) || 0) || 0; } catch (e) { return 0; } }
+function saveBest(v) { try { localStorage.setItem(bestKey(), String(v)); } catch (e) { /* Speicher nicht verfügbar */ } }
+function gameReset() {
+  S.running = false; $("btnStart").textContent = "Start";
+  G.kind = $("gameKind").value; G.best = loadBest(); G.over = false; G.T = 0; G.lives = 3; G.score = 0; G.level = 1; G.inv = 0; G.hit = 0; G.newBest = false; G.vNow = 0; G.inside = true;
+  const w = gWidth(1, "st"); G.start = clamp(S.live.pos, S.sMin + w + gR() * 0.03, S.sMax - w - gR() * 0.03); S.live.pos = G.start;
+  G.segs = []; gFill(GAME_WIN + 2); G.trail = []; S.t = 0;
+}
+function gameStart() {
+  if (S.mode !== "game") return;
+  if (!G.over && G.T > 0) { S.running = true; S.lastTs = 0; $("btnStart").textContent = "Pause"; requestAnimationFrame(tick); return; }
+  gameReset(); G.inv = 2.0; G.msgT = 2.5; G.trail = [{ t: 0, s: S.live.pos }];
+  if (G.kind === "vt" && !S.showVT) { S.showVT = true; layoutPlots(); }
+  S.live.started = true; S.running = true; S.lastTs = 0; $("btnStart").textContent = "Pause"; requestAnimationFrame(tick);
+}
+function gameTick(dt) {
+  G.T += dt; S.t = G.T; const L = gLevelAt(G.T); if (L !== G.level) { G.level = L; G.msgT = 2.5; }
+  gFill(G.T + GAME_WIN + 2);
+  if (G.segs.length > 80) G.segs.splice(0, G.segs.length - 80);
+  G.trail.push({ t: G.T, s: S.live.pos }); while (G.trail.length && G.trail[0].t < G.T - GAME_PAST - 1) G.trail.shift();
+  const c = gAt(G.T); G.vNow = gTrailV(G.trail.length - 1);
+  const bd = gBand(G.T, G.kind, L), val = G.kind === "st" ? S.live.pos : G.vNow; G.inside = val >= bd[0] && val <= bd[1];
+  if (G.inv > 0) G.inv -= dt;
+  else if (!G.inside) { G.lives--; G.inv = 1.5; G.hit = 0.5; if (G.lives <= 0) { gameOver(); return; } }
+  if (G.hit > 0) G.hit -= dt; if (G.msgT > 0) G.msgT -= dt;
+  if (G.inside) G.score += dt * 10 * L * (G.kind === "vt" ? 2 : 1);   // Profi (v-t) zählt doppelt
+}
+function gameOver() {
+  G.over = true; G.lives = 0; S.running = false; $("btnStart").textContent = "Neue Runde";
+  const sc = Math.round(G.score); if (sc > G.best) { G.best = sc; G.newBest = true; saveBest(sc); }
+}
+function drawGamePlot(c, kind) {
+  const { ctx, w, h } = fit(c); ctx.clearRect(0, 0, w, h);
+  const pen = new CanvasPen(ctx), P = palette(false), fs = 12.5;
+  const tA = Math.max(0, G.T - GAME_PAST), tB = tA + GAME_WIN;
+  const y0 = kind === "st" ? S.sMin : S.vMin, y1 = kind === "st" ? S.sMax : S.vMax;
+  const L = fs * 3.4, R = fs * 1.2, T = fs * 1.9, B = fs * 2.8;
+  const X = (t) => L + (t - tA) / (tB - tA) * (w - L - R), Y = (v) => T + (y1 - clamp(v, y0, y1)) / (y1 - y0) * (h - T - B);
+  const ys = niceStep(y1 - y0, kind === "st" ? 10 : 8);
+  if (G.hit > 0) pen.rect(X(tA), Y(y1), X(tB) - X(tA), Y(y0) - Y(y1), { fill: css("--hit") });
+  for (let t = Math.ceil(tA); t <= tB + 1e-9; t += 1) pen.line(X(t), Y(y0), X(t), Y(y1), { color: P.grid, w: 0.9 });
+  for (let v = Math.ceil(y0 / ys) * ys; v <= y1 + 1e-9; v += ys) pen.line(X(tA), Y(v), X(tB), Y(v), { color: P.grid, w: 0.9 });
+  // Tunnel bzw. Hilfslinie
+  if (G.segs.length) {
+    const up = [], dn = [], mid = [];
+    for (let t = tA; t <= tB + 1e-9; t += 0.05) { const r = gAt(t), m = kind === "st" ? r.s : r.v, bd = kind === G.kind ? gBand(t, kind, gLevelAt(t)) : [m, m]; up.push([X(t), Y(bd[1])]); dn.push([X(t), Y(bd[0])]); mid.push([X(t), Y(m)]); }
+    if (kind === G.kind) {
+      ctx.save(); ctx.beginPath(); up.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); for (let i = dn.length - 1; i >= 0; i--) ctx.lineTo(dn[i][0], dn[i][1]); ctx.closePath(); ctx.fillStyle = css("--tunnel"); ctx.fill(); ctx.restore();
+      pen.poly(up, { color: css("--tunnelEdge"), w: 1.6 }); pen.poly(dn, { color: css("--tunnelEdge"), w: 1.6 });
+    } else pen.poly(mid, { color: P.target, w: 1.2, dash: [6, 5] });
+  }
+  // Achsen
+  const yz = Y(clamp(0, y0, y1));
+  pen.line(X(tA), Y(y0), X(tA), Y(y1), { color: P.axis, w: 1.6 }); pen.line(X(tA), yz, X(tB), yz, { color: P.axis, w: 1.6 });
+  for (let t = Math.ceil(tA); t <= tB + 1e-9; t += 1) pen.text(de(t, 0), X(t), Y(y0) + fs * 1.3, { color: P.text, size: fs, align: "center", font: P.mono });
+  const dec = Math.max(0, Math.ceil(-Math.log10(ys) - 1e-9));
+  for (let v = Math.ceil(y0 / ys) * ys; v <= y1 + 1e-9; v += ys) pen.text(de(v, dec), X(tA) - fs * 0.5, Y(v) + fs * 0.35, { color: P.text, size: fs, align: "right", font: P.mono });
+  pen.text("t in s", X(tB), Y(y0) + fs * 2.4, { color: P.text, size: fs, align: "right", font: P.font });
+  pen.text(kind === "st" ? "s in m" : "v in m/s", X(tA) + fs * 0.6, T - fs * 0.5, { color: P.text, size: fs, align: "left", font: P.font });
+  // Jetzt-Linie und eigene Spur
+  pen.line(X(G.T), Y(y0), X(G.T), Y(y1), { color: P.muted, w: 1, dash: [4, 4] });
+  const tr = G.trail, pts = [];
+  for (let i = 0; i < tr.length; i++) if (tr[i].t >= tA) pts.push([X(tr[i].t), Y(kind === "st" ? tr[i].s : gTrailV(i))]);
+  pen.poly(pts, { color: P.A, w: 2.6 });
+  const yNow = Y(kind === "st" ? S.live.pos : G.vNow);
+  pen.circle(X(G.T), yNow, 5.5, { fill: G.inside ? css("--good") : css("--bad"), color: P.A, w: 1.2 });
+  // Meldungen
+  if (kind === "st") {
+    const msg = (txt, sub) => { pen.text(txt, (X(tA) + X(tB)) / 2, Y(y1) + fs * 2.4, { color: P.text, size: fs * 1.5, bold: true, align: "center", font: P.font }); if (sub) pen.text(sub, (X(tA) + X(tB)) / 2, Y(y1) + fs * 4, { color: P.muted, size: fs, align: "center", font: P.font }); };
+    if (G.over) msg(`Vorbei – ${Math.round(G.score)} Punkte`, G.newBest ? "Neue Bestleistung auf diesem Gerät!" : "„Neue Runde“ drücken");
+    else if (!S.running && G.T === 0) msg(G.kind === "st" ? "Halte deinen Graphen im Tunnel" : "Halte deine Geschwindigkeit im Band", "„Start“ drücken, dann ziehen");
+    else if (!S.running) msg("Pause", "„Weiter“ drücken");
+    else if (G.msgT > 0) msg(`Level ${G.level}`);
+  }
+}
+function gameHud() {
+  $("gameHud").innerHTML = `<div><b>Punkte</b><span>${Math.round(G.score)}</span></div><div><b>Leben</b><span class="hearts">${"♥".repeat(Math.max(0, G.lives))}${"♡".repeat(3 - Math.max(0, G.lives))}</span></div><div><b>Level</b><span>${G.level}</span></div><div><b>Faktor</b><span>×${G.kind === "vt" ? 2 : 1}</span></div><div class="bestrow"><b>Bestwert</b><span>${G.best}</span></div>`;
+}
+
+// ================= Spiel: Zuordnen =================
+// Endloses Zuordnungsspiel: Bewegung, Text oder Diagramm → passendes Diagramm bzw. passender Text. Falsche Antworten sind
+// typische Verwechslungen: falsche Richtung, schneller, anderer Startort, ungleichförmig statt gleichförmig, Sprung („Quatsch“),
+// Ortsgraph als v-Graph gelesen usw.
+const Q = { lvl: 1, run: false, over: false, score: 0, correct: 0, lives: 3, best: 0, q: null, t0: 0, ans: null, next: 0, limit: 10, n: 0, read: 0, shown: 0 };
+const QR = { s: [-5, 5], v: [-4, 4], a: [-3, 3], T: 6 };
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function qDur(n) { if (n === 1) return [6]; if (n === 2) { const d = pick([2, 2.5, 3, 3.5, 4]); return [d, 6 - d]; } const a = pick([1.5, 2]), b = pick([1.5, 2]); return [a, b, 6 - a - b]; }
+function qSamples(p, step = 0.05) { const c = compile(p), out = []; for (let k = 0; k * step <= QR.T + 1e-9; k++) { const t = k * step, r = progAt(c, Math.min(t, c.T)); out.push({ t, s: r.s, v: r.v, a: r.a }); } return out; }
+function qOk(p, lim) { return !!p && qSamples(p, 0.1).every((q) => Math.abs(q.s) <= lim); }
+function qProg(L) {
+  for (let k = 0; k < 300; k++) {
+    const ds = qDur(L === 1 ? pick([1, 2, 2, 3]) : pick([2, 3, 3])), s0 = pick([-4, -3, -2, -1, 0, 1, 2, 3, 4]), segs = [];
+    if (L < 3) { let prev = null; for (const dt of ds) { let v; do v = pick([-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2]); while (v === prev); segs.push({ dt, v0: v, v1: v }); prev = v; } }
+    else { let v = pick([0, 0, 1, -1, 2, -2]), acc = false; for (const dt of ds) { const v1 = pick([-2, -1, 0, 1, 2]); if (v1 !== v) acc = true; segs.push({ dt, v0: v, v1 }); v = v1; } if (!acc) continue; }
+    const p = { obj: "maus", s0, segs };
+    if (segs.every((g) => !g.v0 && !g.v1) || !qOk(p, 4.6)) continue; return p;
+  }
+  return { obj: "maus", s0: -3, segs: [{ dt: 6, v0: 1, v1: 1 }] };
+}
+const qMap = (p, f) => ({ obj: "maus", s0: p.s0, segs: p.segs.map((g) => f({ dt: g.dt, v0: g.v0, v1: g.v1 })) });
+const vFlip = (p) => qMap(p, (g) => ({ dt: g.dt, v0: -g.v0, v1: -g.v1 }));
+function vFast(p) { const q = qMap(p, (g) => ({ dt: g.dt, v0: 2 * g.v0, v1: 2 * g.v1 })); return qOk(q, 5) ? q : qMap(p, (g) => ({ dt: g.dt, v0: g.v0 / 2, v1: g.v1 / 2 })); }
+function vShift(p) { for (const d of shuffle([-3, -2, 2, 3])) { const q = Object.assign(qMap(p, (g) => g), { s0: p.s0 + d }); if (qOk(q, 5)) return q; } return null; }
+function vUneven(p, L) {
+  if (L >= 3) return qMap(p, (g) => ({ dt: g.dt, v0: (g.v0 + g.v1) / 2, v1: (g.v0 + g.v1) / 2 }));   // gleichförmig statt beschleunigt
+  const idx = p.segs.map((g, i) => (g.v0 ? i : -1)).filter((i) => i >= 0); if (!idx.length) return null; const j = pick(idx);
+  return { obj: "maus", s0: p.s0, segs: p.segs.map((g, i) => i === j ? { dt: g.dt, v0: 0, v1: 2 * g.v0 } : { dt: g.dt, v0: g.v0, v1: g.v1 }) };   // gleicher Weg, aber ungleichförmig
+}
+function vTele(p) {   // „Quatsch“: Sprung im s-t-Graphen
+  const pts = qSamples(p), tj = pick([2, 2.5, 3, 3.5, 4]), sj = progAt(compile(p), tj).s, off = sj > 0 ? -3 : 3;
+  return { kind: "st", pts: pts.map((q) => q.t >= tj - 1e-6 ? { t: q.t, s: clamp(q.s + off, -5, 5) } : q) };
+}
+const qSig = (r) => r.kind === "tx" ? r.txt : r.pts.filter((_, i) => i % 5 === 0).map((q) => (r.kind === "st" ? q.s : r.kind === "vt" ? q.v : q.a).toFixed(1)).join("|");
+function qMake() {
+  const L = Q.lvl, types = ["mot-st", "txt-st", "mot-st"];   // keine Texte als Antworten (zu viel Lesen)
+  if (L >= 2) types.push("st-vt", "vt-st", "mot-vt", "txt-vt");
+  if (L >= 3) types.push("vt-at", "mot-at", "st-vt", "vt-at");
+  for (let tries = 0; tries < 40; tries++) {
+    const type = pick(types), [pk, ak] = type.split("-"), p = qProg(L);
+    const rep = (q, k = ak) => !q ? null : q.kind ? q : k === "tx" ? { kind: "tx", txt: describe(q) } : { kind: k, pts: qSamples(q) };
+    const ok5 = (q) => (qOk(q, 5) ? q : null);
+    let c = [];
+    const anim = pk === "mot";   // in einer Animation sieht man kein absolutes Tempo → keine „nur schneller“-Ablenker
+    if (ak === "st") c = [rep(ok5(vFlip(p))), anim ? null : rep(ok5(vFast(p))), rep(vShift(p)), rep(ok5(vUneven(p, L))), vTele(p), rep(qProg(L))];
+    else if (ak === "vt") c = [rep(vFlip(p)), anim ? null : rep(vFast(p)), rep(vUneven(p, L)), { kind: "vt", pts: qSamples(p).map((q) => ({ t: q.t, v: q.s * 0.8 })) }, rep(qProg(L))];
+    else if (ak === "at") c = [rep(vFlip(p)), anim ? null : rep(vFast(p)), rep(vUneven(p, L)), { kind: "at", pts: qSamples(p).map((q) => ({ t: q.t, a: q.v * 1.5 })) }, rep(qProg(L))];
+    else c = [rep(ok5(vFlip(p))), rep(ok5(vFast(p))), rep(vShift(p)), rep(ok5(vUneven(p, L)))];
+    const ans = rep(p), seen = new Set([qSig(ans)]), wrong = [];
+    for (const r of shuffle(c.filter(Boolean))) { const g = qSig(r); if (!seen.has(g)) { seen.add(g); wrong.push(r); } if (wrong.length === 3) break; }
+    if (wrong.length < 3) continue;
+    const opts = shuffle([ans, ...wrong]);
+    const name = { st: "s-t-Diagramm", vt: "v-t-Diagramm", at: "a-t-Diagramm" };
+    const text = pk === "mot" ? `Welches ${name[ak]} passt zur Bewegung der Maus?` : pk === "txt" ? `Welches ${name[ak]} passt zur Beschreibung?`
+      : ak === "tx" ? `Welche Beschreibung passt zum ${name[pk]}?` : pk === "vt" && ak === "st" ? `Die Maus startet bei ${de(p.s0)} m. Welches s-t-Diagramm passt zu diesem v-t-Diagramm?` : `Welches ${name[ak]} gehört zu diesem ${name[pk]}?`;
+    const prompt = pk === "mot" ? { kind: "mot", p } : pk === "txt" ? { kind: "txt", txt: describe(p) } : { kind: pk, pts: qSamples(p) };
+    return { type, p, prompt, opts, correct: opts.indexOf(ans), text };
+  }
+  return null;
+}
+const qBestKey = () => `bewegungslabor.quizpunkte.${Q.lvl}`;
+function qLoadBest() { try { return +(localStorage.getItem(qBestKey()) || 0) || 0; } catch (e) { return 0; } }
+function qSaveBest(v) { try { localStorage.setItem(qBestKey(), String(v)); } catch (e) { /* nicht verfügbar */ } }
+function qHud() { $("qHud").innerHTML = `<div><b>Punkte</b><span>${Q.score}</span></div><div><b>Richtig</b><span>${Q.correct}</span></div><div><b>Leben</b><span class="hearts">${"♥".repeat(Math.max(0, Q.lives))}${"♡".repeat(3 - Math.max(0, Q.lives))}</span></div><div><b>Zeit</b><span>${Q.limit} s</span></div><div class="bestrow"><b>Bestwert Stufe ${Q.lvl}</b><span>${Q.best}</span></div>`; }
+function quizStart() {
+  if (Q.run) return;
+  Object.assign(Q, { lvl: +$("qLvl").value, score: 0, correct: 0, lives: 3, over: false, run: true, n: 0 }); Q.best = qLoadBest();
+  $("qStart").textContent = "läuft …"; $("qStart").disabled = true; qNext(); requestAnimationFrame(qLoop);
+}
+function qNext() {
+  Q.limit = Math.max(1, 20 - 2 * Math.floor(Q.correct / 2)); Q.q = qMake(); Q.ans = null; Q.n++;   // 20 s, nach je zwei richtigen 2 s weniger, mindestens 1 s
+  // Lesezeit vor dem Antwort-Timer: Text 10 s, Bewegung so lange wie die Animation
+  Q.read = Q.q.prompt.kind === "txt" ? 10 : Q.q.prompt.kind === "mot" ? QR.T + 0.3 : 0; Q.shown = performance.now(); Q.t0 = Q.shown + Q.read * 1000;
+  const box = $("qOpts"); box.innerHTML = "";
+  Q.q.opts.forEach((o, i) => {
+    const b = document.createElement("button"); b.className = "qopt"; b.type = "button"; b.setAttribute("aria-label", `Antwort ${i + 1}`);
+    b.innerHTML = `<span class="qk">${i + 1}</span>` + (o.kind === "tx" ? `<div class="qtx"></div>` : `<canvas></canvas>`);
+    if (o.kind === "tx") b.querySelector(".qtx").textContent = o.txt;
+    b.addEventListener("click", () => qAnswer(i)); box.appendChild(b);
+  });
+  qHud(); drawQuiz(true);
+}
+function qAnswer(i) {
+  if (!Q.run || !Q.q || Q.ans) return;
+  const ok = i === Q.q.correct; Q.ans = { i, ok }; if (ok) { Q.correct++; Q.score += 100 * Q.lvl; } else Q.lives--;   // Stufe 2 doppelt, Stufe 3 dreifach
+  const bs = $("qOpts").children; if (bs[Q.q.correct]) bs[Q.q.correct].classList.add("ok"); if (!ok && bs[i]) bs[i].classList.add("bad");
+  Q.next = performance.now() + (ok ? 700 : 1800); qHud();
+}
+function qOver() {
+  Q.run = false; Q.over = true; if (Q.score > Q.best) { Q.best = Q.score; Q.newBest = true; qSaveBest(Q.score); } else Q.newBest = false;
+  $("qStart").textContent = "Neue Runde"; $("qStart").disabled = false; qHud(); drawQuiz(true);
+}
+function qLoop() {
+  if (S.mode !== "quiz" || !Q.run) return;
+  const now = performance.now();
+  if (Q.q && !Q.ans && Q.limit - (now - Q.t0) / 1000 <= 0) qAnswer(-1);
+  if (Q.ans && now >= Q.next) { if (Q.lives <= 0) { qOver(); return; } qNext(); }
+  drawQuiz(false); requestAnimationFrame(qLoop);
+}
+function qDiagram(c, r, fs) { const { ctx, w, h } = fit(c); ctx.clearRect(0, 0, w, h); drawPlot(new CanvasPen(ctx), w, h, r.kind, { pal: palette(false), fs, t1: QR.T, range: QR[r.kind[0]], series: [{ pts: r.pts, color: "--objA" }], noDot: true }); }
+function qMessage(c, a, b) {
+  const { ctx, w, h } = fit(c); ctx.clearRect(0, 0, w, h); ctx.fillStyle = css("--ink"); ctx.textAlign = "center";
+  ctx.font = `700 ${Math.min(26, w / 22)}px ${css("--font")}`; ctx.fillText(a, w / 2, h / 2 - 6);
+  if (b) { ctx.fillStyle = css("--muted"); ctx.font = `15px ${css("--font")}`; ctx.fillText(b, w / 2, h / 2 + 22); }
+}
+function qMotion(c, p, el) {
+  const { ctx, w, h } = fit(c); ctx.clearRect(0, 0, w, h);
+  const tm = clamp(el, 0, QR.T), r = progAt(compile(p), tm), done = el >= QR.T;   // genau einmal abspielen, dann stehen bleiben
+  const X = (s) => PADX + (s + 5) / 10 * (w - 2 * PADX), y = h * 0.66;
+  ctx.strokeStyle = css("--ink"); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(PADX - 10, y); ctx.lineTo(w - PADX + 10, y); ctx.stroke();
+  ctx.font = `12px ${css("--mono")}`; ctx.fillStyle = css("--muted"); ctx.textAlign = "center";
+  const every = X(1) - X(0) >= ctx.measureText("−5 m").width + 8 ? 1 : 2;
+  for (let k = -5; k <= 5; k++) { ctx.strokeStyle = css("--muted"); ctx.lineWidth = k ? 1 : 2; ctx.beginPath(); ctx.moveTo(X(k), y); ctx.lineTo(X(k), y + (k ? 6 : 9)); ctx.stroke(); if ((k + 5) % every === 0) ctx.fillText(`${de(k)} m`, X(k), y + 21); }
+  const dir = r.v < -1e-6 ? -1 : 1; drawObj(ctx, "maus", X(r.s), y - 2, Math.min(1.3, h / 110), css("--objA"), dir);
+  ctx.textAlign = "left"; ctx.fillStyle = css("--ink"); ctx.font = `600 14px ${css("--mono")}`; ctx.fillText(`t = ${deFix(tm, 1)} s`, 12, 22);
+  ctx.textAlign = "right"; ctx.font = `700 14px ${css("--font")}`; ctx.fillStyle = done ? css("--good") : css("--accent2");
+  ctx.fillText(done ? "Bewegung beendet – jetzt antworten" : "Bewegung läuft – zuschauen", w - 12, 22);
+  const bw = Math.min(220, w * 0.3), bx = w - 12 - bw; ctx.fillStyle = css("--grid2"); ctx.fillRect(bx, 30, bw, 5); ctx.fillStyle = done ? css("--good") : css("--accent2"); ctx.fillRect(bx, 30, bw * tm / QR.T, 5);
+}
+function drawQuiz(all) {
+  cues();
+  const q = Q.q, pc = $("qPrompt"), pt = $("qPromptTxt"), now = performance.now();
+  if (!Q.run) $("qRead").style.visibility = "hidden";
+  if (!Q.run && !Q.over) { pc.hidden = false; pt.hidden = true; $("qText").textContent = "Zuordnen: Welche Antwort passt?"; $("qOpts").innerHTML = ""; $("qBar").style.width = "100%"; qMessage(pc, "„Start“ drücken", "Dann zu jeder Aufgabe die passende Antwort antippen."); qHud(); return; }
+  if (Q.over) { pc.hidden = false; pt.hidden = true; qMessage(pc, `Vorbei – ${Q.score} richtige Antwort${Q.score === 1 ? "" : "en"}`, Q.newBest ? "Neue Bestleistung auf diesem Gerät!" : "„Neue Runde“ drücken"); }
+  else if (q) {
+    $("qText").textContent = `${Q.n}. ${q.text}`;
+    const isTxt = q.prompt.kind === "txt"; pc.hidden = isTxt; pt.hidden = !isTxt;
+    if (isTxt) { if (all) pt.textContent = q.prompt.txt; }
+    else if (q.prompt.kind === "mot") qMotion(pc, q.p, (now - Q.shown) / 1000);
+    else if (all) qDiagram(pc, q.prompt, 12);
+    const left = Math.max(0, Q.limit - Math.max(0, now - Q.t0) / 1000), rl = Math.max(0, (Q.t0 - now) / 1000);
+    if (!Q.ans) { $("qBar").style.width = `${100 * left / Q.limit}%`; $("qBar").classList.toggle("low", left / Q.limit < 0.3); }
+    const rd = $("qRead"), show = rl > 0 && !Q.ans; rd.style.visibility = show ? "visible" : "hidden";
+    if (show) { const f = rl / Q.read, a = 2 * Math.PI * (1 - f), x = 11 + 9 * Math.sin(a), y = 11 - 9 * Math.cos(a);
+      rd.innerHTML = `<svg viewBox="0 0 22 22" aria-hidden="true" width="48" height="48"><circle cx="11" cy="11" r="9" fill="var(--grid2)"/><path d="M11 11 L11 2 A9 9 0 ${f > 0.5 ? 1 : 0} 0 ${x.toFixed(2)} ${y.toFixed(2)} Z" fill="var(--accent2)" transform="scale(-1,1) translate(-22,0)"/></svg>${q.prompt.kind === "txt" ? "Lesezeit" : "Zuschauen"} ${Math.ceil(rl)} s`; }
+  }
+  if (all && q) [...$("qOpts").children].forEach((b, i) => { const c = b.querySelector("canvas"); if (c) qDiagram(c, q.opts[i], 10.5); });
+}
+$("qStart").onclick = () => quizStart();
+$("qLvl").onchange = () => {   // Stufe wechseln bricht die laufende Runde ab
+  Q.run = false; Q.over = false; Q.q = null; Q.lvl = +$("qLvl").value; Q.best = qLoadBest(); Q.score = 0; Q.correct = 0; Q.lives = 3; Q.limit = 10;
+  $("qStart").textContent = "Start"; $("qStart").disabled = false; drawQuiz(true);
+};
+document.addEventListener("keydown", (e) => { if (S.mode === "quiz" && Q.run && /^[1-4]$/.test(e.key) && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) { e.preventDefault(); qAnswer(+e.key - 1); } });
+
+// ================= 2D: Bewegung in der Ebene =================
+// Selbst ziehen (Punkt in x und y) oder mit Startwerten x0, v0, a je Richtung: Die beiden Teilbewegungen überlagern sich.
+const D2 = {
+  def: { xMin: -5, xMax: 5, yMin: -5, yMax: 5, tMax: 10 },
+  xMin: -5, xMax: 5, yMin: -5, yMax: 5, tMax: 10, vMin: -8, vMax: 8,
+  src: "live", rec: [], pos: { x: 0, y: 0 }, dragging: false, speed: 1, arrow: true, tf: null, scene: null, showV: false, vis: null,
+  par: { x0: -4, vx: 0.8, ax: 0, y0: -4, vy: 1, ay: 0, T: 8 },
+};
+const G9 = 9.81;
+const D2PRESETS = [
+  { name: "Flussüberquerung: Boot fährt quer, Strömung nach rechts", scene: "fluss", p: { x0: -4, vx: 0.8, ax: 0, y0: -4, vy: 1, ay: 0, T: 8 } },
+  { name: "Gleichförmig schräg (zwei gleichförmige Bewegungen)", scene: null, p: { x0: -4, vx: 1, ax: 0, y0: -3, vy: 0.6, ay: 0, T: 8 } },
+  { name: "Waagerechter Wurf (Busunglück)", scene: "seite", p: { x0: -4.5, vx: 4, ax: 0, y0: 4, vy: 0, ay: -G9, T: +Math.sqrt(16 / G9).toFixed(3) } },
+  { name: "Freier Fall aus derselben Höhe (zum Vergleich)", scene: "seite", p: { x0: -4.5, vx: 0, ax: 0, y0: 4, vy: 0, ay: -G9, T: +Math.sqrt(16 / G9).toFixed(3) } },
+  { name: "Schräger Wurf", scene: "seite", p: { x0: -4.5, vx: 3.5, ax: 0, y0: -4, vy: 8.5, ay: -G9, T: +(2 * 8.5 / G9).toFixed(3) } },
+  { name: "Gleichmäßig beschleunigt aus der Ruhe, schräg", scene: null, p: { x0: -4, vx: 0, ax: 0.25, y0: -4, vy: 0, ay: 0.15, T: 8 } },
+];
+const PAR_KEYS = ["x0", "vx", "ax", "y0", "vy", "ay", "T"];
+function d2At(t) { const p = D2.par; return { t, x: p.x0 + p.vx * t + 0.5 * p.ax * t * t, y: p.y0 + p.vy * t + 0.5 * p.ay * t * t, vx: p.vx + p.ax * t, vy: p.vy + p.ay * t, ax: p.ax, ay: p.ay }; }
+function d2Series(full) {
+  if (D2.src === "live") return smoothRec(D2.rec, ["x", "y", "vx", "vy", "ax", "ay"], !recording());
+  const T = full ? D2.par.T : clamp(S.t, 0, D2.par.T), n = clamp(Math.ceil(T / 0.01), 2, 800), out = [];
+  for (let k = 0; k <= n; k++) out.push(d2At(T * k / n)); return out;
+}
+function d2Cur() {
+  if (D2.src === "param") return d2At(clamp(S.t, 0, D2.par.T));
+  const l = D2.rec[D2.rec.length - 1], mv = S.running && l;
+  return { x: D2.pos.x, y: D2.pos.y, vx: mv ? l.vx : 0, vy: mv ? l.vy : 0 };
+}
+function d2Push(t, dt) {
+  if (!dt) { D2.fin = { x: D2.pos.x, y: D2.pos.y }; D2.ph = { x: phInit(D2.pos.x), y: phInit(D2.pos.y) }; D2.rec.push({ t, x: D2.pos.x, y: D2.pos.y, vx: 0, vy: 0, ax: 0, ay: 0 }); return; }
+  const px = D2.ph.x, py = D2.ph.y, vx0 = px.v, vy0 = py.v; phStep(px, D2.fin.x, dt); phStep(py, D2.fin.y, dt); D2.pos = { x: px.x, y: py.x };
+  D2.rec.push({ t, x: px.x, y: py.x, vx: px.v, vy: py.v, ax: (px.v - vx0) / dt, ay: (py.v - vy0) / dt });
+}
+function d2Avg(key) {
+  if (!(S.showAvg && D2.src === "live" && !S.running && S.cd === 0 && D2.rec.length > 10)) return null;
+  const r = key === "x" ? D2.xMax - D2.xMin : D2.yMax - D2.yMin; return avgSteps(d2Series(true), key, 0.02 * r, 0.02 * (D2.vMax - D2.vMin));
+}
+// Achsen: Standardbereich; mit Startwerten so erweitert, dass die ganze Bahn sichtbar ist (gleicher Maßstab in x und y)
+function d2Range() {
+  const d = D2.def, lv = levelsFor([d.xMin, d.xMax])[S.vLvl].v; Object.assign(D2, { xMin: d.xMin, xMax: d.xMax, yMin: d.yMin, yMax: d.yMax, tMax: d.tMax, vMin: -lv, vMax: lv });
+  if (D2.src !== "param") return;
+  const pts = d2Series(true); let xl = d.xMin, xh = d.xMax, yl = d.yMin, yh = d.yMax, vm = 0;
+  pts.forEach((p) => { xl = Math.min(xl, p.x); xh = Math.max(xh, p.x); yl = Math.min(yl, p.y); yh = Math.max(yh, p.y); vm = Math.max(vm, Math.abs(p.vx), Math.abs(p.vy)); });
+  const st = niceStep(Math.max(xh - xl, yh - yl), 12);
+  D2.xMin = Math.floor(xl / st - 1e-9) * st; D2.xMax = Math.ceil(xh / st - 1e-9) * st; D2.yMin = Math.floor(yl / st - 1e-9) * st; D2.yMax = Math.ceil(yh / st - 1e-9) * st;
+  const T = Math.max(D2.par.T, 0.1), ts = niceStep(T, 5); D2.tMax = Math.ceil(T / ts - 1e-9) * ts;
+  vm = Math.max(vm * 1.1, 1); const vs = niceStep(vm, 4); D2.vMax = Math.ceil(vm / vs) * vs; D2.vMin = -D2.vMax;
+}
+const d2Pad = (fs) => ({ L: fs * 3.0, R: fs * 1.4, T: fs * 1.6, B: fs * 2.6 });
+function d2Tf(W, H, fs, V) {
+  const { L, R, T, B } = d2Pad(fs), dx = V.xMax - V.xMin, dy = V.yMax - V.yMin;
+  const k = Math.min((W - L - R) / dx, (H - T - B) / dy), ox = L + ((W - L - R) - k * dx) / 2, oy = T + ((H - T - B) - k * dy) / 2;
+  return { k, x0: ox, y0: oy, x1: ox + k * dx, y1: oy + k * dy, X: (x) => ox + (x - V.xMin) * k, Y: (y) => oy + (V.yMax - y) * k, ix: (px) => V.xMin + (px - ox) / k, iy: (py) => V.yMax - (py - oy) / k };
+}
+// Sichtbarer Bereich: mindestens der eingestellte, auf dem Bildschirm in der freien Richtung so erweitert, dass die Ebene die Fläche füllt (gleicher Maßstab in x und y)
+function d2Vis(W, H, fs) {
+  const { L, R, T, B } = d2Pad(fs), aw = W - L - R, ah = H - T - B, b = { xMin: D2.xMin, xMax: D2.xMax, yMin: D2.yMin, yMax: D2.yMax };
+  if (aw < 20 || ah < 20) return b;
+  const dx = b.xMax - b.xMin, dy = b.yMax - b.yMin, k = Math.min(aw / dx, ah / dy), rx = aw / k, ry = ah / k, st = niceStep(Math.max(rx, ry), 12), V = Object.assign({}, b);
+  if (rx > dx + 1e-6) { const c = (b.xMin + b.xMax) / 2; V.xMin = Math.min(b.xMin, Math.ceil((c - rx / 2) / st - 1e-9) * st); V.xMax = Math.max(b.xMax, Math.floor((c + rx / 2) / st + 1e-9) * st); }
+  if (ry > dy + 1e-6) {
+    if (D2.scene === "seite") { V.yMax = Math.max(b.yMax, Math.floor((b.yMin + ry) / st + 1e-9) * st); }
+    else { const c = (b.yMin + b.yMax) / 2; V.yMin = Math.min(b.yMin, Math.ceil((c - ry / 2) / st - 1e-9) * st); V.yMax = Math.max(b.yMax, Math.floor((c + ry / 2) / st + 1e-9) * st); }
+  }
+  return V;
+}
+function arrowTo(pen, x1, y1, x2, y2, st) {
+  const len = Math.hypot(x2 - x1, y2 - y1); if (len < 1.5) return;
+  pen.line(x1, y1, x2, y2, st); const a = Math.atan2(y2 - y1, x2 - x1), h = Math.min(11, len * 0.45);
+  pen.poly([[x2 - h * Math.cos(a - 0.42), y2 - h * Math.sin(a - 0.42)], [x2, y2], [x2 - h * Math.cos(a + 0.42), y2 - h * Math.sin(a + 0.42)]], { color: st.color, w: st.w });
+}
+function drawField(pen, W, H, o) {
+  const P = o.pal, fs = o.fs || 12, pr = !!o.print, V = pr ? (D2.vis || D2) : d2Vis(W, H, fs), tf = d2Tf(W, H, fs, V), { X, Y } = tf; if (!pr) { D2.tf = tf; D2.vis = V; }
+  if (P.bg) pen.rect(0, 0, W, H, { fill: P.bg });
+  // Szene
+  if (D2.scene === "fluss") {
+    const ya = clamp(4, V.yMin, V.yMax), yb = clamp(-4, V.yMin, V.yMax);
+    pen.rect(tf.x0, Y(ya), tf.x1 - tf.x0, Y(yb) - Y(ya), { fill: pr ? "#E4EEF8" : css("--water") });
+    [ya, yb].forEach((y) => pen.line(tf.x0, Y(y), tf.x1, Y(y), { color: pr ? "#555555" : P.muted, w: 2 }));
+    for (let x = V.xMin + (V.xMax - V.xMin) * 0.12; x < V.xMax - 0.5; x += (V.xMax - V.xMin) / 4) arrowTo(pen, X(x), Y(3.3), X(x) + tf.k * 1.1, Y(3.3), { color: pr ? "#555555" : P.muted, w: 1.4 });
+    pen.text("Strömung", X(V.xMax) - fs * 0.3, Y(2.75), { color: pr ? "#333333" : P.muted, size: fs * 0.85, align: "right", font: P.font });
+    pen.text("Ufer", X(V.xMin) + fs * 0.3, Y(ya) - fs * 0.35, { color: pr ? "#333333" : P.muted, size: fs * 0.85, font: P.font });
+    pen.text("Ufer", X(V.xMin) + fs * 0.3, Y(yb) + fs * 1.05, { color: pr ? "#333333" : P.muted, size: fs * 0.85, font: P.font });
+  }
+  // Raster
+  const st = niceStep(Math.max(V.xMax - V.xMin, V.yMax - V.yMin), 12), lab = tf.k * st < fs * 2.4 ? (tf.k * 2 * st < fs * 2.4 ? 5 * st : 2 * st) : st;
+  for (let x = Math.ceil(V.xMin / st) * st; x <= V.xMax + 1e-9; x += st) pen.line(X(x), tf.y0, X(x), tf.y1, { color: P.grid, w: 0.8 });
+  for (let y = Math.ceil(V.yMin / st) * st; y <= V.yMax + 1e-9; y += st) pen.line(tf.x0, Y(y), tf.x1, Y(y), { color: P.grid, w: 0.8 });
+  const ax0 = Y(clamp(0, V.yMin, V.yMax)), ay0 = X(clamp(0, V.xMin, V.xMax));
+  pen.line(tf.x0, ax0, tf.x1 + fs * 0.5, ax0, { color: P.axis, w: 1.5 }); pen.line(ay0, tf.y1, ay0, tf.y0 - fs * 0.5, { color: P.axis, w: 1.5 });
+  pen.poly([[tf.x1 - fs * 0.1, ax0 - fs * 0.35], [tf.x1 + fs * 0.6, ax0], [tf.x1 - fs * 0.1, ax0 + fs * 0.35]], { color: P.axis, w: 1.5 });
+  pen.poly([[ay0 - fs * 0.35, tf.y0 + fs * 0.1], [ay0, tf.y0 - fs * 0.6], [ay0 + fs * 0.35, tf.y0 + fs * 0.1]], { color: P.axis, w: 1.5 });
+  const dl = (v) => de(v, st < 1 ? 1 : 0);
+  for (let x = Math.ceil(V.xMin / lab) * lab; x <= V.xMax + 1e-9; x += lab) pen.text(dl(x), X(x), tf.y1 + fs * 1.3, { color: P.text, size: fs * 0.9, align: "center", font: P.mono });
+  for (let y = Math.ceil(V.yMin / lab) * lab; y <= V.yMax + 1e-9; y += lab) pen.text(dl(y), tf.x0 - fs * 0.45, Y(y) + fs * 0.32, { color: P.text, size: fs * 0.9, align: "right", font: P.mono });
+  pen.text("x in m", tf.x1, tf.y1 + fs * 2.4, { color: P.text, size: fs, align: "right", font: P.font });
+  pen.text("y in m", ay0 + fs * 0.6, tf.y0 - fs * 0.3, { color: P.text, size: fs, align: "left", font: P.font });
+  if (D2.scene === "seite" && -4 >= V.yMin && -4 <= V.yMax) {
+    const yg = Y(-4); pen.line(tf.x0, yg, tf.x1, yg, { color: pr ? "#000000" : P.axis, w: 2.2 });
+    for (let x = tf.x0 + 4; x < tf.x1; x += 9) pen.line(x, yg + 1, x - 6, yg + 7, { color: pr ? "#555555" : P.muted, w: 0.9 });
+    pen.text("Boden", tf.x1 - fs * 0.3, yg - fs * 0.4, { color: pr ? "#333333" : P.muted, size: fs * 0.85, align: "right", font: P.font });
+  }
+  if (o.mode === "empty") return;
+  // Bahnkurve
+  const pts = d2Series(!!o.full);
+  pen.poly(pts.map((p) => [X(p.x), Y(p.y)]), { color: P.A, w: fs * 0.18 });
+  // Punktspur in Zeitfarben
+  if (S.showStrobe && pts.length > 1) { const sp = d2Strobe(pts); sp.pts.forEach((q) => pen.circle(X(q.x), Y(q.y), fs * 0.36, pr ? { fill: P.A } : { fill: timeColor(q.t / sp.Tref), color: P.text, w: 0.6 })); }
+  if (pr) return;
+  // Punkt und Geschwindigkeitspfeil
+  const c = d2Cur(), px = X(clamp(c.x, V.xMin, V.xMax)), py = Y(clamp(c.y, V.yMin, V.yMax));
+  if (D2.arrow && Math.hypot(c.vx, c.vy) > 1e-3) {
+    const kv = 0.32 * (tf.x1 - tf.x0) / Math.max(D2.vMax, 1), ex = px + c.vx * kv, ey = py - c.vy * kv, cc = css("--accent2");
+    arrowTo(pen, px, py, ex, py, { color: cc, w: 1.6, dash: [5, 4] }); arrowTo(pen, ex, py, ex, ey, { color: cc, w: 1.6, dash: [5, 4] });
+    arrowTo(pen, px, py, ex, ey, { color: css("--vec"), w: 2.6 });
+    if (Math.abs(ex - px) > 26) subText(pen, "v", "x", "", (px + ex) / 2 - fs * 0.4, py + (c.vy >= 0 ? fs * 1.3 : -fs * 0.5), { color: cc, size: fs, font: P.font, bold: true });
+    if (Math.abs(ey - py) > 26) subText(pen, "v", "y", "", ex + (c.vx >= 0 ? fs * 0.4 : -fs * 1.4), (py + ey) / 2 + fs * 0.3, { color: cc, size: fs, font: P.font, bold: true });
+    if (Math.hypot(ex - px, ey - py) > 30) pen.text("v", ex + (c.vx >= 0 ? fs * 0.5 : -fs * 0.9), ey + (c.vy >= 0 ? -fs * 0.3 : fs * 1.1), { color: css("--vec"), size: fs * 1.1, font: P.font, bold: true });
+  }
+  pen.circle(px, py, D2.dragging ? 10 : 8, { fill: css("--accent"), color: css("--panel"), w: 2 });
+  if (S.cd > 0) pen.text(S.cd > 1 ? "2" : "1", (tf.x0 + tf.x1) / 2, (tf.y0 + tf.y1) / 2 + H * 0.12, { color: css("--accent"), size: Math.round(H * 0.33), bold: true, align: "center", font: P.font });
+}
+function d2Strobe(pts) {
+  const Tend = pts[pts.length - 1].t, Tref = D2.src === "param" ? Math.max(D2.par.T, 1e-9) : (!S.running && Tend > 0 ? Math.max(Tend, 1) : D2.tMax), out = [];
+  let k = 0;
+  for (let t = 0; t <= Tend + 1e-9; t += S.strobeDt) {
+    while (k < pts.length - 1 && pts[k + 1].t <= t) k++;
+    const a = pts[k], b = pts[Math.min(k + 1, pts.length - 1)], f = b.t > a.t ? clamp((t - a.t) / (b.t - a.t), 0, 1) : 0;
+    out.push({ t, x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f });
+  }
+  return { pts: out, Tref };
+}
+function drawCharts2D() {
+  const pal = palette(false), pts = d2Series(false);
+  const sp = S.showStrobe && pts.length > 1 ? d2Strobe(pts) : null;
+  const one = (c, key, vkey, range, ylab, avg) => { const { ctx, w, h } = fit(c); ctx.clearRect(0, 0, w, h); drawPlot(new CanvasPen(ctx), w, h, vkey ? "vt" : "st", { pal, fs: 12, t1: D2.tMax, range, ylab, avg, strobe: sp && !vkey ? { lanes: [sp.pts.map((q) => ({ t: q.t, s: q[key] }))], Tref: sp.Tref, fly: S.flyT0 } : null, series: [{ pts: pts.map((p) => ({ t: p.t, s: p[key], v: p[vkey || "vx"] })), color: "--objA" }] }); };
+  const V = D2.vis || D2; one(cv.xt, "x", null, [V.xMin, V.xMax], "x in m"); one(cv.yt, "y", null, [V.yMin, V.yMax], "y in m");
+  if (D2.showV) { one(cv.vx, "x", "vx", [D2.vMin, D2.vMax], ["v", "x", " in m/s"], d2Avg("x")); one(cv.vy, "y", "vy", [D2.vMin, D2.vMax], ["v", "y", " in m/s"], d2Avg("y")); }
+}
+function render2D() {
+  const { ctx, w, h } = fit(cv.field); ctx.clearRect(0, 0, w, h); drawField(new CanvasPen(ctx), w, h, { pal: palette(false), fs: 12 });
+  drawCharts2D();
+  const c = d2Cur(), d = 2;
+  $("readout").innerHTML = `<span class="ro"><span><i>t</i> = <span class="num">${deFix(S.t, D2.src === "param" && D2.par.T < 3 ? 2 : 1)} s</span></span></span>`
+    + `<span class="ro"><span><i>x</i> = <span class="num">${deFix(c.x, d)} m</span><span class="sep"></span><i>y</i> = <span class="num">${deFix(c.y, d)} m</span></span></span>`
+    + `<span class="ro"><span><i>v</i><sub>x</sub> = <span class="num">${deFix(c.vx, d)} m/s</span><span class="sep"></span><i>v</i><sub>y</sub> = <span class="num">${deFix(c.vy, d)} m/s</span><span class="sep"></span>|<i>v</i>| = <span class="num">${deFix(Math.hypot(c.vx, c.vy), d)} m/s</span></span></span>`;
+  $("legend").innerHTML = D2.showV && d2Avg("x") ? `<span><span class="swatch" style="background:var(--avg);height:6px"></span>v gemittelt</span>` : "";
+  $("fieldTitle").textContent = D2.scene === "fluss" ? "Fluss – Blick von oben" : D2.scene === "seite" ? "Blick von der Seite" : "Bewegung in der Ebene";
+  $("fieldHint").textContent = D2.src === "live" && !S.running && S.cd === 0 && D2.rec.length < 2 ? "Punkt an den Start ziehen, dann „Start“" : "";
+}
+function d2Describe() {
+  const p = D2.par;
+  const ax = (n, v0, a, pos, neg) => !v0 && !a ? `${n}-Richtung: keine Bewegung.` : !a ? `${n}-Richtung: gleichförmig mit ${de(Math.abs(v0))} m/s ${v0 > 0 ? pos : neg}.`
+    : `${n}-Richtung: gleichmäßig beschleunigt, a = ${de(a)} m/s², ${v0 ? `Anfangsgeschwindigkeit ${de(v0)} m/s` : "aus der Ruhe"}.`;
+  return `Start bei (${de(p.x0)} m | ${de(p.y0)} m). ${ax("x", p.vx, p.ax, "nach rechts", "nach links")} ${ax("y", p.vy, p.ay, "nach oben", "nach unten")} Dauer ${de(p.T)} s. Beide Teilbewegungen laufen unabhängig voneinander ab und setzen sich zur Bahnkurve zusammen.`;
+}
+function d2Sync() {
+  $("d2Live").setAttribute("aria-pressed", D2.src === "live"); $("d2Par").setAttribute("aria-pressed", D2.src === "param");
+  $("d2NoteLive").hidden = D2.src !== "live"; $("d2ParBox").hidden = D2.src !== "param";
+  PAR_KEYS.forEach((k) => { $("d2" + k).value = +(+D2.par[k]).toFixed(3); });
+  $("d2Desc").textContent = d2Describe(); layoutPlots();
+}
+function d2Changed() { S.running = false; S.flyT0 = -1e9; S.cd = 0; d2Range(); S.t = D2.src === "param" ? D2.par.T : 0; $("btnStart").textContent = "Start"; d2Sync(); buildVScale(); render(); }
+function d2Load(i) { const p = D2PRESETS[i]; D2.par = Object.assign({}, p.p); D2.scene = p.scene; D2.src = "param"; D2.loaded = true; d2Changed(); }
+cv.field = $("field"); cv.xt = $("xtChart"); cv.yt = $("ytChart"); cv.vx = $("vxChart"); cv.vy = $("vyChart");
+function fieldPos(e) { const r = cv.field.getBoundingClientRect(), tf = D2.tf; if (!tf) return null; const V = D2.vis || D2; return { x: clamp(tf.ix(e.clientX - r.left), V.xMin, V.xMax), y: clamp(tf.iy(e.clientY - r.top), V.yMin, V.yMax) }; }
+// Der Punkt springt nicht dorthin, wo man tippt: Er wird im Umkreis von ca. 80 px gegriffen und dann mit dem Finger mitgeführt.
+cv.field.addEventListener("pointerdown", (e) => {
+  if (S.mode !== "2d" || D2.src !== "live" || !D2.tf) return; const p = fieldPos(e); if (!p) return;
+  const r = cv.field.getBoundingClientRect(), dx = e.clientX - r.left - D2.tf.X(D2.pos.x), dy = e.clientY - r.top - D2.tf.Y(D2.pos.y);
+  if (Math.hypot(dx, dy) > 80) { toast("Den Punkt anfassen und ziehen."); return; }
+  D2.dragging = true; const rec = S.running && S.live.started, base = rec && D2.fin ? D2.fin : D2.pos; D2.off = { x: base.x - p.x, y: base.y - p.y }; cv.field.setPointerCapture(e.pointerId); if (!S.running) render();
+});
+cv.field.addEventListener("pointermove", (e) => {
+  if (!D2.dragging) return; const p = fieldPos(e); if (!p) return; const V = D2.vis || D2;
+  const q = { x: clamp(p.x + D2.off.x, V.xMin, V.xMax), y: clamp(p.y + D2.off.y, V.yMin, V.yMax) };
+  D2.fin = q; if (!(S.running && S.live.started)) D2.pos = { x: q.x, y: q.y }; if (!S.running) render();
+});
+const endDrag2 = () => { D2.dragging = false; if (!S.running) render(); };
+cv.field.addEventListener("pointerup", endDrag2); cv.field.addEventListener("pointercancel", endDrag2);
+
+// ================= Programm-Editor =================
+function editP() { return S.prog.two && S.prog.edit === "B" ? S.prog.B : S.prog.A; }
+function renderSegs() {
+  const p = editP(); const c = compile(p); const body = $("segBody"); body.innerHTML = "";
+  p.segs.forEach((g, i) => {
+    const tr = document.createElement("tr");
+    const endS = c.segs[i] ? c.segs[i].s0 + (c.segs[i].v0 + c.segs[i].v1) / 2 * (c.segs[i].t1 - c.segs[i].t0) : p.s0;
+    tr.innerHTML = `<td>${ROM[i] || i + 1}</td>
+      <td><input type="number" step="0.5" min="0" value="${g.dt}" aria-label="Dauer Abschnitt ${i + 1}" id="seg${i}dt"></td>
+      <td><input type="number" step="0.5" value="${g.v0}" aria-label="Anfangsgeschwindigkeit Abschnitt ${i + 1}" id="seg${i}v0"></td>
+      <td><input type="number" step="0.5" value="${g.v1}" aria-label="Endgeschwindigkeit Abschnitt ${i + 1}" id="seg${i}v1"></td>
+      <td><button class="btn small" aria-label="Abschnitt ${i + 1} löschen" data-del="${i}">✕</button></td>`;
+    body.appendChild(tr);
+    const kr = document.createElement("tr"); kr.className = "kindrow"; kr.innerHTML = `<td></td><td colspan="4" class="kind">${kindOf(g)} · endet bei ${de(endS, 3)} m</td>`; body.appendChild(kr);
+    ["dt", "v0", "v1"].forEach((k) => tr.querySelector(`#seg${i}${k}`).addEventListener("change", (e) => {
+      g[k] = parseFloat(String(e.target.value).replace(",", ".")) || 0;
+      progChanged();
+    }));
+    tr.querySelector("[data-del]").addEventListener("click", () => { p.segs.splice(i, 1); progChanged(); });
+  });
+  $("s0").value = p.s0; $("objSelProg").value = p.obj;
+  $("descText").textContent = describe(S.prog.A) + (S.prog.two ? "\n\n" + describe(S.prog.B) : "");
+  $("abTabs").hidden = !S.prog.two;
+  $("tabA").setAttribute("aria-pressed", S.prog.edit === "A"); $("tabB").setAttribute("aria-pressed", S.prog.edit === "B");
+}
+function progChanged() { S.running = false; S.flyT0 = -1e9; autoRangeProg(); S.t = Math.min(progT(), S.tMax); $("btnStart").textContent = "Start"; renderSegs(); render(); }
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function describe(p) {
+  const o = OBJ[p.obj], nm = o.kurz || o.name, c = compile(p);
+  const d3 = Math.abs(S.sMax - S.sMin) < 1 ? 3 : 2;
+  let txt = `${cap(o.art)} ${nm} startet an der Stelle ${de(p.s0, d3)} m.`;
+  c.segs.forEach((g, i) => {
+    const dt = de(g.t1 - g.t0), end = de(g.s0 + (g.v0 + g.v1) / 2 * (g.t1 - g.t0), d3), P = i === 0 ? cap(o.pron) : (i === 1 ? "Dann" : "Danach");
+    const lead = i === 0 ? `${cap(o.pron)} ${o.verb}` : `${P} ${o.verb} ${o.pron}`;
+    const leadR = i === 0 ? `${cap(o.pron)} bleibt` : `${P} bleibt ${o.pron}`;
+    const leadW = i === 0 ? `${cap(o.pron)} wird` : `${P} wird ${o.pron}`;
+    const dir = (v) => v > 0 ? "nach rechts" : "nach links";
+    if (g.v0 === 0 && g.v1 === 0) txt += ` ${leadR} ${dt} s lang stehen.`;
+    else if (g.v0 === g.v1) txt += ` ${lead} ${dt} s lang gleichförmig mit ${de(Math.abs(g.v0))} m/s ${dir(g.v0)} (bis zur Stelle ${end} m).`;
+    else if (Math.sign(g.v0) * Math.sign(g.v1) < 0) txt += ` ${leadW} ${dt} s lang gleichmäßig langsamer, kehrt um und bewegt sich zum Schluss mit ${de(Math.abs(g.v1))} m/s ${dir(g.v1)}.`;
+    else { const faster = Math.abs(g.v1) > Math.abs(g.v0); const v = g.v0 !== 0 ? g.v0 : g.v1;
+      txt += ` ${leadW} ${dt} s lang gleichmäßig ${faster ? "schneller" : "langsamer"} (${dir(v)}, von ${de(Math.abs(g.v0))} m/s auf ${de(Math.abs(g.v1))} m/s) und ist dann bei ${end} m.`; }
+  });
+  return txt;
+}
+
+// ================= Export Bild =================
+let downloads = null;
+if (window.claude && window.claude.use) window.claude.use("downloads").then((d) => { downloads = d; updateSaveUI(); }).catch(() => {});
+// Standalone (z. B. GitHub Pages): normaler Browser-Download
+if (!(window.claude && window.claude.use)) downloads = { save: async ({ filename, data }) => { const b = data instanceof Blob ? data : new Blob([data], { type: filename.endsWith(".svg") ? "image/svg+xml" : "text/plain;charset=utf-8" }); const u = URL.createObjectURL(b); const a = document.createElement("a"); a.href = u; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000); } };
+function updateSaveUI() { const ok = !!downloads; ["expPng", "expSvg", "tblCsv"].forEach((id) => { $(id).hidden = !ok; }); $("expHint").textContent = ok ? "" : "Speichern: Bild in der Vorschau mit Rechtsklick sichern oder kopieren."; }
+function exportDraw(pen, Wpx, Hpx, dpiScale) {
+  const what = $("expWhat").value, mode = $("expMode").value;
+  const pal = palette(true, mode); const fs = 11 * dpiScale;
+  if (S.mode === "2d") {
+    if (what === "field") { drawField(pen, Wpx, Hpx, { pal, fs, print: true, full: true, mode }); return; }
+    const pts = d2Series(true), key = what === "xt" || what === "vxt" ? "x" : "y", v = what === "vxt" || what === "vyt";
+    drawPlot(pen, Wpx, Hpx, v ? "vt" : "st", { pal, fs, print: true, mode, t1: D2.tMax, range: v ? [D2.vMin, D2.vMax] : key === "x" ? [(D2.vis || D2).xMin, (D2.vis || D2).xMax] : [(D2.vis || D2).yMin, (D2.vis || D2).yMax],
+      ylab: v ? ["v", key, " in m/s"] : key + " in m", avg: v ? d2Avg(key) : null, series: [{ pts: pts.map((p) => ({ t: p.t, s: p[key], v: p["v" + key] })), color: "--objA" }] });
+    return;
+  }
+  if (what === "strobe") { drawStrobeTo(pen, Wpx, Hpx, pal, fs, true); return; }
+  const ser = series(true);
+  let pt = null; if ($("expPoints").checked) { const d = sampled(+$("tblDt").value || 1); pt = d.cols.map((col) => col.map((s, k) => ({ t: d.t[k], s }))); }
+  drawPlot(pen, Wpx, Hpx, what, { pal, fs, series: ser, target: null, roman: $("expRoman").checked, mode, print: true, points: !!pt && what === "st", pointTimes: pt, avgs: what === "vt" ? avg1D() : null });
+}
+function exportSize() { const cmW = +$("expWidth").value, cmH = +$("expHeight").value; const what = $("expWhat").value; const h = what === "strobe" ? Math.min(cmH, 3.5) : cmH; return { W: Math.round(cmW / 2.54 * 300), H: Math.round(h / 2.54 * 300), scale: 300 / 96 * 1.0 }; }
+// „Alles“: Bildschirmbild aus Bahn/Ebene, Punktspur und allen eingeblendeten Diagrammen (in den Farben der Ansicht)
+function exportAll() {
+  const root = $("trackCard").parentElement, R = root.getBoundingClientRect(), k = 2, c = document.createElement("canvas");
+  c.width = Math.round(R.width * k); c.height = Math.round(R.height * k); const x = c.getContext("2d"); x.scale(k, k);
+  x.fillStyle = css("--bg"); x.fillRect(0, 0, R.width, R.height);
+  const box = (el, fill, stroke) => { const r = el.getBoundingClientRect(); x.beginPath(); x.roundRect ? x.roundRect(r.left - R.left, r.top - R.top, r.width, r.height, 10) : x.rect(r.left - R.left, r.top - R.top, r.width, r.height); x.fillStyle = fill; x.fill(); x.strokeStyle = stroke; x.lineWidth = 1; x.stroke(); };
+  root.querySelectorAll(".card").forEach((el) => { if (el.offsetParent) box(el, css("--panel"), css("--line")); });
+  root.querySelectorAll(".plot").forEach((el) => { if (el.offsetParent) box(el, css("--panel"), css("--line")); });
+  root.querySelectorAll("canvas").forEach((cv0) => { if (!cv0.offsetParent || !cv0.width) return; const r = cv0.getBoundingClientRect(); x.drawImage(cv0, r.left - R.left, r.top - R.top, r.width, r.height); });
+  x.fillStyle = css("--muted"); x.font = `700 13px ${css("--font")}`; x.textBaseline = "top";
+  root.querySelectorAll(".plot > .lbl").forEach((el) => { if (!el.offsetParent) return; const r = el.getBoundingClientRect(); x.fillText((el.firstChild && el.firstChild.textContent || el.textContent).trim(), r.left - R.left, r.top - R.top + 2); });
+  const ro = $("readout"); if (ro.offsetParent) { const r = ro.getBoundingClientRect(); x.fillStyle = css("--ink"); x.font = `14px ${css("--mono")}`; x.fillText(ro.innerText.replace(/\s*\n\s*/g, " ").replace(/\s{2,}/g, "   "), r.left - R.left + 4, r.top - R.top + 6); }
+  return c;
+}
+function exportCanvas() {
+  if ($("expWhat").value === "all") return exportAll(); const { W, H, scale } = exportSize(); const c = document.createElement("canvas"); c.width = W; c.height = H; exportDraw(new CanvasPen(c.getContext("2d")), W, H, scale); return c; }
+function exportSvg() { const { W, H, scale } = exportSize(); const k = 96 / 300; const w = W * k, h = H * k; const pen = new SvgPen(w, h); exportDraw(pen, w, h, scale * k); return pen.out(); }
+function updatePreview() {
+  const all = $("expWhat").value === "all"; ["expMode", "expWidth", "expHeight", "expPoints", "expRoman"].forEach((id) => { $(id).disabled = all; });
+  $("expSvg").hidden = all || !downloads; $("expPreview").src = exportCanvas().toDataURL("image/png");
+}
+function fname(ext) { const d = new Date(); const p = (n) => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_Bewegungslabor_${$("expWhat").value}${$("expMode").value === "empty" ? "_leer" : $("expMode").value === "solution" ? "_Loesung" : ""}.${ext}`; }
+async function saveFile(name, data) {
+  if (!downloads) { toast("Speichern ist hier nicht verfügbar."); return; }
+  try { await downloads.save({ filename: name, data }); toast("Gespeichert."); }
+  catch (e) { toast(e && e.code === "declined" ? "Nicht gespeichert." : "Speichern nicht möglich."); }
+}
+
+// ================= Messwerte =================
+let noiseSeed = 1;
+function rng() { noiseSeed = (noiseSeed * 16807) % 2147483647; return noiseSeed / 2147483647; }
+// qs: welche Größen ("s", "v", "a"); Ort kann mit Streuung versehen werden
+function sampled(dt, qs = ["s"]) {
+  const unit = { s: "m", v: "m/s", a: "m/s²" }, interp = (p, x, key) => { if (!p.length) return NaN; let k = 0; while (k < p.length - 1 && p[k + 1].t <= x) k++; const a = p[k], b = p[Math.min(k + 1, p.length - 1)], f = b.t > a.t ? clamp((x - a.t) / (b.t - a.t), 0, 1) : 0; return (a[key] || 0) + ((b[key] || 0) - (a[key] || 0)) * f; };
+  const cols = [], rows = [], kinds = [];
+  if (S.mode === "2d") {
+    const p = d2Series(true), T = p.length ? Math.min(p[p.length - 1].t, D2.tMax) : 0, t = []; for (let x = 0; x <= T + 1e-9; x += dt) t.push(+x.toFixed(6));
+    const nm = { s: ["x", "y"], v: ["vx", "vy"], a: ["ax", "ay"] }, lab = { x: "x in m", y: "y in m", vx: "vₓ in m/s", vy: "v_y in m/s", ax: "aₓ in m/s²", ay: "a_y in m/s²" };
+    qs.forEach((q) => nm[q].forEach((key) => { cols.push(t.map((x) => interp(p, x, key))); rows.push(lab[key]); kinds.push(q); }));
+    return { t, cols, rows, kinds, labels: rows };
+  }
+  const ser = series(true); let T = 0; ser.forEach((sr) => { if (sr.pts.length) T = Math.max(T, sr.pts[sr.pts.length - 1].t); }); T = Math.min(T, S.tMax);
+  const t = []; for (let x = 0; x <= T + 1e-9; x += dt) t.push(+x.toFixed(6));
+  ser.forEach((sr) => qs.forEach((q) => { cols.push(t.map((x) => interp(sr.pts, x, q))); rows.push((ser.length > 1 ? sr.label + ": " : "") + `${q} in ${unit[q]}`); kinds.push(q); }));
+  return { t, cols, rows, kinds, labels: ser.map((sr) => sr.label) };
+}
+const tblQs = () => { const q = []; if ($("tblS").checked) q.push("s"); if ($("tblV").checked) q.push("v"); if ($("tblA").checked) q.push("a"); return q.length ? q : ["s"]; };
+function tableData(dt, noise, dec) {
+  const d = sampled(dt, tblQs()); noiseSeed = tableSeed;
+  const cols = d.cols.map((col, ci) => col.map((s, k) => { if (k === 0 || d.kinds[ci] !== "s") return s; let n = 0; if (noise.startsWith("rel")) n = s * (+noise.slice(3) / 100) * (rng() * 2 - 1); else n = (+noise) * (rng() * 2 - 1); return s + n; }));
+  return { t: d.t, cols, labels: d.labels, rows: d.rows, dec };
+}
+let tableSeed = 7;
+function renderTable() {
+  const d = tableData(+$("tblDt").value, $("tblNoise").value, +$("tblDec").value);
+  const tdec = +$("tblDt").value < 1 ? 1 : 0;
+  let h = `<table><tr><th>t in s</th>${d.t.map((x) => `<td>${deFix(x, tdec)}</td>`).join("")}</tr>`;
+  d.cols.forEach((c, i) => { h += `<tr><th>${d.rows[i]}</th>${c.map((x) => `<td>${deFix(x, d.dec)}</td>`).join("")}</tr>`; });
+  $("tblOut").innerHTML = h + "</table>";
+  return d;
+}
+function tableText(sep) {
+  const d = tableData(+$("tblDt").value, $("tblNoise").value, +$("tblDec").value); const tdec = +$("tblDt").value < 1 ? 1 : 0;
+  const rows = [["t in s", ...d.t.map((x) => deFix(x, tdec))], ...d.cols.map((c, i) => [d.rows[i], ...c.map((x) => deFix(x, d.dec))])];
+  return rows.map((r) => r.join(sep)).join("\r\n");
+}
+async function copyText(txt, ok) { try { await navigator.clipboard.writeText(txt); toast(ok); } catch { toast("Kopieren nicht möglich – bitte markieren und mit Strg+C kopieren."); } }
+
+// ================= UI-Aufbau =================
+function setRange(a, b, tmax, vr, ar) {
+  S.sMin = a; S.sMax = b; S.tMax = tmax; $("sMin").value = a; $("sMax").value = b; $("tMax").value = tmax;
+  if (vr) { S.vMin = vr[0]; S.vMax = vr[1]; $("vMin").value = vr[0]; $("vMax").value = vr[1]; }
+  if (ar) { S.aMin = ar[0]; S.aMax = ar[1]; $("aMin").value = ar[0]; $("aMax").value = ar[1]; }
+  buildVScale();
+}
+// Lupe / Auge / Fernglas oben rechts im v-t- und a-t-Diagramm: Achsenstufen umschalten
+function zoomObj() { return S.mode === "prog" ? S.prog.A.obj : S.obj; }
+function buildVScale() {
+  document.querySelectorAll(".zoom").forEach((z) => {
+    const k = z.dataset.k, is2d = z.dataset.d2 === "1";
+    const lv = is2d ? levelsFor([D2.def.xMin, D2.def.xMax]) : OBJ[zoomObj()].lv;
+    const cur = is2d ? D2.vMax : k === "v" ? S.vMax : S.aMax, cur0 = is2d ? D2.vMin : k === "v" ? S.vMin : S.aMin;
+    z.querySelectorAll("button").forEach((b, i) => {
+      const val = lv[i][k], on = Math.abs(cur - val) < 1e-9 && Math.abs(cur0 + val) < 1e-9;
+      b.setAttribute("aria-pressed", on); b.title = `${ZOOM_TIPS[i]} (±${de(val, 4)} ${k === "v" ? "m/s" : "m/s²"})`;
+    });
+  });
+}
+function setZoom(k, i, is2d) {
+  if (is2d) { const l = levelsFor([D2.def.xMin, D2.def.xMax])[i]; S.vLvl = i; D2.vMin = -l.v; D2.vMax = l.v; buildVScale(); render(); return; }
+  const l = OBJ[zoomObj()].lv[i];
+  if (k === "v") { S.vLvl = i; S.vMin = -l.v; S.vMax = l.v; $("vMin").value = S.vMin; $("vMax").value = S.vMax; }
+  else { S.aLvl = i; S.aMin = -l.a; S.aMax = l.a; $("aMin").value = S.aMin; $("aMax").value = S.aMax; }
+  buildVScale(); render();
+}
+function buildZoomButtons() {
+  document.querySelectorAll(".zoom").forEach((z) => {
+    z.innerHTML = ZOOM_ICONS.map((ic, i) => `<button type="button" aria-label="${ZOOM_TIPS[i]}" aria-pressed="false">${ic}</button>`).join("");
+    z.querySelectorAll("button").forEach((b, i) => b.addEventListener("click", () => setZoom(z.dataset.k, i, z.dataset.d2 === "1")));
+  });
+}
+// Programm außerhalb der Achsen: Achsen erweitern (nie verkleinern), normale Bahn bleibt grün markiert
+function autoRangeProg() {
+  const cs = [compile(S.prog.A), ...(S.prog.two ? [compile(S.prog.B)] : [])]; let lo = Infinity, hi = -Infinity, T = 0, vlo = 0, vhi = 0, alo = 0, ahi = 0;
+  cs.forEach((c) => { T = Math.max(T, c.T); lo = Math.min(lo, c.s0); hi = Math.max(hi, c.s0); c.segs.forEach((g) => { for (let k = 0; k <= 20; k++) { const u = (g.t1 - g.t0) * k / 20, sv = g.s0 + g.v0 * u + 0.5 * g.a * u * u; lo = Math.min(lo, sv); hi = Math.max(hi, sv); } vlo = Math.min(vlo, g.v0, g.v1); vhi = Math.max(vhi, g.v0, g.v1); alo = Math.min(alo, g.a); ahi = Math.max(ahi, g.a); }); });
+  if (!isFinite(lo)) return;
+  const st = niceStep(Math.max(hi - lo, S.sMax - S.sMin, 1e-3), 9);
+  if (lo < S.sMin - 1e-9) S.sMin = Math.floor(lo / st) * st; if (hi > S.sMax + 1e-9) S.sMax = Math.ceil(hi / st) * st;
+  if (T > S.tMax + 1e-9) S.tMax = Math.ceil(T);
+  const vs = niceStep(Math.max(vhi - vlo, S.vMax - S.vMin, 1e-6), 8);
+  if (vlo < S.vMin - 1e-9) S.vMin = Math.floor(vlo / vs) * vs; if (vhi > S.vMax + 1e-9) S.vMax = Math.ceil(vhi / vs) * vs;
+  const as = niceStep(Math.max(ahi - alo, S.aMax - S.aMin, 1e-6), 8);
+  if (alo < S.aMin - 1e-9) S.aMin = Math.floor(alo / as) * as; if (ahi > S.aMax + 1e-9) S.aMax = Math.ceil(ahi / as) * as;
+  setRange(S.sMin, S.sMax, S.tMax, [S.vMin, S.vMax], [S.aMin, S.aMax]);
+}
+// Diagrammflächen: s-t oben über die ganze Breite, v-t und a-t darunter (nebeneinander, wenn beide an)
+function layoutPlots() {
+  const game = S.mode === "game", d2 = S.mode === "2d";
+  $("stBox").hidden = d2; $("vtCard").hidden = !S.showVT || d2; $("atCard").hidden = !S.showAT || game || d2;
+  ["fieldBox", "xtBox", "ytBox"].forEach((id) => { $(id).hidden = !d2; }); ["vxBox", "vyBox"].forEach((id) => { $(id).hidden = !d2 || !D2.showV; });
+  const subs = d2 ? -1 : (S.showVT ? 1 : 0) + (S.showAT && !game ? 1 : 0);
+  $("plots").classList.toggle("no-sub", subs === 0); $("plots").classList.toggle("one-sub", subs === 1);
+  $("plots").classList.toggle("d2", d2); $("plots").classList.toggle("d2v", d2 && D2.showV);
+  $("tgVT").setAttribute("aria-pressed", d2 ? D2.showV : S.showVT); $("tgAT").setAttribute("aria-pressed", S.showAT); $("tgStrobe").setAttribute("aria-pressed", S.showStrobe); $("tgAvg").setAttribute("aria-pressed", S.showAvg);
+  $("tgAT").disabled = game || d2; $("tgStrobe").disabled = game;
+  $("tgAvg").hidden = !(S.mode === "live" || S.mode === "ueb" || (d2 && D2.src === "live")); $("tgAvg").disabled = d2 ? !D2.showV : !S.showVT;
+  $("objpick").hidden = d2 || S.mode === "quiz";
+  cv.track.hidden = d2; cv.strobe.hidden = !S.showStrobe || game || d2;
+}
+function buildObjPicker() {
+  const box = $("objpick"); box.innerHTML = ""; const sel = $("objSelProg"); sel.innerHTML = "";
+  OBJ_KEYS.forEach((k) => {
+    const b = document.createElement("button"); b.title = OBJ[k].name; b.setAttribute("aria-label", OBJ[k].name); b.dataset.key = k;
+    const c = document.createElement("canvas"); c.width = 80; c.height = 68; b.appendChild(c); box.appendChild(b);
+    b.addEventListener("click", () => chooseObj(k));
+    const o = document.createElement("option"); o.value = k; o.textContent = OBJ[k].name; sel.appendChild(o);
+  });
+  drawPicker();
+}
+function drawPicker() {
+  document.querySelectorAll("#objpick button").forEach((b) => {
+    const k = b.dataset.key, c = b.querySelector("canvas"), ctx = c.getContext("2d"); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, 80, 68);
+    ctx.save(); ctx.scale(2, 2); drawObj(ctx, k, 20, 29, 0.55, css("--ink"), 1); ctx.restore();
+    b.setAttribute("aria-pressed", (S.mode === "prog" ? editP().obj : S.obj) === k);
+  });
+}
+function chooseObj(k) {
+  if (S.mode === "prog") { editP().obj = k; if (editP() === S.prog.A) { S.obj = k; S.vScaleF = 1; S.refR = OBJ[k].range.slice(); setRange(OBJ[k].range[0], OBJ[k].range[1], OBJ[k].tmax, lvV(k), lvA(k)); autoRangeProg(); } renderSegs(); }
+  else { S.obj = k; S.vScaleF = 1; S.refR = OBJ[k].range.slice(); setRange(OBJ[k].range[0], OBJ[k].range[1], OBJ[k].tmax, lvV(k), lvA(k)); if (S.mode === "ueb") S.ueb.target = randomTarget(+$("uebLevel").value); uebImpUI(); }
+  buildVScale();
+  drawPicker(); resetRun();
+}
+// Programmieren und die Live-Modi merken sich ihre Achsen getrennt (Objekt, Bahn, v- und a-Bereich)
+const famOf = (m) => m === "prog" ? "prog" : m === "2d" || m === "quiz" ? null : "1d";
+function snapView() { return { obj: S.obj, refR: S.refR, r: [S.sMin, S.sMax, S.tMax, S.vMin, S.vMax, S.aMin, S.aMax] }; }
+function restoreView(v) { S.obj = v.obj; S.refR = v.refR; const r = v.r; setRange(r[0], r[1], r[2], [r[3], r[4]], [r[5], r[6]]); }
+function setMode(m) {
+  const pf = famOf(S.mode), nf = famOf(m);
+  if (pf) S.views[pf] = snapView();
+  if (nf && nf !== pf && S.views[nf]) restoreView(S.views[nf]);
+  if (S.mode === "quiz" && m !== "quiz") { Q.run = false; $("qStart").disabled = false; $("qStart").textContent = "Start"; }
+  S.mode = m; ["live", "prog", "ueb", "game", "quiz", "2d"].forEach((x) => { $("m-" + x).setAttribute("aria-pressed", x === m); $("p-" + x).hidden = x !== m; });
+  $("trackCard").hidden = m === "quiz"; $("chartsCard").hidden = m === "quiz"; $("quizCard").hidden = m !== "quiz";
+  if (m === "ueb" && !S.ueb.target) S.ueb.target = randomTarget(+$("uebLevel").value); uebImpUI();
+  if (m === "ueb") uebImpUI();
+  if (m === "prog") { S.t = Math.min(progT(), S.tMax); renderSegs(); } else S.t = 0;
+  cv.track.style.cursor = m === "prog" ? "default" : "";
+  layoutPlots(); buildVScale();
+  drawPicker(); if (m === "2d") { d2Range(); d2Sync(); } resetRun(); if (m === "prog") { S.t = Math.min(progT(), S.tMax); render(); }
+  if (m === "prog" || (m === "2d" && D2.src === "param")) { S.flyT0 = -1e9; if (m === "2d") S.t = D2.par.T; render(); }
+}
+function syncUI() {
+  $("twoObj").checked = S.prog.two; $("speed").value = String(S.prog.speed);
+  if (S.mode === "prog") renderSegs(); drawPicker();
+}
+
+// Ereignisse
+$("m-2d").onclick = () => setMode("2d"); $("m-quiz").onclick = () => setMode("quiz");
+$("d2Live").onclick = () => { D2.src = "live"; D2.scene = null; d2Changed(); resetRun(); };
+$("d2Par").onclick = () => { if (!D2.loaded) d2Load(+$("d2Preset").value); else { D2.src = "param"; d2Changed(); } };
+D2PRESETS.forEach((p, i) => { const o = document.createElement("option"); o.value = i; o.textContent = p.name; $("d2Preset").appendChild(o); });
+$("d2Load").onclick = () => d2Load(+$("d2Preset").value);
+PAR_KEYS.forEach((k) => $("d2" + k).addEventListener("change", (e) => { const v = parseFloat(String(e.target.value).replace(",", ".")); if (isFinite(v)) D2.par[k] = k === "T" ? Math.max(0.1, v) : v; d2Changed(); }));
+$("d2Speed").onchange = (e) => { D2.speed = +e.target.value; };
+$("d2Arrow").onchange = (e) => { D2.arrow = e.target.checked; render(); };
+["d2xMin", "d2xMax", "d2yMin", "d2yMax", "d2tMax"].forEach((id) => $(id).addEventListener("change", () => {
+  const n = (i) => parseFloat(String($(i).value).replace(",", ".")); const a = n("d2xMin"), b = n("d2xMax"), c = n("d2yMin"), d = n("d2yMax"), t = n("d2tMax");
+  if (b > a && d > c && t > 0) { D2.def = { xMin: a, xMax: b, yMin: c, yMax: d, tMax: t }; d2Changed(); if (D2.src === "live") resetRun(); }
+  else toast("Bitte jeweils „bis“ größer als „von“ und tmax größer als 0 wählen.");
+}));
+$("liveTwo").onchange = (e) => {
+  S.live.two = e.target.checked; $("liveTwoNote").hidden = !S.live.two; S.live.recB = []; S.live.recMode = "A"; if (S.rp) replayStop();
+  const R = S.sMax - S.sMin; S.live.posB = S.sMin + R * 0.75; render();
+};
+$("tgAvg").onclick = () => { S.showAvg = !S.showAvg; layoutPlots(); render(); };
+$("m-live").onclick = () => setMode("live"); $("m-prog").onclick = () => setMode("prog"); $("m-ueb").onclick = () => setMode("ueb"); $("m-game").onclick = () => setMode("game");
+$("gameKind").onchange = () => { resetRun(); };
+$("btnStart").onclick = start; $("btnReset").onclick = () => { if (S.mode === "prog") { S.running = false; S.t = 0; $("btnStart").textContent = "Start"; render(); } else resetRun(); };
+document.addEventListener("keydown", (e) => { if (e.code === "Space" && !/INPUT|SELECT|TEXTAREA|BUTTON/.test(e.target.tagName) && !document.querySelector("dialog[open]")) { e.preventDefault(); start(); } });
+PRESETS.forEach((p, i) => { const o = document.createElement("option"); o.value = i; o.textContent = p.name; $("presetSel").appendChild(o); });
+$("btnPreset").onclick = () => loadPreset(+$("presetSel").value);
+$("twoObj").onchange = (e) => { S.prog.two = e.target.checked; if (!S.prog.two) S.prog.edit = "A"; else if (!S.prog.B.segs.length) S.prog.B = { obj: "auto", s0: S.sMax - (S.sMax - S.sMin) * 0.1, segs: [{ dt: 4, v0: -(S.sMax - S.sMin) / 10, v1: -(S.sMax - S.sMin) / 10 }] }; progChanged(); drawPicker(); };
+$("tabA").onclick = () => { S.prog.edit = "A"; renderSegs(); drawPicker(); }; $("tabB").onclick = () => { S.prog.edit = "B"; renderSegs(); drawPicker(); };
+$("objSelProg").onchange = (e) => chooseObj(e.target.value);
+$("s0").onchange = (e) => { editP().s0 = parseFloat(String(e.target.value).replace(",", ".")) || 0; progChanged(); };
+$("btnAddSeg").onclick = () => { const p = editP(); const last = p.segs[p.segs.length - 1]; const v = last ? last.v1 : 1; p.segs.push({ dt: 1, v0: v, v1: v }); progChanged(); };
+$("btnFit").onclick = () => {
+  const cs = [compile(S.prog.A), ...(S.prog.two ? [compile(S.prog.B)] : [])]; let lo = Infinity, hi = -Infinity, T = 0;
+  cs.forEach((c) => { T = Math.max(T, c.T); for (let t = 0; t <= c.T; t += c.T / 200 || 1) { const s = progAt(c, t).s; lo = Math.min(lo, s); hi = Math.max(hi, s); } lo = Math.min(lo, c.s0); hi = Math.max(hi, c.s0); });
+  if (!isFinite(lo)) return; const st = niceStep(Math.max(hi - lo, 1e-3), 8); setRange(Math.floor(lo / st) * st, Math.ceil(hi / st) * st + (hi === lo ? st : 0), Math.ceil(T) || 1); progChanged();
+};
+$("speed").onchange = (e) => { S.prog.speed = +e.target.value; };
+$("btnCopyDesc").onclick = () => copyText($("descText").textContent, "Text kopiert.");
+$("btnNewTarget").onclick = newTarget; $("uebLevel").onchange = newTarget;
+$("tgVT").onclick = () => { if (S.mode === "2d") D2.showV = !D2.showV; else S.showVT = !S.showVT; layoutPlots(); render(); };
+$("tgAT").onclick = () => { S.showAT = !S.showAT; layoutPlots(); render(); };
+$("tgStrobe").onclick = () => { S.showStrobe = !S.showStrobe; layoutPlots(); render(); };
+$("strobeDt").onchange = (e) => { S.strobeDt = +e.target.value; render(); };
+$("showRoman").onchange = (e) => { S.showRoman = e.target.checked; render(); };
+["sMin", "sMax", "tMax", "vMin", "vMax", "aMin", "aMax"].forEach((id) => $(id).addEventListener("change", () => {
+  const num = (id) => parseFloat(String($(id).value).replace(",", "."));
+  const a = num("sMin"), b = num("sMax"), t = num("tMax"), va = num("vMin"), vb = num("vMax"), aa = num("aMin"), ab = num("aMax");
+  if (b > a && t > 0 && vb > va && ab > aa) { S.sMin = a; S.sMax = b; S.tMax = t; S.vMin = va; S.vMax = vb; S.aMin = aa; S.aMax = ab; buildVScale(); if (S.mode === "ueb") S.ueb.target = randomTarget(+$("uebLevel").value); uebImpUI(); resetRun(); if (S.mode === "prog") progChanged(); }
+  else toast("Bitte jeweils „bis“ größer als „von“ und tmax größer als 0 wählen.");
+}));
+// Export-Dialog
+function buildExpWhat() {
+  const opts = S.mode === "2d" ? [["field", "Bahnkurve in der Ebene"], ["xt", "x-t-Diagramm"], ["yt", "y-t-Diagramm"], ["vxt", "v-t-Diagramm (x-Richtung)"], ["vyt", "v-t-Diagramm (y-Richtung)"]]
+    : [["st", "s-t-Diagramm"], ["vt", "v-t-Diagramm"], ["at", "a-t-Diagramm"], ["strobe", "Punktspur (Stroboskop)"]];
+  opts.unshift(["all", "Alles (Bahn bzw. Ebene und alle Diagramme, wie auf dem Bildschirm)"]);
+  const sel = $("expWhat"), cur = sel.value; sel.innerHTML = opts.map(([v, t]) => `<option value="${v}">${t}</option>`).join(""); if (opts.some((o) => o[0] === cur)) sel.value = cur;
+  $("expPoints").parentElement.hidden = S.mode === "2d"; $("expRoman").parentElement.hidden = S.mode === "2d";
+}
+$("btnExport").onclick = () => { buildExpWhat(); $("expRoman").checked = S.showRoman; $("dlgExport").showModal(); updatePreview(); };
+["expWhat", "expMode", "expWidth", "expHeight", "expPoints", "expRoman"].forEach((id) => $(id).addEventListener("change", updatePreview));
+$("expClose").onclick = () => $("dlgExport").close();
+$("expPng").onclick = () => exportCanvas().toBlob((b) => saveFile(fname("png"), b), "image/png");
+$("expSvg").onclick = () => saveFile(fname("svg"), exportSvg());
+$("expCopy").onclick = () => exportCanvas().toBlob(async (b) => { try { await navigator.clipboard.write([new ClipboardItem({ "image/png": b })]); toast("Bild kopiert – in Word einfügen."); } catch { toast("Kopieren nicht möglich – Rechtsklick auf die Vorschau nutzen."); } }, "image/png");
+// Messwerte-Dialog
+$("btnTable").onclick = () => { $("dlgTable").showModal(); renderTable(); };
+["tblDt", "tblNoise", "tblDec", "tblS", "tblV", "tblA"].forEach((id) => $(id).addEventListener("change", renderTable));
+$("tblReroll").onclick = () => { tableSeed = Math.floor(Math.random() * 1e6) + 1; renderTable(); };
+$("tblCopy").onclick = () => copyText(tableText("\t"), "Tabelle kopiert.");
+$("tblCsv").onclick = () => saveFile(fname("csv").replace(/_(st|vt|strobe).*\.csv$/, "_Messwerte.csv"), "﻿" + tableText(";"));
+$("tblClose").onclick = () => $("dlgTable").close();
+
+// Theme-Wechsel und Größe
+const mq = window.matchMedia("(prefers-color-scheme: dark)"); mq.addEventListener && mq.addEventListener("change", () => { drawPicker(); render(); });
+new MutationObserver(() => { drawPicker(); render(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+window.addEventListener("resize", () => render());
+if (window.ResizeObserver) { const ro = new ResizeObserver(() => render()); [cv.st, cv.vt, cv.at, cv.track, cv.field, cv.xt, cv.yt, cv.vx, cv.vy, $("qPrompt"), $("qOpts")].forEach((c) => ro.observe(c)); }
+
+// Start: Beispielaufnahme, damit die Seite nicht leer ist
+buildObjPicker(); buildZoomButtons(); updateSaveUI();
+loadPreset(0); S.views.prog = snapView();   // Programm vorbereiten und seine Achsen merken
+(function demoLive() {            // Live-Modus mit Beispielspur aus dem Programm füllen
+  const c = compile(S.prog.A); S.live.rec = []; for (let t = 0; t <= c.T + 1e-9; t += 1 / 30) { const r = progAt(c, t); S.live.rec.push({ t, s: r.s, v: r.v, a: r.a }); }
+  S.live.pos = c.sEnd; S.t = c.T; S.mode = "live"; S.obj = "maus";
+  ["live", "prog", "ueb", "game", "quiz", "2d"].forEach((x) => { $("m-" + x).setAttribute("aria-pressed", x === "live"); $("p-" + x).hidden = x !== "live"; });
+  S.flyT0 = -1e9;
+  S.vScaleF = 1; S.refR = [-5, 5]; setRange(-5, 5, 12, lvV("maus"), lvA("maus")); buildVScale(); layoutPlots();
+  drawPicker(); render(); readout();
+})();
+})();
+</script>
+
+
+</body></html>
