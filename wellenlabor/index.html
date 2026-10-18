@@ -1,0 +1,1674 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wellenlabor</title>
+<style>
+:root{
+  --bg:#eef2f1; --panel:#ffffff; --plot:#fbfcfc; --ink:#17211f; --muted:#5b6a67;
+  --line:#d3dcda; --grid:#e1e8e6; --axis:#9aa9a6; --accent:#0f6e74; --accent-ink:#ffffff;
+  --btn:#e3e9e8; --btn-ink:#17211f; --sum:#17211f;
+  --w1:#1f66b8; --w2:#c2306f; --con:#1f8a4c; --des:#c2362b;
+  --mom:#a87400; --kb:#6a4fcf; --kb-ink:#ffffff; --lab:#c75a12; --lab-ink:#ffffff; --tip:#1f8a4c; --tip-ink:#ffffff;
+  --ui: -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --num: ui-monospace, "SF Mono", Menlo, Consolas, "Roboto Mono", monospace;
+  --sideW: 380px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1514; --panel:#161e1d; --plot:#121918; --ink:#e6eeec; --muted:#93a4a0;
+    --line:#2a3634; --grid:#1f2927; --axis:#4e5e5b; --accent:#3fb8bd; --accent-ink:#06201f;
+    --btn:#223030; --btn-ink:#e6eeec; --sum:#f2f7f6;
+    --w1:#6aa8f0; --w2:#f07aac; --con:#4cc27f; --des:#ff6b5e;
+    --mom:#f2c94c; --kb:#a28cf5; --kb-ink:#140c33; --lab:#f0914a; --lab-ink:#2a1203; --tip:#4cc27f; --tip-ink:#06200f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --panel:#161e1d; --plot:#121918; --ink:#e6eeec; --muted:#93a4a0;
+  --line:#2a3634; --grid:#1f2927; --axis:#4e5e5b; --accent:#3fb8bd; --accent-ink:#06201f;
+  --btn:#223030; --btn-ink:#e6eeec; --sum:#f2f7f6;
+  --w1:#6aa8f0; --w2:#f07aac; --con:#4cc27f; --des:#ff6b5e;
+  --mom:#f2c94c; --kb:#a28cf5; --kb-ink:#140c33; --lab:#f0914a; --lab-ink:#2a1203; --tip:#4cc27f; --tip-ink:#06200f;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 var(--ui);
+  -webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-rows:auto minmax(0,1fr);gap:8px;height:100%;
+  padding:8px max(16px, env(safe-area-inset-left,0px)) 10px}
+
+/* Kopfleiste */
+.bar{display:flex;align-items:center;gap:8px;min-width:0}
+.brand{display:flex;flex-direction:column;margin-right:2px;flex:none}
+.brand h1{margin:0;font-size:18px;letter-spacing:-.01em;line-height:1.1}
+.brand span{font-size:11.5px;color:var(--muted)}
+@media (max-width:1300px){.brand span{display:none}}
+@media (max-width:1240px){.brand{display:none}}
+.tabs{display:flex;gap:2px;background:var(--btn);border-radius:10px;padding:3px;overflow-x:auto;min-width:0;flex:1 1 auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{border:0;background:transparent;border-radius:8px;padding:4px 8px;min-height:44px;flex:1 0 auto;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;color:var(--btn-ink)}
+.tabs button small{font:11px var(--num);color:var(--muted)}
+.tabs button span{font-size:14px;white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--panel);font-weight:650;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.tabs button[aria-selected="true"] small{color:var(--accent);font-weight:700}
+.btn{border:0;background:var(--btn);color:var(--btn-ink);border-radius:10px;padding:7px 10px;min-height:40px;flex:none}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.icon{width:44px;padding:0;display:inline-grid;place-items:center;font-weight:700;font-size:19px}
+.spacer{flex:1}
+
+/* Modul-Layout */
+.mod{display:grid;grid-template-columns:var(--sideW) minmax(0,1fr);gap:8px;min-height:0}
+.side{display:flex;flex-direction:column;gap:12px;overflow-y:auto;background:var(--panel);border-radius:12px;
+  padding:12px 12px 16px;min-height:0;overscroll-behavior:contain;border:1px solid var(--line)}
+.side>*{flex-shrink:0}
+.side h2{margin:0;font-size:19px;line-height:1.2;text-wrap:balance}
+.side .lead{margin:-6px 0 0;font-size:14px;color:var(--muted);line-height:1.4}
+.stage{display:flex;flex-direction:column;gap:8px;min-height:0;min-width:0}
+.cvbox{position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;gap:3px}
+.cvhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:15px;color:var(--muted);font-weight:600;min-height:20px}
+.cvhead .st{font-weight:400;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cv{position:relative;flex:1 1 auto;min-height:60px;border-radius:6px;background:var(--plot);border:1px solid var(--line);overflow:hidden;touch-action:none}
+.cv canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.grow{flex:1 1 0}
+
+/* Steuer-Elemente */
+.transport{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.play{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;
+  background:var(--accent);color:var(--accent-ink);font-weight:650;font-size:16px;
+  padding:9px 18px 9px 14px;min-height:44px}
+.play svg{width:18px;height:18px}
+.grp{display:flex;flex-direction:column;gap:6px}
+.grp>.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--btn);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;border-radius:8px;padding:6px 9px;min-height:36px;
+  font-variant-numeric:tabular-nums;color:var(--btn-ink);font-size:15px}
+.seg button[aria-pressed="true"]{background:var(--panel);font-weight:650;box-shadow:inset 0 0 0 2px var(--accent)}
+.seg.full{display:flex}
+.seg.full button{flex:1 1 auto}
+
+.sl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 8px;align-items:center}
+.sl .nm{font-size:14px;color:var(--muted)}
+.sl .nm i{font-family:Georgia,'Times New Roman',serif;font-size:1.1em;color:var(--ink)}
+.sl output{font:600 14px var(--num);text-align:right;white-space:nowrap}
+.sl input[type=range]{grid-column:1/-1;width:100%;height:36px;margin:0;-webkit-appearance:none;appearance:none;background:transparent;touch-action:pan-y;cursor:pointer;--p:0%;--c:var(--accent)}
+.sl input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:5px;background:linear-gradient(to right,var(--c) var(--p),var(--btn) var(--p))}
+.sl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-8px;border-radius:50%;background:var(--c);border:3px solid var(--panel);box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.sl input[type=range]::-moz-range-track{height:10px;border-radius:5px;background:var(--btn)}
+.sl input[type=range]::-moz-range-progress{height:10px;border-radius:5px;background:var(--c)}
+.sl input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--c);border:3px solid var(--panel)}
+.sl.rainbow input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(to right,#7a00c8,#2a3cff,#00a0ff,#00d070,#b0e000,#ffd000,#ff7a00,#e00000,#9a0000)}
+.sl.rainbow input[type=range]::-moz-range-track{background:linear-gradient(to right,#7a00c8,#2a3cff,#00a0ff,#00d070,#b0e000,#ffd000,#ff7a00,#e00000,#9a0000)}
+.sl.rainbow input[type=range]::-moz-range-progress{background:transparent}
+
+.togs{display:flex;flex-wrap:wrap;gap:6px}
+.tog{display:flex;align-items:center;gap:7px;border:1.5px solid var(--line);background:var(--panel);
+  border-radius:10px;padding:4px 9px;min-height:36px;text-align:left;font-size:14.5px;--c:var(--accent)}
+.tog .dot{width:12px;height:12px;border-radius:50%;flex:none;border:2px solid var(--c);background:transparent}
+.tog[aria-pressed="true"]{border-color:var(--c)}
+.tog[aria-pressed="true"] .dot{background:var(--c)}
+.tog.big{min-width:118px}
+.tog b{display:block;font-size:15px;line-height:1.1}
+.tog small{display:block;font-size:12px;color:var(--muted);font-family:var(--num);line-height:1.1}
+.tog .ln{width:18px;height:0;border-top:3px solid var(--c);flex:none}
+.tog .ln.dash{border-top-style:dashed}
+.tog[aria-pressed="false"] .ln{opacity:.3}
+
+.read{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:14.5px;background:var(--bg);border-radius:10px;padding:8px 10px}
+.read dt{color:var(--muted)}
+.read dd{margin:0;font:600 14.5px var(--num);text-align:right;font-variant-numeric:tabular-nums}
+.read .res{grid-column:1/-1;font:600 15px var(--ui);text-align:left;padding-top:2px}
+.read .res.con{color:var(--con)} .read .res.des{color:var(--des)}
+.formula{font:15px Georgia,'Times New Roman',serif;background:var(--bg);border-radius:10px;padding:8px 10px;line-height:1.6;overflow-x:auto}
+.formula .v{font-family:var(--num);font-size:14px;color:var(--mom);font-weight:700}
+.note{font-size:13.5px;color:var(--muted);line-height:1.4}
+.hearbtn{display:inline-flex;align-items:center;gap:6px}
+.hearbtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hearbtn.on{background:var(--accent);color:var(--accent-ink)}
+.hearbtn .bi path:first-child{fill:currentColor}
+
+/* Aufgaben-Kasten (orange wie Klanglabor) */
+.task{border:3px solid var(--lab);border-radius:12px;padding:8px 10px 10px;display:flex;flex-direction:column;gap:8px}
+.task>b{color:var(--lab);font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+.task ol{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;font-size:14.5px;line-height:1.4}
+.task .pre{display:flex;flex-wrap:wrap;gap:6px}
+.task .pre button{border:0;border-radius:10px;padding:6px 10px;min-height:36px;background:var(--btn);font-size:14.5px;box-shadow:inset 0 0 0 1.5px var(--lab)}
+.task .pre button.act{background:var(--lab);color:var(--lab-ink);font-weight:650}
+
+/* Dialoge */
+dialog{border:0;border-radius:16px;background:var(--panel);color:var(--ink);padding:0;
+  width:min(680px,calc(100vw - 32px));max-height:calc(100vh - 48px);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(10,20,20,.45)}
+.dlg{padding:20px 22px;display:flex;flex-direction:column;gap:12px;overflow:auto;max-height:calc(100vh - 48px)}
+.dlg h2{margin:0;font-size:23px;text-wrap:balance}
+.dlg h3{margin:6px 0 0;font-size:18px}
+.dlg p,.dlg li{margin:0;line-height:1.5;max-width:68ch}
+.dlg ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.dlg .foot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:4px}
+.primary{background:var(--accent);color:var(--accent-ink);font-weight:650}
+.legend{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;font-size:15px}
+.legend .sw{display:inline-grid;place-items:center;min-width:44px;height:28px;border-radius:8px;padding:0 8px;font-size:13px;font-weight:650}
+
+/* schmale Bildschirme */
+@media (max-width:900px){
+  .app{height:auto;min-height:100vh}
+  .mod{grid-template-columns:minmax(0,1fr)}
+  .stage{order:-1}
+  .stage .cvbox{flex:none!important}
+  .stage .cvbox .cv{min-height:170px}
+  .stage .cvbox.grow .cv{min-height:min(72vh,100vw)}
+  .side{overflow:visible}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <div class="brand"><h1>Wellenlabor</h1><span>Physik Q2 · Wellen</span></div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Arbeitsblätter"></nav>
+    <button class="btn icon" id="infoBtn" aria-label="Erklärung">i</button>
+    <button class="btn icon" id="setBtn" aria-label="Einstellungen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.4-2.9a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg></button>
+  </header>
+  <main id="main" style="min-height:0;display:grid"></main>
+</div>
+
+<dialog id="infoDlg"><div class="dlg">
+  <div id="infoBody"></div>
+  <h3>Farben und Symbole</h3>
+  <div class="legend">
+    <span class="sw" style="background:var(--accent);color:var(--accent-ink)">▶</span><span><b>Türkis</b>: Abspielen, Start und Anhören.</span>
+    <span class="sw" style="color:var(--w1);border:2px solid var(--w1)">Q₁</span><span><b>Blau</b>: Welle 1 bzw. Quelle 1 (hinlaufende Welle).</span>
+    <span class="sw" style="color:var(--w2);border:2px solid var(--w2)">Q₂</span><span><b>Himbeere</b>: Welle 2 bzw. Quelle 2 (reflektierte Welle).</span>
+    <span class="sw" style="background:var(--ink);color:var(--bg)">Σ</span><span><b>Dunkel, dick</b>: Überlagerung (Summe der Auslenkungen).</span>
+    <span class="sw" style="color:var(--con);border:2px solid var(--con)">Max</span><span><b>Grün</b>: konstruktive Interferenz, Maxima, Wellenbäuche.</span>
+    <span class="sw" style="color:var(--des);border:2px dashed var(--des)">Min</span><span><b>Rot (gestrichelt)</b>: destruktive Interferenz, Minima, Wellenknoten.</span>
+    <span class="sw" style="color:var(--mom);border:2px solid var(--mom)">P</span><span><b>Gold</b>: markierter Punkt, Messpunkt, Zeitpunkt. Antippen und ziehen.</span>
+    <span class="sw" style="color:var(--kb);border:2px solid var(--kb)">λ</span><span><b>Violett</b>: Messen (Wellenlänge, Gangunterschied, Lineal).</span>
+    <span class="sw" style="background:var(--lab);color:var(--lab-ink)">AB</span><span><b>Orange</b>: Aufgaben und Vorlagen passend zum Arbeitsblatt.</span>
+    <span class="sw" style="box-shadow:inset 0 0 0 2px var(--accent)">Auswahl</span><span><b>Türkiser Rahmen</b>: gewählte Einstellung.</span>
+  </div>
+  <p class="note">Physikalisch gerechnet: Alle Bilder entstehen aus y = ŷ·sin(…) und dem Superpositionsprinzip, nichts ist gezeichnet „nach Gefühl“. Bewegungen laufen in Zeitlupe, damit man sie verfolgen kann.</p>
+  <div class="foot"><button class="btn primary" id="infoClose">Schließen</button></div>
+</div></dialog>
+
+<dialog id="setDlg"><div class="dlg">
+  <h2>Einstellungen</h2>
+  <div class="grp"><span class="lbl">Darstellung</span><div class="seg" id="themeSeg"><button data-v="auto">automatisch</button><button data-v="light">hell</button><button data-v="dark">dunkel</button></div></div>
+  <div class="grp"><span class="lbl">Wellenfeld (Auflösung)</span><div class="seg" id="resSeg"><button data-v="3">schnell</button><button data-v="2">fein</button></div>
+  <p class="note">„schnell“ für ältere iPads, „fein“ für Beamer und neuere Geräte.</p></div>
+  <div class="foot"><button class="btn primary" id="setClose">Fertig</button></div>
+</div></dialog>
+<script>
+'use strict';
+/* ================= Grundlagen ================= */
+const TAU = Math.PI*2;
+const $ = (s,r=document)=>r.querySelector(s);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const lerp=(a,b,t)=>a+(b-a)*t;
+function el(tag, attrs, ...kids){
+  const e=document.createElement(tag);
+  if(attrs) for(const k in attrs){
+    const v=attrs[k];
+    if(k==='class') e.className=v;
+    else if(k==='html') e.innerHTML=v;
+    else if(k==='style') e.style.cssText=v;
+    else if(k.startsWith('on')) e.addEventListener(k.slice(2),v);
+    else if(v!==false && v!=null) e.setAttribute(k,v===true?'':v);
+  }
+  for(const k of kids.flat()) if(k!=null) e.append(k.nodeType?k:document.createTextNode(k));
+  return e;
+}
+/* Zahlen deutsch */
+function nf(x,d=2){ if(!isFinite(x)) return '–'; let s=(Math.abs(x)<1e-12?0:x).toFixed(d); return s.replace('.',',').replace('-','−'); }
+function nft(v){ return String(+(+v).toPrecision(6)).replace('.',',').replace('-','−'); }
+function nfs(x,sig=3){ // signifikante Stellen, ohne wissenschaftl. Notation für moderate Werte
+  if(!isFinite(x)) return '–'; if(x===0) return '0';
+  const e=Math.floor(Math.log10(Math.abs(x)));
+  const d=Math.max(0,sig-1-e); return nf(x,Math.min(d,6));
+}
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+function sci(x,sig=3){
+  if(!isFinite(x)) return '–'; if(x===0) return '0';
+  const e=Math.floor(Math.log10(Math.abs(x)+1e-300));
+  if(e>=-2 && e<=3) return nfs(x,sig);
+  let m=x/Math.pow(10,e); let ms=nf(m,sig-1);
+  if(ms.replace('−','').startsWith('10')){ m/=10; ms=nf(m,sig-1); return ms+'·10'+String(e+1).split('').map(c=>SUP[c]).join(''); }
+  return ms+'·10'+String(e).split('').map(c=>SUP[c]).join('');
+}
+/* Längen mit passender Einheit */
+function len(m,sig=3){
+  const a=Math.abs(m);
+  if(a>=1000) return nfs(m/1000,sig)+' km';
+  if(a>=1) return nfs(m,sig)+' m';
+  if(a>=0.01) return nfs(m*100,sig)+' cm';
+  if(a>=1e-3) return nfs(m*1000,sig)+' mm';
+  if(a>=1e-6) return nfs(m*1e6,sig)+' µm';
+  if(a>=1e-9) return nfs(m*1e9,sig)+' nm';
+  if(a>=1e-12) return nfs(m*1e12,sig)+' pm';
+  return sci(m,sig)+' m';
+}
+function freq(f,sig=3){
+  const a=Math.abs(f);
+  if(a>=1e18) return sci(f,sig)+' Hz';
+  if(a>=1e12) return nfs(f/1e12,sig)+' THz';
+  if(a>=1e9) return nfs(f/1e9,sig)+' GHz';
+  if(a>=1e6) return nfs(f/1e6,sig)+' MHz';
+  if(a>=1e3) return nfs(f/1e3,sig)+' kHz';
+  return nfs(f,sig)+' Hz';
+}
+
+/* ================= Farben ================= */
+const theme={};
+let fieldLUT=null, intLUT=null;
+function hex2rgb(h){h=h.trim(); if(h.startsWith('#')){ if(h.length===4) h='#'+h[1]+h[1]+h[2]+h[2]+h[3]+h[3]; return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; } const m=h.match(/\d+/g); return m?m.slice(0,3).map(Number):[0,0,0];}
+function rgba(h,a){const c=hex2rgb(h);return `rgba(${c[0]},${c[1]},${c[2]},${a})`;}
+function readTheme(){
+  const cs=getComputedStyle(document.documentElement);
+  for(const k of ['bg','panel','plot','ink','muted','line','grid','axis','accent','w1','w2','sum','con','des','mom','kb','lab','tip','btn'])
+    theme[k]=cs.getPropertyValue('--'+k).trim();
+  const p=hex2rgb(theme.plot); theme.dark=(p[0]+p[1]+p[2])<300;
+  // Wellenwanne: Berg dunkel, Ruhe mittel, Tal hell (wie Schattenbild der Wellenwanne)
+  fieldLUT=new Uint8ClampedArray(512*3);
+  const top=[8,52,62], mid=theme.dark?[52,92,96]:[128,162,164], bot=theme.dark?[200,236,234]:[244,251,250];
+  for(let i=0;i<512;i++){ const v=i/511*2-1; // -1..1
+    const a=v>=0? top: bot, t=Math.abs(v);
+    const s=Math.pow(t,0.85);
+    for(let c=0;c<3;c++) fieldLUT[i*3+c]=lerp(mid[c],a[c],s); }
+  intLUT=new Uint8ClampedArray(256*3);
+  const lo=theme.dark?[10,22,24]:[22,40,44], hi=[236,255,250];
+  for(let i=0;i<256;i++){ const t=Math.pow(i/255,0.8); for(let c=0;c<3;c++) intLUT[i*3+c]=lerp(lo[c],hi[c],t); }
+  if(typeof current!=='undefined' && current && current.onTheme) current.onTheme();
+}
+/* Wellenlänge (nm) -> RGB 0..1 */
+function wl2rgb(nm){
+  let r=0,g=0,b=0;
+  if(nm>=380&&nm<440){r=-(nm-440)/60;b=1}
+  else if(nm<490){g=(nm-440)/50;b=1}
+  else if(nm<510){g=1;b=-(nm-510)/20}
+  else if(nm<580){r=(nm-510)/70;g=1}
+  else if(nm<645){r=1;g=-(nm-645)/65}
+  else if(nm<=780){r=1}
+  let f=1; if(nm<420) f=.3+.7*(nm-380)/40; else if(nm>700) f=.3+.7*(780-nm)/80;
+  if(nm<380||nm>780) f=0;
+  return [r*f,g*f,b*f];
+}
+function wlCss(nm,a=1){const c=wl2rgb(nm);const g=x=>Math.round(255*Math.pow(x,.8));return `rgba(${g(c[0])},${g(c[1])},${g(c[2])},${a})`;}
+
+/* ================= UI-Bausteine ================= */
+function setFill(inp){const p=(inp.value-inp.min)/(inp.max-inp.min)*100; inp.style.setProperty('--p',p+'%');}
+/* Schieberegler. opt: {label, min,max,step,value, fmt, color, log, oninput, cls} */
+function slider(o){
+  const out=el('output');
+  const inp=el('input',{type:'range',min:0,max:1000,step:1,'aria-label':o.aria||o.label.replace(/<[^>]+>/g,'')});
+  if(o.color) inp.style.setProperty('--c',o.color);
+  const box=el('label',{class:'sl'+(o.cls?' '+o.cls:'')},el('span',{class:'nm',html:o.label}),out,inp);
+  const toPos=v=> o.log? Math.log(v/o.min)/Math.log(o.max/o.min)*1000 : (v-o.min)/(o.max-o.min)*1000;
+  const toVal=p=>{ let v= o.log? o.min*Math.pow(o.max/o.min,p/1000) : o.min+(o.max-o.min)*p/1000;
+    if(o.step){ if(o.log){ const e=Math.pow(10,Math.floor(Math.log10(v))-1); const st=Math.max(o.step,e); v=Math.round(v/st)*st;} else v=Math.round(v/o.step)*o.step; }
+    return clamp(+v.toPrecision(10),o.min,o.max); };
+  let val=o.value;
+  const show=()=>{ out.innerHTML=o.fmt?o.fmt(val):nf(val); };
+  const api={el:box,input:inp,get:()=>val,
+    set(v,silent){ val=clamp(v,o.min,o.max); inp.value=toPos(val); setFill(inp); show(); if(!silent&&o.oninput) o.oninput(val); },
+    hidden(h){ out.style.visibility=h?'hidden':''; }};
+  inp.addEventListener('input',()=>{ val=toVal(+inp.value); setFill(inp); show(); o.oninput&&o.oninput(val); });
+  api.set(val,true);
+  return api;
+}
+/* Segment-Auswahl */
+function seg(opts,value,onchange,cls){
+  const box=el('div',{class:'seg'+(cls?' '+cls:''),role:'group'});
+  let val=value;
+  const btns=opts.map(o=>{const b=el('button',{type:'button',title:o.title||false,html:o.label}); b.dataset.v=o.v;
+    b.addEventListener('click',()=>{api.set(o.v)}); box.append(b); return b;});
+  const api={el:box,get:()=>val,set(v,silent){val=v;btns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===String(v)))); if(!silent&&onchange) onchange(v);},
+    btn:v=>btns.find(b=>b.dataset.v===String(v))};
+  api.set(val,true); return api;
+}
+/* Umschalter mit Farbpunkt oder Linie */
+function tog(o){
+  const b=el('button',{type:'button',class:'tog'+(o.big?' big':''),title:o.title||false});
+  if(o.color) b.style.setProperty('--c',o.color);
+  const mark= o.line? el('span',{class:'ln'+(o.line==='dash'?' dash':'')}) : el('span',{class:'dot'});
+  b.append(mark, o.sub? el('span',null,el('b',{html:o.label}),el('small',{html:o.sub})) : el('span',{html:o.label}));
+  let val=!!o.value;
+  const api={el:b,get:()=>val,set(v,silent){val=!!v;b.setAttribute('aria-pressed',String(val)); if(!silent&&o.onchange) o.onchange(val);}};
+  b.addEventListener('click',()=>api.set(!val));
+  api.set(val,true); return api;
+}
+function grp(label,...kids){return el('div',{class:'grp'},label?el('span',{class:'lbl',html:label}):null,...kids);}
+function readout(){const d=el('dl',{class:'read'}); return d;}
+function setRead(dl,rows,res,cls){
+  dl.innerHTML=rows.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')+(res?`<div class="res ${cls||''}">${res}</div>`:'');
+}
+/* Aufgaben-Kasten (orange) */
+function taskBox(ab, items, presets){
+  const box=el('div',{class:'task'},el('b',null,'Zum AB '+ab));
+  if(items&&items.length) box.append(el('ol',null,...items.map(t=>el('li',{html:t}))));
+  if(presets&&presets.length){
+    const pre=el('div',{class:'pre'});
+    const btns=presets.map(p=>{const b=el('button',{type:'button',title:p.title||false,html:p.label}); b.addEventListener('click',()=>{btns.forEach(x=>x.classList.remove('act')); b.classList.add('act'); p.run();}); pre.append(b); return b;});
+    box.append(pre); box.clearAct=()=>btns.forEach(x=>x.classList.remove('act'));
+  }
+  return box;
+}
+const HEAR='<svg class="bi" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
+
+/* Canvas */
+function mkCanvas(title,extraCls){
+  const st=el('span',{class:'st'});
+  const cv=el('canvas');
+  const wrap=el('div',{class:'cv'},cv);
+  const box=el('div',{class:'cvbox'+(extraCls?' '+extraCls:'')},el('div',{class:'cvhead'},el('span',{html:title}),st),wrap);
+  const api={box,cv,wrap,st,title:t=>{box.firstChild.firstChild.innerHTML=t;},
+    status(t){st.innerHTML=t;},
+    begin(){ const r=wrap.getBoundingClientRect(); const dpr=Math.min(2,window.devicePixelRatio||1);
+      const W=Math.max(1,Math.round(r.width*dpr)),H=Math.max(1,Math.round(r.height*dpr));
+      if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+      const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,r.width,r.height);
+      api.w=r.width; api.h=r.height; api.dpr=dpr; api.ctx=ctx; return ctx; }};
+  return api;
+}
+/* Zeiger-Interaktion auf einem Canvas */
+function onDrag(cvApi,{down,move,up}){
+  const c=cvApi.wrap; let act=false;
+  const pos=e=>{const r=c.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top];};
+  c.addEventListener('pointerdown',e=>{ const p=pos(e); const r=down?down(p[0],p[1],e):true; if(r!==false){act=true; c.setPointerCapture(e.pointerId); e.preventDefault();} });
+  c.addEventListener('pointermove',e=>{ if(act&&move){const p=pos(e); move(p[0],p[1],e);} });
+  const end=e=>{ if(act){act=false; up&&up(e);} };
+  c.addEventListener('pointerup',end); c.addEventListener('pointercancel',end);
+}
+
+/* Zeichenhelfer */
+function line(ctx,x1,y1,x2,y2){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
+function dot(ctx,x,y,r,fill,stroke,lw){ctx.beginPath();ctx.arc(x,y,r,0,TAU); if(fill){ctx.fillStyle=fill;ctx.fill();} if(stroke){ctx.lineWidth=lw||2;ctx.strokeStyle=stroke;ctx.stroke();}}
+function text(ctx,s,x,y,o={}){ctx.font=(o.w||'600')+' '+(o.size||13)+'px '+(o.font||'-apple-system,Segoe UI,Roboto,Arial,sans-serif'); ctx.textAlign=o.align||'left'; ctx.textBaseline=o.base||'alphabetic';
+  if(o.halo){ctx.lineWidth=4;ctx.strokeStyle=o.halo;ctx.lineJoin='round';ctx.strokeText(s,x,y);} ctx.fillStyle=o.color||theme.ink; ctx.fillText(s,x,y);}
+function arrow(ctx,x1,y1,x2,y2,col,lw=2,head=8,both=false){
+  ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=lw; line(ctx,x1,y1,x2,y2);
+  const hd=(xa,ya,xb,yb)=>{const a=Math.atan2(yb-ya,xb-xa); ctx.beginPath(); ctx.moveTo(xb,yb); ctx.lineTo(xb-head*Math.cos(a-.4),yb-head*Math.sin(a-.4)); ctx.lineTo(xb-head*Math.cos(a+.4),yb-head*Math.sin(a+.4)); ctx.closePath(); ctx.fill();};
+  hd(x1,y1,x2,y2); if(both) hd(x2,y2,x1,y1);
+}
+/* Maßpfeil (violett) mit Beschriftung */
+function measure(ctx,x1,y1,x2,y2,label,col,side=-1){
+  col=col||theme.kb; ctx.save(); ctx.setLineDash([]);
+  const a=Math.atan2(y2-y1,x2-x1), nx=-Math.sin(a)*side, ny=Math.cos(a)*side;
+  ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.globalAlpha=.7;
+  line(ctx,x1,y1,x1+nx*8,y1+ny*8); line(ctx,x2,y2,x2+nx*8,y2+ny*8); ctx.globalAlpha=1;
+  arrow(ctx,x1+nx*5,y1+ny*5,x2+nx*5,y2+ny*5,col,2,7,true);
+  if(label) text(ctx,label,(x1+x2)/2+nx*16,(y1+y2)/2+ny*16+4,{align:'center',color:col,halo:theme.plot,size:13.5,w:'700'});
+  ctx.restore();
+}
+/* Achsenkreuz für Diagramme. box={x,y,w,h}, xr=[a,b], yr=[a,b] */
+function axes(ctx,box,xr,yr,o={}){
+  const X=v=>box.x+(v-xr[0])/(xr[1]-xr[0])*box.w, Y=v=>box.y+box.h-(v-yr[0])/(yr[1]-yr[0])*box.h;
+  ctx.save(); ctx.lineWidth=1; ctx.strokeStyle=theme.grid;
+  const tick=(r,n)=>{const span=r[1]-r[0]; const raw=span/n; const p=Math.pow(10,Math.floor(Math.log10(raw))); const m=raw/p; const st=(m<1.5?1:m<3?2:m<7?5:10)*p; const out=[]; for(let v=Math.ceil(r[0]/st-1e-9)*st; v<=r[1]+1e-9; v+=st) out.push(+v.toPrecision(12)); return out;};
+  const xt=o.xticks||tick(xr,o.nx||8), yt=o.yticks||tick(yr,o.ny||4);
+  for(const v of xt) line(ctx,X(v),box.y,X(v),box.y+box.h);
+  for(const v of yt) line(ctx,box.x,Y(v),box.x+box.w,Y(v));
+  ctx.strokeStyle=theme.axis; ctx.lineWidth=1.2;
+  const y0=clamp(Y(0),box.y,box.y+box.h); line(ctx,box.x,y0,box.x+box.w,y0);
+  line(ctx,box.x,box.y,box.x,box.y+box.h);
+  if(!o.noLabels){
+    for(const v of xt) text(ctx,(o.xfmt||nft)(v),X(v),y0+14,{align:'center',size:11.5,w:'400',color:theme.muted,halo:theme.plot});
+    for(const v of yt) if(Math.abs(v)>1e-12) text(ctx,(o.yfmt||nft)(v),box.x-4,Y(v)+4,{align:'right',size:11.5,w:'400',color:theme.muted});
+  }
+  if(o.xl) text(ctx,o.xl,box.x+box.w-2,y0-6,{align:'right',size:13,font:'Georgia,serif',w:'italic 400',color:theme.muted,halo:theme.plot});
+  if(o.yl) text(ctx,o.yl,box.x+6,box.y+12,{size:13,font:'Georgia,serif',w:'italic 400',color:theme.muted,halo:theme.plot});
+  ctx.restore();
+  return {X,Y};
+}
+/* Kurve aus Funktion */
+function curve(ctx,f,x0,x1,X,Y,n=400){ctx.beginPath(); for(let i=0;i<=n;i++){const x=x0+(x1-x0)*i/n; const px=X(x),py=Y(f(x)); i?ctx.lineTo(px,py):ctx.moveTo(px,py);} ctx.stroke();}
+
+/* ================= Wellenfeld-Rechner =================
+   Gruppen von Punktquellen; je Gruppe werden C=Σa·cos φ, S=Σa·sin φ und
+   der kleinste Abstand vorab berechnet. Momentbild: y = C·cos ωt + S·sin ωt
+   (für alle Zellen, die die Front schon erreicht hat). */
+let FIELD_RES=3;
+function makeField(){
+  const F={nx:0,ny:0,groups:[],img:null,off:document.createElement('canvas'),plane:null};
+  F.setup=function(view,res){ // view: {x0,y0,w,h} in Welt-Einheiten, pixel size
+    F.view=view; F.res=res; };
+  /* groups: [{pts:[[x,y],...], a:[...] or null, phase:(k,r)=>..., falloff:fn(r)}] */
+  F.compute=function(nx,ny,view,groups,k){
+    F.nx=nx;F.ny=ny;F.view=view;F.k=k;
+    const N=nx*ny; F.groups=[];
+    for(const g of groups){
+      const C=new Float32Array(N),S=new Float32Array(N),R=new Float32Array(N).fill(1e9);
+      const pts=g.pts, A=g.a, ph=g.ph||0, fo=g.falloff;
+      for(let j=0;j<ny;j++){ const y=view.y0+(j+.5)/ny*view.h;
+        for(let i=0;i<nx;i++){ const x=view.x0+(i+.5)/nx*view.w; const id=j*nx+i;
+          if(g.region && !g.region(x,y)){R[id]=-1; continue;}
+          let c=0,s=0,rm=1e9;
+          for(let q=0;q<pts.length;q++){ const dx=x-pts[q][0],dy=y-pts[q][1]; const r=Math.sqrt(dx*dx+dy*dy);
+            const a=(A?A[q]:1)*(fo?fo(r):1); const p=k*r+ph; c+=a*Math.cos(p); s+=a*Math.sin(p); if(r<rm) rm=r; }
+          C[id]=c;S[id]=s;R[id]=rm; } }
+      F.boost=1;
+      if(g.norm){ let mx=0; for(let id=0;id<N;id++){ if(R[id]>g.normR){ const a=C[id]*C[id]+S[id]*S[id]; if(a>mx) mx=a; } } mx=Math.sqrt(mx);
+        if(mx>0 && mx<g.norm){ const f=g.norm/mx; F.boost=f; for(let id=0;id<N;id++){C[id]*=f;S[id]*=f;} } }
+      F.groups.push({C,S,R,t0:g.t0||0});
+    }
+  };
+  /* Rendern. opts: {mode:'field'|'int', omega, t, c, amp, plane:{x0,xb,k} } */
+  F.render=function(ctx,pxW,pxH,o){
+    const nx=F.nx,ny=F.ny,N=nx*ny;
+    if(!F.img||F.img.width!==nx||F.img.height!==ny){F.off.width=nx;F.off.height=ny;F.img=F.off.getContext('2d').createImageData(nx,ny);}
+    const d=F.img.data; const cw=Math.cos(o.omega*o.t), sw=Math.sin(o.omega*o.t);
+    const scale=1/(o.amp||2); const gs=F.groups; const v=F.view;
+    let pl=o.plane;
+    for(let id=0;id<N;id++){
+      let y=0, I=0, any=false;
+      if(o.mode==='int'){ let cr=0,sr=0; for(const g of gs){ if(g.R[id]<0) continue; cr+=g.C[id]; sr+=g.S[id]; any=true;} I=cr*cr+sr*sr; }
+      else for(const g of gs){ const r=g.R[id]; if(r<0) continue; if(r <= o.c*(o.t-g.t0)){ y+=g.C[id]*cw+g.S[id]*sw; } }
+      const i=id%nx, j=(id/nx)|0;
+      if(pl){ const x=v.x0+(i+.5)/nx*v.w; if(x<pl.xb){ any=true; if(o.mode==='int'){ I=pl.iamp||1; } else if(x-pl.x0 <= o.c*o.t) y=Math.cos(o.k*(x-pl.xb)-o.omega*o.t); else y=0; } }
+      if(pl && pl.wall && pl.wall(v.x0+(i+.5)/nx*v.w, v.y0+(j+.5)/ny*v.h)){ d[id*4]=60;d[id*4+1]=60;d[id*4+2]=60;d[id*4+3]=255; continue;}
+      let r,g,b;
+      if(o.mode==='int'){ const t=clamp(Math.sqrt(I)*(o.iscale||1),0,1); const q=Math.round(t*255)*3; r=intLUT[q];g=intLUT[q+1];b=intLUT[q+2]; }
+      else { const t=clamp(y*scale,-1,1); const q=Math.round((t+1)/2*511)*3; r=fieldLUT[q];g=fieldLUT[q+1];b=fieldLUT[q+2]; }
+      d[id*4]=r;d[id*4+1]=g;d[id*4+2]=b;d[id*4+3]=255;
+    }
+    F.off.getContext('2d').putImageData(F.img,0,0);
+    ctx.save(); ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high'; ctx.drawImage(F.off,0,0,pxW,pxH); ctx.restore();
+  };
+  return F;
+}
+
+/* ================= Ton ================= */
+let AC=null, master=null;
+function audio(){ if(!AC){ AC=new (window.AudioContext||window.webkitAudioContext)(); master=AC.createGain(); master.gain.value=.5; master.connect(AC.destination);} if(AC.state==='suspended') AC.resume(); return AC; }
+const voices=new Set();
+/* spielt Teiltöne [{f,a}] für dur Sekunden; gibt Stopp-Funktion zurück */
+function playTones(parts,dur=1.6,onend){
+  const ac=audio(); const t0=ac.currentTime+.02; const g=ac.createGain(); g.connect(master);
+  const sum=parts.reduce((s,p)=>s+Math.abs(p.a),0)||1; const peak=.32/Math.max(1,sum*0.7);
+  g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(peak,t0+.03);
+  if(isFinite(dur)){ g.gain.setValueAtTime(peak,t0+dur-.12); g.gain.linearRampToValueAtTime(0,t0+dur); }
+  const osc=parts.filter(p=>p.f<20000).map(p=>{const o=ac.createOscillator(); o.frequency.value=p.f; const og=ac.createGain(); og.gain.value=p.a; o.connect(og); og.connect(g); o.start(t0); if(isFinite(dur)) o.stop(t0+dur+.05); return o;});
+  const v={stop(){ try{ const n=ac.currentTime; g.gain.cancelScheduledValues(n); g.gain.setValueAtTime(g.gain.value,n); g.gain.linearRampToValueAtTime(0,n+.06); osc.forEach(o=>o.stop(n+.08)); }catch(e){} voices.delete(v); }};
+  voices.add(v);
+  if(isFinite(dur)) setTimeout(()=>{voices.delete(v); onend&&onend();},dur*1000+60);
+  return v;
+}
+function stopAll(){ for(const v of [...voices]) v.stop(); }
+
+/* ================= Module & Hauptschleife ================= */
+const MODS=[]; let current=null;
+let playing=true, speed=1;
+const transport=(()=>{
+  const playB=el('button',{class:'play',type:'button'});
+  const setP=()=>{ playB.innerHTML= playing? '<svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M5 3.5h3.5v13H5zM11.5 3.5H15v13h-3.5z"/></svg><span>Pause</span>' : '<svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M5 3.5v13l11-6.5z"/></svg><span>Abspielen</span>'; };
+  playB.addEventListener('click',()=>{playing=!playing; setP();});
+  const rst=el('button',{class:'btn',type:'button',title:'Von vorn starten',html:'↺ Neustart'});
+  rst.addEventListener('click',()=>{ current&&current.restart&&current.restart(); playing=true; setP(); });
+  const sp=seg([{v:'1',label:'1×'},{v:'0.5',label:'½×'},{v:'0.25',label:'¼×'}],'1',v=>{speed=+v;});
+  sp.el.title='Tempo (Zeitlupe)';
+  setP();
+  return {el:el('div',{class:'transport'},playB,rst,sp.el),setP,rst};
+})();
+function setPlaying(p){playing=p; transport.setP();}
+function defMod(m){MODS.push(m);}
+
+let lastT=performance.now();
+function loop(now){
+  const dt=Math.min(.05,(now-lastT)/1000); lastT=now;
+  if(current && !document.hidden){ try{ current.frame(playing?dt*speed:0); }catch(e){ console.error(e); } }
+  requestAnimationFrame(loop);
+}
+
+function showMod(m){
+  stopAll();
+  if(current&&current.leave) current.leave();
+  for(const x of MODS){ x.root.hidden = x!==m; }
+  current=m;
+  m.side.insertBefore(transport.el, m.side.children[2]||null);
+  transport.rst.hidden = m.noTransport; transport.el.hidden = !!m.noTransport;
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.id===m.id)));
+  try{ history.replaceState(null,'','#ab'+m.id); }catch(e){}
+  if(m.enter) m.enter();
+}
+
+function init(){
+  readTheme();
+  const main=$('#main'), tabs=$('#tabs');
+  for(const m of MODS){
+    m.side=el('aside',{class:'side'},el('h2',{html:m.title}),el('p',{class:'lead',html:m.lead||''}));
+    m.stage=el('section',{class:'stage'});
+    m.root=el('div',{class:'mod',hidden:true},m.side,m.stage);
+    main.append(m.root);
+    m.build(m.side,m.stage);
+    const b=el('button',{role:'tab',type:'button'},el('small',null,'AB '+m.id),el('span',null,m.short));
+    b.dataset.id=m.id; b.addEventListener('click',()=>showMod(m)); tabs.append(b);
+  }
+  const h=(location.hash||'').replace('#ab','');
+  showMod(MODS.find(m=>m.id===h)||MODS[0]);
+  // Dialoge
+  $('#infoBtn').addEventListener('click',()=>{ $('#infoBody').innerHTML=current.info||''; $('#infoDlg').showModal(); });
+  $('#infoClose').addEventListener('click',()=>$('#infoDlg').close());
+  $('#setBtn').addEventListener('click',()=>$('#setDlg').showModal());
+  $('#setClose').addEventListener('click',()=>$('#setDlg').close());
+  for(const d of document.querySelectorAll('dialog')) d.addEventListener('click',e=>{ if(e.target===d) d.close(); });
+  let th='auto'; try{ th=localStorage.getItem('wl-theme')||'auto'; }catch(e){}
+  const applyTh=v=>{ if(v==='auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme',v); try{localStorage.setItem('wl-theme',v);}catch(e){} readTheme(); };
+  const ts=$('#themeSeg'); const setTs=v=>{ts.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));};
+  ts.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{setTs(b.dataset.v); applyTh(b.dataset.v);}));
+  setTs(th); applyTh(th);
+  let rs='3'; try{ rs=localStorage.getItem('wl-res')||(Math.min(screen.width,screen.height)>900?'2':'3'); }catch(e){}
+  const rsb=$('#resSeg'); const setRs=v=>{rsb.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v))); FIELD_RES=+v; try{localStorage.setItem('wl-res',v);}catch(e){} MODS.forEach(m=>m.dirty=true);};
+  rsb.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>setRs(b.dataset.v)));
+  setRs(rs);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readTheme);
+  addEventListener('keydown',e=>{ if(e.code==='Space' && !document.querySelector('dialog[open]') && !(e.target instanceof HTMLInputElement)){ e.preventDefault(); setPlaying(!playing);} });
+  requestAnimationFrame(loop);
+}
+/* ================= AB 01: Was ist eine Welle? ================= */
+defMod((()=>{
+  const m={id:'01',short:'Welle',title:'Was ist eine Welle?',
+    lead:'Eine Kette aus Teilchen, die über Federn gekoppelt sind. Das erste Teilchen (links, Erreger) wird bewegt. Verfolge ein einzelnes Teilchen!'};
+  const L=6, SP=0.2, N=Math.round(L/SP)+1;
+  const CS=[0.5,0.7,1.0,1.4,2.0];
+  let t=0, type='trans', mode='puls', kop=3, gold=10, trail=[];
+  let showSpring, showTrail, showFront, showArrows;
+  let cv;
+  const c=()=>CS[kop-1];
+  function disp(x){ // gibt [ux,uy] in m
+    const tau=t-x/c(); if(tau<=0) return [0,0];
+    if(mode==='puls'){ const Tp=1.0; if(tau>=Tp) return [0,0]; const s=tau/Tp;
+      if(type==='trans') return [0,0.45*Math.sin(Math.PI*s)];
+      if(type==='long') return [0.12*Math.sin(Math.PI*s),0];
+      const R=0.22; return [-R*Math.sin(TAU*s), R*(1-Math.cos(TAU*s))]; }
+    const T=2, e=Math.min(1,tau/T), ph=TAU*tau/T;
+    if(type==='trans') return [0,e*0.45*Math.sin(ph)];
+    if(type==='long') return [e*0.12*Math.sin(ph),0];
+    return [-e*0.3*Math.cos(ph)+0.3*e*0, e*0.3*Math.sin(ph)];
+  }
+  m.restart=()=>{t=0;trail=[];};
+  m.build=(side,stage)=>{
+    const ty=seg([{v:'trans',label:'Transversal'},{v:'long',label:'Longitudinal'},{v:'water',label:'Wasserwelle'}],type,v=>{type=v;m.restart();upd();},'full');
+    const md=seg([{v:'puls',label:'Störung (einmal)'},{v:'dauer',label:'Schwingung (dauernd)'}],mode,v=>{mode=v;m.restart();},'full');
+    const ks=slider({label:'Kopplung der Teilchen (Federhärte)',min:1,max:5,step:1,value:kop,fmt:v=>['sehr schwach','schwach','mittel','stark','sehr stark'][v-1]+' → c = '+nf(CS[v-1],1)+' m/s',oninput:v=>{kop=v;}});
+    showTrail=tog({label:'Spur des goldenen Teilchens',color:theme.mom||'#a87400',value:true});
+    showSpring=tog({label:'Federn',color:'var(--muted)',value:true});
+    showFront=tog({label:'Wellenfront',color:'var(--ink)',value:true});
+    showArrows=tog({label:'Richtungspfeile',color:'var(--ink)',value:true});
+    showTrail.el.style.setProperty('--c','var(--mom)');
+    side.append(grp('Art der Welle',ty.el),grp('Erreger',md.el),ks.el,grp('Anzeigen',el('div',{class:'togs'},showTrail.el,showFront.el,showArrows.el,showSpring.el)));
+    const rd=readout(); m.rd=rd; side.append(rd);
+    side.append(taskBox('01',[
+      'Tippe ein Teilchen an (gold). Bewegt es sich mit der Welle mit nach rechts? Was wird also transportiert?',
+      'Vergleiche <b>Transversal</b> und <b>Longitudinal</b>: In welche Richtung schwingt das goldene Teilchen, in welche läuft die Welle?',
+      'Wo erkennst du bei der Longitudinalwelle Verdichtungen und Verdünnungen?',
+      'Erhöhe die Kopplung. Wie ändert sich die Ausbreitungsgeschwindigkeit?',
+      'Auftrag 2: Wähle „Wasserwelle“ und „dauernd“. Welche Bahn beschreibt ein einzelnes Teilchen?'],[
+      {label:'Teilchen-Bahn Wasserwelle',run:()=>{ty.set('water');md.set('dauer');showTrail.set(true);}},
+      {label:'Längswelle mit Dichte',run:()=>{ty.set('long');md.set('dauer');}}]));
+    cv=mkCanvas('Teilchenkette'); cv.box.classList.add('grow'); stage.append(cv.box);
+    onDrag(cv,{down:(px)=>{ const s=m.s; const x=(px-m.ox)/s; gold=clamp(Math.round(x/SP),1,N-1); trail=[]; return false; }});
+    function upd(){ cv.title({trans:'Transversalwelle (Querwelle)',long:'Longitudinalwelle (Längswelle)',water:'Wasserwelle (Oberflächenwelle)'}[type]); }
+    upd();
+  };
+  m.frame=(dt)=>{
+    t+=dt;
+    const ctx=cv.begin(), W=cv.w, H=cv.h;
+    const pad=34, s=(W-2*pad)/L; m.s=s; m.ox=pad;
+    const y0= type==='long'? H*0.42 : H*0.5;
+    const X=x=>pad+x*s, Y=y=>y0-y*s*Math.min(1,(H*0.32)/(0.5*s));
+    const ysc=Math.min(1,(H*0.32)/(0.5*s));
+    // Ruhelage
+    ctx.strokeStyle=theme.grid; ctx.lineWidth=1; ctx.setLineDash([4,5]); line(ctx,X(0),y0,X(L),y0); ctx.setLineDash([]);
+    const P=[]; for(let i=0;i<N;i++){ const x=i*SP; const u=disp(x); P.push([X(x+u[0]*(type==='water'?ysc:1)), y0-u[1]*s*ysc]); }
+    // Front
+    const xf=c()*t;
+    if(showFront.get() && xf<L+0.01){ ctx.strokeStyle=theme.muted; ctx.setLineDash([3,4]); line(ctx,X(xf),y0-H*0.36,X(xf),y0+H*0.3); ctx.setLineDash([]); text(ctx,'Front',X(xf),y0-H*0.36-4,{align:'center',size:12,color:theme.muted}); }
+    // Federn
+    if(showSpring.get()){ ctx.strokeStyle=theme.axis; ctx.lineWidth=1.2;
+      for(let i=0;i<N-1;i++){ const a=P[i],b=P[i+1]; const dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1, nx=-dy/l, ny=dx/l; ctx.beginPath(); ctx.moveTo(a[0],a[1]);
+        const k=6; for(let j=1;j<k*2;j++){ const f=j/(k*2); const o=(j%2?1:-1)*3.5; ctx.lineTo(a[0]+dx*f+nx*o,a[1]+dy*f+ny*o);} ctx.lineTo(b[0],b[1]); ctx.stroke(); } }
+    // Spur
+    const G=P[gold];
+    if(playing) { trail.push([G[0],G[1]]); if(trail.length>240) trail.shift(); }
+    if(showTrail.get() && trail.length>1){ ctx.strokeStyle=rgba(theme.mom,.75); ctx.lineWidth=2.5; ctx.beginPath(); trail.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.stroke(); }
+    // Ruhelage des goldenen Teilchens
+    ctx.strokeStyle=rgba(theme.mom,.6); ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(X(gold*SP),y0,9,0,TAU); ctx.stroke();
+    // Teilchen
+    for(let i=0;i<N;i++){ const p=P[i]; if(i===0){ ctx.fillStyle=theme.accent; ctx.fillRect(p[0]-8,p[1]-8,16,16); continue; }
+      if(type==='long'){ ctx.strokeStyle=rgba(theme.w1,.5); ctx.lineWidth=2; line(ctx,p[0],y0-H*0.2,p[0],y0+H*0.2); }
+      dot(ctx,p[0],p[1],i===gold?9:6.5,i===gold?theme.mom:theme.w1,theme.plot,1.5); }
+    text(ctx,'Erreger',P[0][0]-4,P[0][1]-16,{align:'left',size:12,color:theme.accent,halo:theme.plot});
+    // Pfeile
+    if(showArrows.get()){
+      const ay=H-22; arrow(ctx,X(L*0.62),ay,X(L*0.92),ay,theme.ink,2,9); text(ctx,'Ausbreitungsrichtung',X(L*0.62)-8,ay+5,{align:'right',size:13});
+      const gx=X(gold*SP);
+      if(type==='trans') { arrow(ctx,gx+22,y0-34,gx+22,y0+34,theme.mom,2.5,8,true); text(ctx,'Schwingungsrichtung',gx+30,y0-26,{size:12.5,color:theme.mom,halo:theme.plot}); }
+      else if(type==='long'){ arrow(ctx,gx-26,y0-H*0.26,gx+26,y0-H*0.26,theme.mom,2.5,8,true); text(ctx,'Schwingungsrichtung',gx,y0-H*0.26-10,{align:'center',size:12.5,color:theme.mom,halo:theme.plot}); }
+      else { ctx.strokeStyle=theme.mom; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(gx,y0-36,13,-.3,4.6); ctx.stroke(); text(ctx,'Kreisbahn',gx+20,y0-44,{size:12.5,color:theme.mom,halo:theme.plot}); }
+    }
+    // Dichte-Streifen bei Längswelle
+    if(type==='long'){
+      const sy=y0+H*0.24, sh=Math.min(26,H*0.08);
+      for(let i=0;i<N-1;i++){ const d=(P[i+1][0]-P[i][0])/(SP*s); const v=clamp((1-d)*2.2,-1,1);
+        ctx.fillStyle= v>0? rgba(theme.w1,.15+.75*v) : rgba(theme.w1,.15*(1+v)); ctx.fillRect(P[i][0],sy,P[i+1][0]-P[i][0]+.5,sh); }
+      ctx.strokeStyle=theme.line; ctx.strokeRect(X(0),sy,X(L)-X(0),sh);
+      text(ctx,'Dichte: dunkel = Verdichtung, hell = Verdünnung',X(0),sy+sh+15,{size:12,w:'400',color:theme.muted});
+    }
+    cv.status('t = '+nf(t,1)+' s');
+    setRead(m.rd,[['Ausbreitungsgeschw. c',nf(c(),1)+' m/s'],['Weg der Front',nf(Math.min(xf,L),2)+' m'],['goldenes Teilchen: Ruhelage',nf(gold*SP,1)+' m']],
+      mode==='puls'&&t>L/c()+1.2 ? 'Die Störung ist durchgelaufen: Alle Teilchen sind wieder an ihrer Ruhelage. Energie wurde transportiert, Materie nicht.' : '');
+  };
+  m.info=`<h2>AB 01 · Was ist eine Welle?</h2>
+  <p>Die Teilchen sind durch Federn gekoppelt. Wird das erste Teilchen (Erreger) ausgelenkt, zieht es seinen Nachbarn mit, der den nächsten usw. Wegen der Trägheit geschieht das <b>zeitlich verzögert</b>: Die Störung wandert mit der Geschwindigkeit c nach rechts.</p>
+  <ul><li><b>Transversalwelle</b>: Teilchen schwingen quer zur Ausbreitungsrichtung (Seil).</li>
+  <li><b>Longitudinalwelle</b>: Teilchen schwingen längs der Ausbreitungsrichtung. Es entstehen Verdichtungen und Verdünnungen (Schall).</li>
+  <li><b>Wasserwelle</b>: Die Teilchen bewegen sich auf Kreisbahnen, eine Mischung aus Quer- und Längsbewegung.</li></ul>
+  <p>Jedes Teilchen kehrt zu seiner Ruhelage zurück: Eine Welle transportiert <b>Energie</b>, aber keine Materie. Je stärker die Kopplung, desto größer ist c (im Modell vereinfacht: gleiche Masse aller Teilchen).</p>`;
+  return m;
+})());
+
+/* ================= AB 02: λ, f, c ================= */
+defMod((()=>{
+  const m={id:'02',short:'c = λ·f',title:'Harmonische Welle: λ, T, f und c',
+    lead:'Der Erreger links schwingt harmonisch. Die Frequenz kommt vom Erreger, die Geschwindigkeit vom Medium. Daraus ergibt sich die Wellenlänge.'};
+  let t=0, f=0.5, c=0.8, sp=null, pendel=false, x1=1.2;
+  let cv, cv2, tl, tx, tsnap, fS, cS;
+  const L=6.4, A=0.5;
+  const lam=()=>c/f, T=()=>1/f;
+  const y=(x,tt)=> tt-x/c>0 ? A*Math.sin(TAU*f*(tt-x/c)) : 0;
+  m.restart=()=>{t=0;};
+  m.build=(side,stage)=>{
+    fS=slider({label:'Frequenz <i>f</i> des Erregers',min:0.1,max:4,step:0.05,value:f,fmt:v=>nf(v,2)+' Hz',oninput:v=>{f=v;pendel=false;sp=null;m.tb.clearAct();}});
+    cS=slider({label:'Ausbreitungsgeschwindigkeit <i>c</i> (Medium)',min:0.2,max:2,step:0.05,value:c,fmt:v=>nf(v,2)+' m/s',oninput:v=>{c=v;pendel=false;sp=null;m.tb.clearAct();}});
+    tl=tog({label:'λ messen',color:'var(--kb)',value:true});
+    tx=tog({label:'x₁ und x₂ = x₁ + λ',color:'var(--mom)',value:true});
+    tsnap=tog({label:'Momentaufnahmen',color:'var(--w1)',value:false,onchange:v=>{cvS.box.hidden=!v;}});
+    side.append(fS.el,cS.el,grp('Werkzeuge',el('div',{class:'togs'},tl.el,tx.el,tsnap.el)));
+    m.rd=readout(); side.append(m.rd);
+    m.tb=taskBox('02',[
+      'Erhöhe nur <i>f</i>. Was passiert mit λ? Erhöhe nur <i>c</i>. Was passiert mit λ?',
+      'Beobachte x₁ und x₂: In der Zeit T läuft die Welle genau um λ weiter. Daraus folgt c = λ/T = λ·f.',
+      'Tippe in die Kette, um x₁ zu verschieben. Sind die Punkte x₁ und x₂ immer im gleichen Schwingungszustand?'],[
+      {label:'Übung 2 (12 Schw. in 3 s)',title:'f = 4 Hz, c = 1,2 m/s',run:()=>{pendel=false;sp=null;fS.set(4,true);cS.set(1.2,true);f=4;c=1.2;m.restart();}},
+      {label:'Übung 3 (Pendelkette)',title:'Pendel im Abstand 0,4 m, nacheinander alle 0,5 s angestoßen',run:()=>{fS.set(0.5,true);cS.set(0.8,true);f=0.5;c=0.8;sp=0.4;pendel=true;x1=0.4;m.restart();}}]);
+    side.append(m.tb, el('p',{class:'note',html:'Übung 1 (Dünung: λ = 60 m, f = ⅙ Hz) passt nicht auf den Bildschirm. Gleiches Prinzip: c = 60 m · ⅙ Hz = 10 m/s.'}));
+    cv=mkCanvas('Momentbild der Welle (y-x)'); cv.box.classList.add('grow'); stage.append(cv.box);
+    const cvS=mkCanvas('Momentaufnahmen im Abstand T/4'); cvS.box.classList.add('grow'); cvS.box.hidden=true; stage.append(cvS.box); m.cvS=cvS;
+    cv2=mkCanvas('Schwingung des Teilchens bei x₁ (y-t)'); cv2.wrap.style.minHeight='120px'; cv2.box.style.flex='0 0 150px'; stage.append(cv2.box);
+    onDrag(cv,{down:(px)=>{ const x=(px-m.ox)/m.s; x1=clamp(x,0.05,L-lam()-0.01); if(pendel) x1=Math.max(0.4,Math.round(x1/0.4)*0.4); return true; },move:(px)=>{ const x=(px-m.ox)/m.s; x1=clamp(x,0.05,Math.max(0.06,L-lam()-0.01)); if(pendel) x1=Math.max(0.4,Math.round(x1/0.4)*0.4);}});
+  };
+  m.frame=(dt)=>{
+    t+=dt;
+    const lm=lam();
+    const ctx=cv.begin(), W=cv.w, H=cv.h; const pad=36, s=(W-2*pad)/L; m.s=s; m.ox=pad;
+    const y0=H*0.55, ys=Math.min(H*0.3/A, s);
+    const X=x=>pad+x*s, Y=v=>y0-v*ys;
+    // Achse
+    ctx.strokeStyle=theme.grid; ctx.lineWidth=1;
+    for(let x=0;x<=L+1e-9;x+=0.5){ line(ctx,X(x),y0-H*0.38,X(x),y0+H*0.36); }
+    ctx.strokeStyle=theme.axis; line(ctx,X(0),y0,X(L),y0);
+    for(let x=0;x<=L+1e-9;x+=1) text(ctx,nf(x,0)+' m',X(x),y0+H*0.36+14,{align:'center',size:11.5,w:'400',color:theme.muted});
+    const step= sp|| clamp(lm/10,0.04,0.2);
+    if(pendel){ // Pendel zeichnen
+      ctx.strokeStyle=theme.axis; ctx.lineWidth=3; line(ctx,X(0)-10,y0-H*0.38,X(L),y0-H*0.38);
+    }
+    // Linie
+    ctx.strokeStyle=rgba(theme.w1,.55); ctx.lineWidth=2; curve(ctx,x=>y(x,t),0,L,X,Y,600);
+    for(let x=0;x<=L+1e-9;x+=step){ const v=y(x,t);
+      if(pendel){ ctx.strokeStyle=theme.axis; ctx.lineWidth=1.5; line(ctx,X(x),y0-H*0.38,X(x),Y(v)); }
+      dot(ctx,X(x),Y(v),pendel?9:4.5,x===0?theme.accent:theme.w1); }
+    // Front
+    const xf=c*t; if(xf<L){ ctx.strokeStyle=theme.muted; ctx.setLineDash([3,4]); line(ctx,X(xf),y0-H*0.3,X(xf),y0+H*0.3); ctx.setLineDash([]); }
+    // λ messen: zwei benachbarte Wellenberge
+    if(tl.get()){
+      // Berge bei x = c(t - T/4 - kT)
+      const ks=[]; for(let k=0;k<200;k++){ const x=c*(t-T()/4-k*T()); if(x<0) break; if(x<=L) ks.push(x); }
+      if(ks.length>=2){ // nimm die zwei der Mitte nächsten
+        ks.sort((a,b)=>Math.abs(a-L/2)-Math.abs(b-L/2)); let a=ks[0]; let b=ks.find(x=>Math.abs(Math.abs(x-a)-lm)<1e-6); if(b==null) b=ks[1];
+        const xa=Math.min(a,b),xb=Math.max(a,b);
+        ctx.strokeStyle=rgba(theme.kb,.5); ctx.setLineDash([3,3]); line(ctx,X(xa),Y(A),X(xa),Y(A)-26); line(ctx,X(xb),Y(A),X(xb),Y(A)-26); ctx.setLineDash([]);
+        measure(ctx,X(xa),Y(A)-22,X(xb),Y(A)-22,'λ = '+len(lm),theme.kb,1);
+      }
+    }
+    // x1, x2
+    let xx1=x1; if(xx1+lm>L) xx1=Math.max(0.05,L-lm-0.01);
+    if(tx.get()){
+      for(const [x,lb] of [[xx1,'x₁'],[xx1+lm,'x₂']]) if(x<=L){ const v=y(x,t); ctx.strokeStyle=rgba(theme.mom,.6); ctx.setLineDash([2,3]); line(ctx,X(x),y0+H*0.32,X(x),Y(v)); ctx.setLineDash([]); dot(ctx,X(x),Y(v),8,theme.mom,theme.plot,2); text(ctx,lb,X(x),y0+H*0.32+2,{align:'center',size:13,color:theme.mom,base:'top'}); }
+    }
+    cv.status('t = '+nf(t,2)+' s');
+    // y-t des Teilchens x1
+    const c2=cv2.begin(), W2=cv2.w, H2=cv2.h; const span=3*T(); const t0=Math.max(0,t-span);
+    const ax=axes(c2,{x:44,y:12,w:W2-60,h:H2-34},[t0,t0+span],[-A*1.25,A*1.25],{xl:'t in s',yl:'y',noLabels:false,ny:2,xfmt:v=>nf(v,1),yfmt:v=>nf(v,1)});
+    c2.strokeStyle=theme.mom; c2.lineWidth=2.5; curve(c2,tt=>y(xx1,tt),t0,t,ax.X,ax.Y,300);
+    if(tx.get() && xx1+lm<=L){ c2.strokeStyle=rgba(theme.mom,.45); c2.setLineDash([5,4]); c2.lineWidth=1.5; curve(c2,tt=>y(xx1+lm,tt),t0,t,ax.X,ax.Y,300); c2.setLineDash([]); }
+    // T markieren (zwei Maxima)
+    if(tl.get()){ const tm=[]; for(let k=0;k<1000;k++){ const tt=xx1/c+T()/4+k*T(); if(tt>t) break; if(tt>=t0) tm.push(tt);} if(tm.length>=2){ const a=tm[tm.length-2],b=tm[tm.length-1]; measure(c2,ax.X(a),ax.Y(A)-4,ax.X(b),ax.Y(A)-4,'T = '+nfs(T(),3)+' s',theme.kb,1);} }
+    cv2.status('gestrichelt: Teilchen bei x₂');
+    setRead(m.rd,[['Frequenz f',nf(f,2)+' Hz'],['Periodendauer T = 1/f',nfs(T(),3)+' s'],['Geschwindigkeit c',nf(c,2)+' m/s'],['Wellenlänge λ = c/f',len(lm)],['Probe: λ·f',nf(lm*f,2)+' m/s']],
+      pendel?'Pendelkette: Pendel 1 und 5 sind phasengleich → λ = 4 · 0,4 m = 1,6 m.':'');
+    // Momentaufnahmen
+    if(!m.cvS.box.hidden){
+      const c3=m.cvS.begin(),W3=m.cvS.w,H3=m.cvS.h; const rows=9, rh=(H3-20)/rows; const X3=x=>pad+x*(W3-2*pad)/L;
+      c3.font='12px sans-serif';
+      for(let k=0;k<rows;k++){ const tt=k*T()/4, yc=10+rh*(k+.5); const sc=rh*0.42/A;
+        c3.strokeStyle=theme.grid; c3.lineWidth=1; line(c3,X3(0),yc,X3(L),yc);
+        c3.strokeStyle=theme.w1; c3.lineWidth=1.8; c3.beginPath(); for(let i=0;i<=400;i++){const x=L*i/400; const v=y(x,tt); i?c3.lineTo(X3(x),yc-v*sc):c3.moveTo(X3(x),yc-v*sc);} c3.stroke();
+        text(c3, 't = '+['0','T/4','T/2','3T/4','T','5T/4','3T/2','7T/4','2T'][k],4,yc+4,{size:11.5,color:theme.muted,w:'400'}); }
+      c3.strokeStyle=theme.kb; c3.lineWidth=2; c3.setLineDash([5,4]); line(c3,X3(0),10+rh*.5,X3(Math.min(L,c*2*T())),10+rh*8.5); c3.setLineDash([]);
+      if(lm<=L) { measure(c3,X3(0),10+rh*4.5-rh*0.42,X3(lm),10+rh*4.5-rh*0.42,'λ (nach T)',theme.kb,-1); }
+      m.cvS.status('violett: Weg der Front, Steigung c = λ/T');
+    }
+  };
+  m.info=`<h2>AB 02 · Harmonische Wellen</h2>
+  <p>Der Erreger schwingt harmonisch mit der Frequenz f. Jedes Teilchen der Kette übernimmt diese Schwingung etwas später, mit <b>gleicher Frequenz und Amplitude</b>. Der Schwingungszustand (die Phase) hängt vom Ort ab.</p>
+  <p><b>Wellenlänge λ</b>: Abstand zweier benachbarter Teilchen im gleichen Schwingungszustand, z. B. von Berg zu Berg. In der Zeit T (eine Schwingung des Erregers) läuft die Welle genau um λ weiter. Deshalb gilt <b>c = λ/T = λ·f</b>.</p>
+  <ul><li>λ messen (violett): Abstand zweier Berge im Momentbild, T im y-t-Diagramm darunter.</li>
+  <li>x₁ und x₂ (gold): zwei Teilchen im Abstand λ. Sie schwingen immer gleich (gestrichelte Kurve liegt genau auf der goldenen).</li>
+  <li>Momentaufnahmen: Bilder der Kette im Abstand T/4 wie auf dem Arbeitsblatt. Die violette Linie verbindet die Fronten.</li></ul>`;
+  return m;
+})());
+/* ================= AB 03: Wellengleichung ================= */
+defMod((()=>{
+  const m={id:'03',short:'y(x,t)',title:'Die Wellengleichung',
+    lead:'Eine Welle hängt von Ort <i>x</i> und Zeit <i>t</i> ab. Oben: Momentaufnahme (t fest). Unten: ein einzelner Schwinger (x fest).'};
+  let yh=5, T=2, lam=4, dir=1, ux=0.25, t=0;
+  let cvA, cvB, sY, sT, sL, sX, sTt, fb;
+  const W=()=>3*lam, TW=()=>6*T;
+  const yv=(x,tt)=> yh*Math.sin(TAU*(tt/T - dir*x/lam));
+  const xNow=()=>ux*W();
+  m.restart=()=>{t=0;};
+  function setP(p){ yh=p.yh;T=p.T;lam=p.lam; sY.set(yh,true); sT.set(T,true); sL.set(lam,true); ux=(p.x!=null?p.x/W():0.25); sX.set(ux,true); t=p.t||0; if(p.t!=null) setPlaying(false); }
+  m.build=(side,stage)=>{
+    sY=slider({label:'Amplitude <i>ŷ</i>',min:0.5,max:25,step:0.5,value:yh,fmt:v=>nf(v,1)+' cm',oninput:v=>{yh=v;m.tb.clearAct();},color:'var(--w1)'});
+    sT=slider({label:'Schwingungsdauer <i>T</i>',min:0.005,max:20,step:0.001,log:true,value:T,fmt:v=>nfs(v,3)+' s',oninput:v=>{T=v;t=Math.min(t,TW());m.tb.clearAct();},color:'var(--w1)'});
+    sL=slider({label:'Wellenlänge <i>λ</i>',min:0.02,max:10,step:0.001,log:true,value:lam,fmt:v=>len(v),oninput:v=>{lam=v;m.tb.clearAct();},color:'var(--w1)'});
+    const dS=seg([{v:'1',label:'läuft nach +x →'},{v:'-1',label:'← läuft nach −x'}],'1',v=>{dir=+v;},'full');
+    sX=slider({label:'Ort <i>x</i> des Schwingers (gold)',min:0,max:1,step:0.001,value:ux,fmt:v=>len(v*W()),oninput:v=>{ux=v;},color:'var(--mom)'});
+    sTt=slider({label:'Zeitpunkt <i>t</i> (gold)',min:0,max:1,step:0.001,value:0,fmt:v=>nfs(v*TW(),3)+' s',oninput:v=>{t=v*TW();setPlaying(false);},color:'var(--mom)'});
+    side.append(sY.el,sT.el,sL.el,grp('Richtung',dS.el),sX.el,sTt.el);
+    fb=el('div',{class:'formula'}); side.append(fb);
+    m.rd=readout(); side.append(m.rd);
+    m.tb=taskBox('03',[
+      'Ziehe den goldenen Ort <i>x</i>. Ändert sich das untere Diagramm? Wie sieht man darin, dass der Schwinger später „dran“ ist?',
+      'Prüfe die Beispielaufgabe: Welche Elongation hat der Schwinger bei x = 0,5 m zur Zeit t = 40 s?',
+      'Lies bei den Übungen T, λ und ŷ aus den Diagrammen ab und vergleiche mit deiner Rechnung.'],[
+      {label:'Beispiel',title:'λ = 0,2 m, T = 8 s, ŷ = 2 cm; x = 0,5 m, t = 40 s',run:()=>setP({yh:2,T:8,lam:0.2,x:0.5,t:40})},
+      {label:'Übung 1',title:'ŷ = 5 cm, T = 2 s, c = 2 m/s',run:()=>setP({yh:5,T:2,lam:4})},
+      {label:'Übung 2',title:'ŷ = 4 cm, T = 0,8 s, λ = 0,75 m',run:()=>setP({yh:4,T:0.8,lam:0.75})},
+      {label:'Übung 3',title:'ŷ = 0,2 m, T = 0,01 s, λ = 0,05 m',run:()=>setP({yh:20,T:0.01,lam:0.05})}]);
+    side.append(m.tb);
+    cvA=mkCanvas('y-x-Diagramm: Momentaufnahme'); cvA.box.classList.add('grow');
+    cvB=mkCanvas('y-t-Diagramm: Schwinger am Ort x'); cvB.box.classList.add('grow');
+    stage.append(cvA.box,cvB.box);
+    onDrag(cvA,{down:(px)=>{m.dragX(px);},move:(px)=>m.dragX(px)});
+    onDrag(cvB,{down:(px)=>{setPlaying(false);m.dragT(px);},move:(px)=>m.dragT(px)});
+  };
+  const pad={l:52,r:16,t:16,b:30};
+  m.dragX=px=>{ const w=cvA.w-pad.l-pad.r; ux=clamp((px-pad.l)/w,0,1); sX.set(ux,true); };
+  m.dragT=px=>{ const w=cvB.w-pad.l-pad.r; t=clamp((px-pad.l)/w,0,1)*TW(); };
+  m.frame=(dt)=>{
+    // Zeitlupe: eine Periode dauert 3 s
+    t+=dt*T/3; if(t>TW()) t-=TW();
+    sTt.set(t/TW(),true);
+    const x=xNow(), y=yv(x,t);
+    // y-x
+    let ctx=cvA.begin(); let box={x:pad.l,y:pad.t,w:cvA.w-pad.l-pad.r,h:cvA.h-pad.t-pad.b};
+    let ax=axes(ctx,box,[0,W()],[-yh*1.3,yh*1.3],{xl:'x in m',yl:'y in cm',ny:2});
+    ctx.strokeStyle=theme.w1; ctx.lineWidth=2.5; curve(ctx,xx=>yv(xx,t),0,W(),ax.X,ax.Y,600);
+    ctx.strokeStyle=theme.mom; ctx.lineWidth=2; ctx.setLineDash([4,4]); line(ctx,ax.X(x),box.y,ax.X(x),box.y+box.h); ctx.setLineDash([]);
+    dot(ctx,ax.X(x),ax.Y(y),7,theme.mom,theme.plot,2);
+    measure(ctx,ax.X(0),ax.Y(-yh*1.16),ax.X(lam),ax.Y(-yh*1.16),'λ',theme.kb,-1);
+    const ar=dir>0?[0.72,0.86]:[0.86,0.72]; arrow(ctx,box.x+box.w*ar[0],box.y+12,box.x+box.w*ar[1],box.y+12,theme.w1,2,8); text(ctx,'c = '+nfs(lam/T,3)+' m/s',box.x+box.w*0.7,box.y+16,{align:'right',size:13,color:theme.w1,halo:theme.plot});
+    cvA.title('y-x-Diagramm: Momentaufnahme bei <span style="color:var(--mom)">t = '+nfs(t,3)+' s</span>');
+    cvA.status('');
+    // y-t
+    ctx=cvB.begin(); box={x:pad.l,y:pad.t,w:cvB.w-pad.l-pad.r,h:cvB.h-pad.t-pad.b};
+    ax=axes(ctx,box,[0,TW()],[-yh*1.3,yh*1.3],{xl:'t in s',yl:'y in cm',ny:2});
+    ctx.strokeStyle=rgba(theme.w1,.35); ctx.lineWidth=1.5; ctx.setLineDash([4,4]); curve(ctx,tt=>yv(0,tt),0,TW(),ax.X,ax.Y,600); ctx.setLineDash([]);
+    ctx.strokeStyle=theme.mom; ctx.lineWidth=2.5; curve(ctx,tt=>yv(x,tt),0,TW(),ax.X,ax.Y,600);
+    ctx.strokeStyle=theme.mom; ctx.lineWidth=2; ctx.setLineDash([4,4]); line(ctx,ax.X(t),box.y,ax.X(t),box.y+box.h); ctx.setLineDash([]);
+    dot(ctx,ax.X(t),ax.Y(y),7,theme.mom,theme.plot,2);
+    measure(ctx,ax.X(0),ax.Y(-yh*1.16),ax.X(T),ax.Y(-yh*1.16),'T',theme.kb,-1);
+    cvB.title('y-t-Diagramm: Schwinger am Ort <span style="color:var(--mom)">x = '+len(x)+'</span>');
+    cvB.status('blass: Schwinger bei x = 0');
+    // Formel
+    const sgn=dir>0?'−':'+';
+    const ph=t/T - dir*x/lam;
+    fb.innerHTML=`<i>y</i>(<i>x</i>,<i>t</i>) = <i>ŷ</i> · sin(2π(<i>t</i>/<i>T</i> ${sgn} <i>x</i>/<i>λ</i>))<br>
+      = ${nf(yh,1)} cm · sin(2π(<span class="v">${nfs(t,3)} s</span>/${nfs(T,3)} s ${sgn} <span class="v">${nfs(x,3)} m</span>/${nfs(lam,3)} m))<br>
+      = ${nf(yh,1)} cm · sin(2π · ${nf(ph,3)}) = <b class="v">${nf(y,2)} cm</b>`;
+    const om=TAU/T;
+    setRead(m.rd,[['Frequenz f = 1/T',freq(1/T)],['Geschwindigkeit c = λ/T',nfs(lam/T,3)+' m/s'],['Kreisfrequenz ω = 2π/T',nfs(om,3)+' 1/s'],['max. Schnelle v = ŷ·ω',nfs(yh/100*om,4)+' m/s']],
+      'Zeit läuft in '+(T/3>1.05?'Zeitraffer':T/3<0.95?'Zeitlupe':'Echtzeit')+' (eine Periode = 3 s)'+(T<0.1?': Faktor 1 : '+nfs(3/T,2):''));
+  };
+  m.info=`<h2>AB 03 · Die Wellengleichung</h2>
+  <p>Der Schwinger bei x = 0 schwingt mit y = ŷ·sin(2π·t/T). Ein Schwinger am Ort x erreicht denselben Zustand um Δt = x/c später. Mit c = λ/T ergibt sich</p>
+  <p style="font:17px Georgia,serif;text-align:center">y(x,t) = ŷ · sin(2π(t/T − x/λ))</p>
+  <ul><li><b>y-x-Diagramm</b> (oben): Momentaufnahme bei festem t. Darin liest man λ ab.</li>
+  <li><b>y-t-Diagramm</b> (unten): Bewegung eines Schwingers bei festem x. Darin liest man T ab.</li>
+  <li>Gold: Der gewählte Ort x und der gewählte Zeitpunkt t gehören zusammen. Der goldene Punkt hat in beiden Diagrammen dieselbe Auslenkung, sie steht unten in der Formel.</li>
+  <li>Bei Ausbreitung in −x-Richtung wird aus „−“ ein „+“.</li></ul>`;
+  return m;
+})());
+
+/* ================= AB 04: Überlagerung I ================= */
+defMod((()=>{
+  const m={id:'04',short:'Überlagerung',title:'Überlagerung von Wellen',
+    lead:'Zwei Wellen laufen auf einem Seil aufeinander zu. Wo sie sich treffen, werden die Auslenkungen addiert (mit Vorzeichen).'};
+  const L=10, c=1, TEND=7.5, TZ=14;
+  let t=0, A1=1, A2=1, w=1.6, fall='bb', xm=5;
+  let cv, sA1, sA2, sW, sT, tw, ts, tm, fS;
+  const g=(xi)=> Math.abs(xi)<w/2 ? Math.cos(Math.PI*xi/w) : 0;
+  const lamZ=1.6;
+  function y1(x,tt){ if(fall==='zug'){ return x<c*tt ? A1*Math.sin(TAU*(c*tt-x)/lamZ) : 0; } return A1*g(x-(2+c*tt)); }
+  function y2(x,tt){ if(fall==='zug'){ return (L-x)<c*tt ? A2*Math.sin(TAU*(c*tt-(L-x))/lamZ) : 0; } return A2*g(x-(8-c*tt)); }
+  m.restart=()=>{t=0;};
+  function setFall(v){ fall=v; if(v==='bb'){A1=1;A2=1;} if(v==='bt'){A1=1;A2=-1;} if(v==='un'){A1=1;A2=0.5;} if(v==='zug'){A1=0.6;A2=0.6;} sA1.set(A1,true); sA2.set(A2,true); m.restart(); setPlaying(true); }
+  m.build=(side,stage)=>{
+    fS=seg([{v:'bb',label:'Berg + Berg'},{v:'bt',label:'Berg + Tal'},{v:'un',label:'ungleich'},{v:'zug',label:'Wellenzüge'}],fall,setFall,'full');
+    sA1=slider({label:'Amplitude Welle 1 (→)',min:-1,max:1,step:0.05,value:A1,fmt:v=>nf(v,2),color:'var(--w1)',oninput:v=>{A1=v;}});
+    sA2=slider({label:'Amplitude Welle 2 (←)',min:-1,max:1,step:0.05,value:A2,fmt:v=>nf(v,2),color:'var(--w2)',oninput:v=>{A2=v;}});
+    sW=slider({label:'Breite der Pulse',min:0.6,max:3,step:0.1,value:w,fmt:v=>nf(v,1)+' m',oninput:v=>{w=v;}});
+    sT=slider({label:'Zeitpunkt <i>t</i> (gold)',min:0,max:TZ,step:0.01,value:0,fmt:v=>nf(v,2)+' s',color:'var(--mom)',oninput:v=>{t=v;setPlaying(false);}});
+    tw=tog({label:'Teilwellen',color:'var(--w1)',value:true}); ts=tog({label:'Summe',color:'var(--ink)',value:true}); tm=tog({label:'Messpunkt',color:'var(--mom)',value:true});
+    side.append(grp('Fall',fS.el),sA1.el,sA2.el,sW.el,sT.el,grp('Anzeigen',el('div',{class:'togs'},tw.el,ts.el,tm.el)));
+    m.rd=readout(); side.append(m.rd);
+    side.append(taskBox('04',[
+      'Berg + Berg: Stoppe genau beim Treffen. Wie groß ist die Elongation? (Lückentext: „…-fache Elongation“)',
+      'Berg + Tal: Was siehst du im Moment der Begegnung? Ist die Energie verschwunden? Spiel weiter!',
+      'Laufen die Wellen nach dem Treffen ungestört weiter?',
+      'Ziehe den goldenen Messpunkt: Gilt immer y = y₁ + y₂ (mit Vorzeichen)?'],[
+      {label:'Treffpunkt Berg + Berg',run:()=>{fS.set('bb');t=3;setPlaying(false);}},
+      {label:'Treffpunkt Berg + Tal',run:()=>{fS.set('bt');t=3;setPlaying(false);}}]));
+    cv=mkCanvas('Seil (Momentaufnahme)'); cv.box.classList.add('grow'); stage.append(cv.box);
+    onDrag(cv,{down:(px)=>{xm=clamp((px-m.ox)/m.s,0,L);},move:(px)=>{xm=clamp((px-m.ox)/m.s,0,L);}});
+  };
+  m.frame=(dt)=>{
+    t+=dt; if(fall==='zug'){ if(t>TZ) t=TZ; } else if(t>TEND) t=0; sT.set(t,true);
+    const ctx=cv.begin(), W=cv.w, H=cv.h, pad=30, s=(W-2*pad)/L; m.s=s; m.ox=pad;
+    const y0=H*0.55, ys=H*0.2;
+    const X=x=>pad+x*s, Y=v=>y0-v*ys;
+    ctx.strokeStyle=theme.grid; ctx.lineWidth=1; for(let x=0;x<=L;x++){ line(ctx,X(x),y0-H*0.45,X(x),y0+H*0.4); text(ctx,x+' m',X(x),y0+H*0.4+14,{align:'center',size:11,w:'400',color:theme.muted}); }
+    ctx.strokeStyle=theme.axis; line(ctx,X(0),y0,X(L),y0);
+    for(const v of [-2,-1,1,2]){ ctx.strokeStyle=theme.grid; ctx.setLineDash([2,4]); line(ctx,X(0),Y(v),X(L),Y(v)); ctx.setLineDash([]); text(ctx,(v>0?'+':'−')+Math.abs(v)+'ŷ',X(0)-4,Y(v)+4,{align:'right',size:11,w:'400',color:theme.muted}); }
+    if(tw.get()){ ctx.lineWidth=2.2; ctx.strokeStyle=theme.w1; curve(ctx,x=>y1(x,t),0,L,X,Y,800); ctx.strokeStyle=theme.w2; curve(ctx,x=>y2(x,t),0,L,X,Y,800);
+      if(fall!=='zug'){ const p1=2+c*t, p2=8-c*t; if(p1<L) { arrow(ctx,X(p1)-18,Y(Math.max(A1,0))-16,X(p1)+18,Y(Math.max(A1,0))-16,theme.w1,2,7); } if(p2>0) arrow(ctx,X(p2)+18,Y(Math.max(A2,0))-16,X(p2)-18,Y(Math.max(A2,0))-16,theme.w2,2,7); } }
+    if(ts.get()){ ctx.lineWidth=4; ctx.strokeStyle=theme.sum; ctx.lineJoin='round'; curve(ctx,x=>y1(x,t)+y2(x,t),0,L,X,Y,800); }
+    let res='';
+    const v1=y1(xm,t), v2=y2(xm,t);
+    if(tm.get()){ ctx.strokeStyle=theme.mom; ctx.lineWidth=1.5; ctx.setLineDash([4,4]); line(ctx,X(xm),y0-H*0.45,X(xm),y0+H*0.4); ctx.setLineDash([]);
+      if(tw.get()){ dot(ctx,X(xm),Y(v1),5,theme.w1); dot(ctx,X(xm),Y(v2),5,theme.w2);} dot(ctx,X(xm),Y(v1+v2),7,theme.mom,theme.plot,2); }
+    if(fall!=='zug' && Math.abs(t-3)<0.06){ const s0=A1+A2; res= Math.abs(s0)<0.03?'Auslöschung: Berg und Tal heben sich in diesem Moment auf.': (Math.abs(A1-A2)<0.01?'Berg auf Berg: doppelte Elongation.':'Größte Überlagerung: ŷ = '+nf(A1,2)+' + ('+nf(A2,2)+') = '+nf(s0,2)); }
+    cv.status('t = '+nf(t,2)+' s · ziehen: Messpunkt verschieben');
+    setRead(m.rd,[['Messpunkt x',nf(xm,2)+' m'],['<span style="color:var(--w1)">y₁</span>',nf(v1,2)+' ŷ'],['<span style="color:var(--w2)">y₂</span>',nf(v2,2)+' ŷ'],['y = y₁ + y₂',nf(v1+v2,2)+' ŷ']],res, res.startsWith('Ausl')?'des':res?'con':'');
+  };
+  m.info=`<h2>AB 04 · Überlagerung von Wellen</h2>
+  <p><b>Superpositionsprinzip</b>: Treffen Wellen aufeinander, addieren sich ihre Auslenkungen an jedem Ort und zu jedem Zeitpunkt, mit Vorzeichen: y = y₁ + y₂. Danach laufen beide Wellen ungestört weiter.</p>
+  <ul><li>Berg + Berg: kurzzeitig doppelte Elongation (konstruktiv).</li>
+  <li>Berg + Tal (gleich groß): kurzzeitig Auslöschung (destruktiv). Die Energie ist dabei nicht weg, sie steckt in der Bewegung des Seils. Deshalb geht es danach weiter.</li>
+  <li>Wellenzüge: Zwei gleiche Wellen laufen gegeneinander. Es entsteht ein Muster mit Stellen, die immer in Ruhe sind. Mehr dazu bei AB 07 (stehende Wellen).</li></ul>`;
+  return m;
+})());
+/* ================= AB 05: Zwei Quellen (Interferenz) ================= */
+defMod((()=>{
+  const m={id:'05',short:'Zwei Quellen',title:'Zwei Kreiswellen: Interferenz',
+    lead:'Zwei Quellen schwingen im Gleichtakt (kohärent). Starte die Wellen und lass die Schnittpunkte Spuren ziehen: Es entstehen Interferenzhyperbeln.'};
+  const C=340, PER=1.2; // Schall in Luft; eine Periode dauert 1,2 s (Zeitlupe)
+  let lam=0.34, d=0.70, tau=0, view='lines', q1=true, q2=true, spk=false;
+  let P=null; let s=150, VW=4, VH=3, xm=1.3;
+  let cv, cvP, field=makeField(), dirty=true, spur=document.createElement('canvas'), spurCtx=spur.getContext('2d'), spurKey='';
+  let tSpMax,tSpMin,tHyp,tAng,tWay,vS,sL,sD,tQ1,tQ2;
+  const Q=()=>[[xm,-d/2],[xm,d/2]];
+  m.restart=()=>{tau=0; clearSpur();};
+  function clearSpur(){ spurCtx.setTransform(1,0,0,1,0,0); spurCtx.clearRect(0,0,spur.width,spur.height); }
+  function changed(){ dirty=true; clearSpur(); }
+  m.build=(side,stage)=>{
+    tQ1=tog({label:'Q₁',sub:'oben',color:'var(--w1)',value:true,big:true,onchange:v=>{q1=v;changed();}});
+    tQ2=tog({label:'Q₂',sub:'unten',color:'var(--w2)',value:true,big:true,onchange:v=>{q2=v;changed();}});
+    sL=slider({label:'Wellenlänge <i>λ</i>',min:0.1,max:1,step:0.01,value:lam,fmt:v=>nf(v,2)+' m <span style="color:var(--muted);font-weight:400">(f = '+nfs(C/v,3)+' Hz)</span>',oninput:v=>{lam=v;changed();m.tb.clearAct();}});
+    sD=slider({label:'Abstand der Quellen <i>d</i>',min:0,max:2,step:0.01,value:d,fmt:v=>nf(v,2)+' m',oninput:v=>{d=v;changed();m.tb.clearAct();}});
+    vS=seg([{v:'lines',label:'Berge/Täler',title:'Kreise: durchgezogen = Berg, gestrichelt = Tal'},{v:'field',label:'Wellenwanne'},{v:'int',label:'Lautstärke',title:'Zeitliches Mittel: hell = laut, dunkel = still'}],view,v=>{view=v;},'full');
+    tSpMax=tog({label:'Spur Maxima',sub:'Berg auf Berg, Tal auf Tal',color:'var(--con)',value:true});
+    tSpMin=tog({label:'Spur Minima',sub:'Berg auf Tal',color:'var(--des)',value:false});
+    const clr=el('button',{class:'btn',type:'button',html:'Spur löschen',onclick:clearSpur});
+    tHyp=tog({label:'Hyperbeln (Rechnung)',color:'var(--con)',line:'solid',value:false});
+    tAng=tog({label:'Winkel α',color:'var(--kb)',value:false});
+    tWay=tog({label:'Wege zu P, Δs',color:'var(--kb)',value:true});
+    side.append(grp('Quellen',el('div',{class:'row'},tQ1.el,tQ2.el)),sL.el,sD.el,grp('Darstellung',vS.el),
+      grp('Punktspuren der Schnittpunkte',el('div',{class:'togs'},tSpMax.el,tSpMin.el,clr)),
+      grp('Hilfen',el('div',{class:'togs'},tHyp.el,tAng.el,tWay.el)));
+    m.rd=readout(); side.append(el('div',{class:'grp'},el('span',{class:'lbl',html:'Punkt P (gold): antippen oder ziehen'}),m.rd));
+    m.tb=taskBox('05',[
+      'Aufgabe 1: Starte mit „Berge/Täler“ und Spur Maxima. Verbinde gedanklich die Schnittpunkte: Welche Kurven entstehen?',
+      'Aufgabe 2: Warum ist auf der Symmetrieachse (α = 0°) immer ein Maximum? Prüfe Δs mit P.',
+      'Aufgabe 3: Schalte „Winkel α“ ein. Vergleiche mit sin α = n·λ/d.',
+      'Aufgabe 4: Lautsprecher. Verschiebe das Mikrofon P parallel zu den Lautsprechern (nach oben/unten). Was hörst du?'],[
+      {label:'Aufgabe 1: Wellenbild',run:()=>{spk=false;sL.set(0.34,true);lam=0.34;sD.set(0.7,true);d=0.7;vS.set('lines');tSpMax.set(true);tSpMin.set(true);tHyp.set(false);changed();m.restart();setPlaying(true);}},
+      {label:'Aufgabe 4: Lautsprecher',title:'s = 70 cm, Mikrofon 1,40 m vor L₁, c = 340 m/s, f = 1 kHz',run:()=>{spk=true;lam=0.34;d=0.7;sL.set(lam,true);sD.set(d,true);changed();P=[xm+1.40,-d/2];vS.set('int');tWay.set(true);}},
+      {label:'Aufgabe 4f: Winkel der Maxima',run:()=>{spk=true;lam=0.34;d=0.7;sL.set(lam,true);sD.set(d,true);changed();tAng.set(true);tHyp.set(true);vS.set('int');}}]);
+    side.append(m.tb);
+    cv=mkCanvas('Wellenfeld'); cv.box.classList.add('grow'); stage.append(cv.box);
+    cvP=mkCanvas('Schwingung im Punkt P'); cvP.box.style.flex='0 0 140px'; stage.append(cvP.box);
+    onDrag(cv,{down:(px,py)=>{P=[px/s,(py-cv.h/2)/s];},move:(px,py)=>{P=[clamp(px/s,0,VW),clamp((py-cv.h/2)/s,-VH/2,VH/2)];}});
+  };
+  m.enter=()=>{dirty=true;};
+  const ys=(y)=>y*s+cv.h/2, xs=x=>x*s;
+  function lines(ctx){
+    const R=tau*lam; const srcs=Q(); const on=[q1,q2]; const cols=[theme.w1,theme.w2];
+    for(let qi=0;qi<2;qi++){ if(!on[qi]) continue; const [qx,qy]=srcs[qi];
+      ctx.strokeStyle=cols[qi];
+      for(let k=0;;k++){ const rc=lam*(tau-0.25-k), rt=lam*(tau-0.75-k); if(rc<=0&&rt<=0) break;
+        if(rc>0){ ctx.lineWidth=2; ctx.setLineDash([]); ctx.beginPath(); ctx.arc(xs(qx),ys(qy),rc*s,0,TAU); ctx.stroke(); }
+        if(rt>0){ ctx.lineWidth=1.4; ctx.setLineDash([6,5]); ctx.beginPath(); ctx.arc(xs(qx),ys(qy),rt*s,0,TAU); ctx.stroke(); } }
+      ctx.setLineDash([2,4]); ctx.lineWidth=1; ctx.globalAlpha=.5; ctx.beginPath(); ctx.arc(xs(qx),ys(qy),R*s,0,TAU); ctx.stroke(); ctx.globalAlpha=1; ctx.setLineDash([]);
+    }
+  }
+  function addSpur(){
+    if(!(q1&&q2) || d<=0) return;
+    const doMax=tSpMax.get(), doMin=tSpMin.get(); if(!doMax&&!doMin) return;
+    const ringsOf=()=>{ const out=[]; for(let k=0;;k++){ const rc=lam*(tau-0.25-k), rt=lam*(tau-0.75-k); if(rc<=0&&rt<=0) break; if(rc>0) out.push([rc,0]); if(rt>0) out.push([rt,1]); } return out; };
+    const A=ringsOf(); const [Q1,Q2]=Q();
+    spurCtx.setTransform(cv.dpr,0,0,cv.dpr,0,0);
+    const cMax=theme.con, cMin=theme.des;
+    for(const [r1,p1] of A) for(const [r2,p2] of A){
+      const same=p1===p2; if(same&&!doMax) continue; if(!same&&!doMin) continue;
+      if(r1+r2<d || Math.abs(r1-r2)>d) continue;
+      // Schnitt: Quellen auf vertikaler Linie, Q1 oben (y=-d/2)
+      const u=(r1*r1-r2*r2)/(2*d); // Abstand von der Mitte Richtung Q2 (nach unten)
+      const v2=r1*r1-(u+d/2)*(u+d/2); if(v2<0) continue; const v=Math.sqrt(v2);
+      spurCtx.fillStyle=same?cMax:cMin;
+      for(const sg of [1,-1]){ const x=Q1[0]+sg*v, y=u; const px=xs(x), py=ys(y); if(px<0||py<0||px>cv.w||py>cv.h) continue; spurCtx.beginPath(); spurCtx.arc(px,py,1.8,0,TAU); spurCtx.fill(); }
+    }
+  }
+  function hyperbolas(ctx){
+    if(d<=0) return; const a0=d/2; const [Q1]=Q();
+    const draw=(D,col,dash,label)=>{ ctx.strokeStyle=col; ctx.lineWidth=2; ctx.setLineDash(dash);
+      ctx.beginPath();
+      if(Math.abs(D)<1e-9){ ctx.moveTo(0,ys(0)); ctx.lineTo(cv.w,ys(0)); }
+      else{ const a=Math.abs(D)/2; if(a>=a0){ctx.setLineDash([]);return;} const b=Math.sqrt(a0*a0-a*a); const sg=Math.sign(D);
+        for(let i=0;i<=200;i++){ const t=-4+8*i/200; const u=sg*a*Math.cosh(t), v=b*Math.sinh(t); const px=xs(Q1[0]+v), py=ys(u); i?ctx.lineTo(px,py):ctx.moveTo(px,py);} }
+      ctx.stroke(); ctx.setLineDash([]);
+      // Beschriftung am rechten Rand
+      const xr=VW-0.15-Q1[0]; let u; if(Math.abs(D)<1e-9) u=0; else { const a=Math.abs(D)/2,b=Math.sqrt(a0*a0-a*a); u=Math.sign(D)*a*Math.sqrt(1+xr*xr/(b*b)); }
+      if(Math.abs(u)<VH/2-0.05) text(ctx,label,cv.w-6,ys(u)-4,{align:'right',size:12,color:col,halo:theme.plot});
+    };
+    for(let n=-Math.floor(d/lam);n<=Math.floor(d/lam);n++){ draw(n*lam,theme.con,[],'n = '+Math.abs(n)); }
+    for(let n=-Math.floor(d/lam+0.5);n<=Math.floor(d/lam-0.5);n++){ const D=(n+0.5)*lam; if(Math.abs(D)<d) draw(D,theme.des,[7,5],''); }
+  }
+  function angles(ctx){
+    if(d<=0) return; const [cx,cy]=[xm,0]; const L=VW;
+    ctx.save(); ctx.strokeStyle=theme.kb; ctx.lineWidth=1.5; ctx.setLineDash([2,3]); line(ctx,xs(cx),ys(0),cv.w,ys(0)); ctx.setLineDash([]);
+    for(let n=1;n*lam<d;n++){ const al=Math.asin(n*lam/d);
+      for(const sg of [1,-1]){ const ex=cx+L*Math.cos(al), ey=sg*L*Math.sin(al); ctx.strokeStyle=theme.kb; ctx.lineWidth=1.5; line(ctx,xs(cx),ys(cy),xs(ex),ys(ey)); }
+      const r=0.5+0.18*n; ctx.beginPath(); ctx.arc(xs(cx),ys(cy),r*s,0,al); ctx.stroke();
+      text(ctx,'α'+['₀','₁','₂','₃','₄','₅','₆','₇','₈','₉'][Math.min(n,9)]+' = '+nf(al*180/Math.PI,1)+'°',xs(cx+(r+0.08)*Math.cos(al/2)),ys(cy+(r+0.08)*Math.sin(al/2))+4,{size:12.5,color:theme.kb,halo:theme.plot}); }
+    ctx.restore();
+  }
+  m.frame=(dt)=>{
+    tau+=dt/PER;
+    const ctx=cv.begin(); const W=cv.w,H=cv.h;
+    s=H/3.2; VH=H/s; VW=W/s; xm=Math.min(1.3,VW*0.3);
+    const key=Math.round(W)+'x'+Math.round(H)+'@'+cv.dpr;
+    if(key!==spurKey){ spur.width=Math.round(W*cv.dpr); spur.height=Math.round(H*cv.dpr); spurKey=key; dirty=true; }
+    if(!P) P=[xm+1.7,0.45];
+    if(view!=='lines'){
+      if(dirty){ const nx=Math.max(20,Math.round(W/FIELD_RES)), ny=Math.max(20,Math.round(H/FIELD_RES)); const gs=[]; const srcs=Q();
+        if(q1) gs.push({pts:[srcs[0]],ph:Math.PI/2}); if(q2) gs.push({pts:[srcs[1]],ph:Math.PI/2});
+        field.compute(nx,ny,{x0:0,y0:-VH/2,w:VW,h:VH},gs,TAU/lam); dirty=false; }
+      field.render(ctx,W,H,{mode:view,omega:TAU,t:tau,c:lam,amp:2,iscale:0.5});
+    }
+    if(view==='lines') lines(ctx);
+    if(playing&&dt>0) addSpur();
+    ctx.drawImage(spur,0,0,W,H);
+    if(tHyp.get()) hyperbolas(ctx);
+    if(tAng.get()) angles(ctx);
+    // Quellen
+    const srcs=Q(); const on=[q1,q2], cols=[theme.w1,theme.w2], nm=spk?['L₁','L₂']:['Q₁','Q₂'];
+    srcs.forEach(([x,y],i)=>{ if(spk){ ctx.fillStyle=on[i]?cols[i]:theme.axis; ctx.fillRect(xs(x)-16,ys(y)-9,10,18); ctx.beginPath(); ctx.moveTo(xs(x)-6,ys(y)-6); ctx.lineTo(xs(x)+3,ys(y)-13); ctx.lineTo(xs(x)+3,ys(y)+13); ctx.lineTo(xs(x)-6,ys(y)+6); ctx.closePath(); ctx.fill(); }
+      else dot(ctx,xs(x),ys(y),7,on[i]?cols[i]:theme.axis,theme.plot,2);
+      text(ctx,nm[i],xs(x)-12,ys(y)+(i?22:-12),{align:'right',size:14,color:on[i]?cols[i]:theme.muted,halo:theme.plot,w:'700'}); });
+    if(d>0.05) measure(ctx,xs(xm)-34,ys(-d/2),xs(xm)-34,ys(d/2),'d',theme.kb,-1);
+    // P
+    const [px,py]=P; const r1=Math.hypot(px-srcs[0][0],py-srcs[0][1]), r2=Math.hypot(px-srcs[1][0],py-srcs[1][1]);
+    if(tWay.get()&&q1&&q2){ ctx.lineWidth=1.8; ctx.strokeStyle=theme.w1; line(ctx,xs(srcs[0][0]),ys(srcs[0][1]),xs(px),ys(py)); ctx.strokeStyle=theme.w2; line(ctx,xs(srcs[1][0]),ys(srcs[1][1]),xs(px),ys(py));
+      // Gangunterschied auf dem längeren Weg markieren
+      const [lq,rl,rs]= r1>r2? [srcs[0],r1,r2] : [srcs[1],r2,r1]; const ux=(px-lq[0])/rl, uy=(py-lq[1])/rl;
+      ctx.strokeStyle=theme.kb; ctx.lineWidth=6; ctx.globalAlpha=.8; line(ctx,xs(lq[0]+ux*rs),ys(lq[1]+uy*rs),xs(px),ys(py)); ctx.globalAlpha=1;
+      // Bogen um P mit Radius rs vom längeren Weg aus? Kreisbogen um die nähere Quelle:
+      const sq= r1>r2? srcs[1]:srcs[0]; ctx.strokeStyle=rgba(theme.kb,.6); ctx.lineWidth=1.2; ctx.setLineDash([3,3]); const a0=Math.atan2(py-sq[1],px-sq[0]); ctx.beginPath(); ctx.arc(xs(sq[0]),ys(sq[1]),rs*s,a0-0.5,a0+0.5); ctx.stroke(); ctx.setLineDash([]);
+      text(ctx,'Δs',xs(lq[0]+ux*(rs+rl)/2)-uy*16,ys(lq[1]+uy*(rs+rl)/2)+ux*16+4,{size:13,color:theme.kb,halo:theme.plot,w:'700'}); }
+    if(spk){ ctx.fillStyle=theme.mom; ctx.beginPath(); ctx.arc(xs(px),ys(py),9,0,TAU); ctx.fill(); ctx.fillStyle=theme.plot; ctx.fillRect(xs(px)-2,ys(py)-5,4,10); text(ctx,'M',xs(px)+12,ys(py)-10,{size:14,color:theme.mom,halo:theme.plot,w:'700'}); }
+    else { dot(ctx,xs(px),ys(py),8,theme.mom,theme.plot,2.5); text(ctx,'P',xs(px)+11,ys(py)-9,{size:14,color:theme.mom,halo:theme.plot,w:'700'}); }
+    cv.title(view==='lines'?'Wellenfeld: <span style="font-weight:400">Kreise durchgezogen = Berg, gestrichelt = Tal</span>':view==='field'?'Wellenfeld (Momentbild): <span style="font-weight:400">dunkel = Berg, hell = Tal</span>':'Lautstärke (zeitliches Mittel): <span style="font-weight:400">hell = laut, dunkel = still</span>');
+    cv.status('t = '+nf(tau,1)+' T · 1 m = '+Math.round(s)+' px');
+    // Auswertung P
+    const D=Math.abs(r1-r2), q=D/lam, n=Math.round(q), fr=Math.abs(q-n), nh=Math.floor(q);
+    let res='',cls='';
+    if(q1&&q2){ if(fr<0.07){res='konstruktiv: Δs ≈ '+n+'·λ → Maximum ('+n+'. Ordnung)';cls='con';} else if(Math.abs(q-nh-0.5)<0.07){res='destruktiv: Δs ≈ ('+(2*nh+1)+')·λ/2 → Minimum';cls='des';} else res='dazwischen: weder ganz verstärkt noch ganz ausgelöscht'; }
+    else res='Nur eine Quelle an: keine Interferenz.';
+    const ampl= (q1&&q2)? Math.abs(2*Math.cos(Math.PI*q)) : 1;
+    setRead(m.rd,[['r₁ (von '+nm[0]+')',nf(r1,3)+' m'],['r₂ (von '+nm[1]+')',nf(r2,3)+' m'],['Δs = |r₁ − r₂|',nf(D,3)+' m'],['Δs : λ',nf(q,2)],['Amplitude in P',nf(ampl,2)+' (max. 2)']],res,cls);
+    // Schwingung in P
+    const c2=cvP.begin(); const box={x:40,y:8,w:cvP.w-52,h:cvP.h-26}; const tw0=Math.max(0,tau-3);
+    const ax=axes(c2,box,[tw0,tw0+3],[-2.3,2.3],{xl:'t in T',ny:2,nx:6});
+    const yy=(r,tt,on)=> on && r<lam*tt ? Math.sin(TAU*(tt-r/lam)) : 0;
+    c2.lineWidth=1.6; c2.strokeStyle=theme.w1; curve(c2,tt=>yy(r1,tt,q1),tw0,tau,ax.X,ax.Y,300); c2.strokeStyle=theme.w2; curve(c2,tt=>yy(r2,tt,q2),tw0,tau,ax.X,ax.Y,300);
+    c2.lineWidth=3; c2.strokeStyle=theme.sum; curve(c2,tt=>yy(r1,tt,q1)+yy(r2,tt,q2),tw0,tau,ax.X,ax.Y,300);
+    cvP.status('<span style="color:var(--w1)">von Q₁</span> · <span style="color:var(--w2)">von Q₂</span> · <b>Summe</b>');
+  };
+  m.info=`<h2>AB 05 · Überlagerung zweier Kreiswellen</h2>
+  <p>Zwei Quellen schwingen im gleichen Takt (kohärent). Nach dem Start breiten sich um jede Quelle Kreiswellen aus: <b>durchgezogene Kreise = Wellenberge</b>, <b>gestrichelte = Wellentäler</b> (wie auf dem AB).</p>
+  <h3>Punktspuren</h3>
+  <p>Wo sich zwei Berge (oder zwei Täler) schneiden, setzt die App einen grünen Punkt, bei Berg auf Tal einen roten. Weil die Kreise wachsen, wandern die Schnittpunkte und hinterlassen Spuren: die <b>Interferenzhyperbeln</b>. Auf jeder Hyperbel ist der Gangunterschied Δs = |r₁ − r₂| gleich.</p>
+  <ul><li>Maximum (konstruktiv): Δs = n·λ</li><li>Minimum (destruktiv): Δs = (2n+1)·λ/2</li>
+  <li>In großer Entfernung gehen die Hyperbeln in Geraden über. Für ihre Richtung gilt sin αₙ = n·λ/d (Maxima) bzw. sin αₙ = (2n+1)/2 · λ/d (Minima).</li></ul>
+  <h3>Bedienung</h3>
+  <ul><li>Neustart lässt beide Wellen neu starten. Spur löschen wischt die Punkte weg.</li>
+  <li>P antippen oder ziehen: Die App zeigt beide Wege, den Gangunterschied (violett) und unten die Schwingung in P.</li>
+  <li>„Wellenwanne“ zeigt das Momentbild wie in der Wellenwanne, „Lautstärke“ den zeitlichen Mittelwert: In den dunklen Streifen ist es immer still.</li>
+  <li>Modell: Schall in Luft (c = 340 m/s), die Bewegung läuft stark verlangsamt. Die Amplitude nimmt hier nach außen nicht ab, damit das Muster überall gut sichtbar bleibt.</li></ul>`;
+  return m;
+})());
+/* ================= AB 06: Huygens'sches Prinzip ================= */
+defMod((()=>{
+  const m={id:'06',short:'Huygens',title:'Huygens’sches Prinzip und Beugung',
+    lead:'Eine gerade Welle läuft von links auf ein Hindernis. Jeder Punkt der Öffnung wird zum Ausgangspunkt einer Elementarwelle.'};
+  let lam=0.4, b=0.3, mode='spalt', view='lines', nc=7, tau=-1;
+  let cv, field=makeField(), dirty=true, s=150, VW=4, VH=3.2, xb=1.4;
+  let sL,sB,sN,vS,mS;
+  m.restart=()=>{tau=-1;};
+  const ch=()=>{dirty=true;};
+  const open=(y)=> mode==='spalt'? Math.abs(y)<=b/2 : mode==='kante'? y<=0 : Math.abs(y)>=b/2;
+  function openSegs(){ // offene Bereiche der Ebene x = xb (in Welt-y)
+    const E=VH/2+3;
+    if(mode==='spalt') return [[-b/2,b/2]];
+    if(mode==='kante') return [[-E,0]];
+    return [[-E,-b/2],[b/2,E]];
+  }
+  m.build=(side,stage)=>{
+    mS=seg([{v:'spalt',label:'Spalt'},{v:'kante',label:'Kante'},{v:'hind',label:'Hindernis'}],mode,v=>{mode=v;ch();m.tb.clearAct();},'full');
+    sL=slider({label:'Wellenlänge <i>λ</i>',min:0.15,max:1,step:0.01,value:lam,fmt:v=>nf(v,2)+' m',oninput:v=>{lam=v;ch();m.tb.clearAct();}});
+    sB=slider({label:'Breite <i>b</i> (Spalt bzw. Hindernis)',min:0.05,max:3,step:0.05,value:b,fmt:v=>nf(v,2)+' m = '+nf(v/lam,1)+' λ',oninput:v=>{b=v;ch();m.tb.clearAct();}});
+    vS=seg([{v:'lines',label:'Konstruktion'},{v:'field',label:'Wellenwanne'},{v:'int',label:'Intensität'}],view,v=>{view=v;},'full');
+    sN=slider({label:'Zentren der Elementarwellen (Konstruktion)',min:1,max:15,step:1,value:nc,fmt:v=>String(v),color:'var(--w1)',oninput:v=>{nc=v;}});
+    side.append(grp('Hindernis',mS.el),sL.el,sB.el,grp('Darstellung',vS.el),sN.el);
+    m.tb=taskBox('06',[
+      'Mache den Spalt klein gegen λ. Welche Form hat die Welle dahinter? (Elementarwelle)',
+      'Mache den Spalt groß. Wo entsteht eine gerade Welle, wo dringt sie in den Schattenraum ein (Beugung)?',
+      'Konstruktion: Erhöhe die Zahl der Zentren. Die Wellenfront ist die Einhüllende aller Elementarwellen.',
+      'Kante: Warum hört man eine Schallquelle auch hinter einer Hauswand?'],[
+      {label:'Spalt b < λ',run:()=>{mS.set('spalt',true);mode='spalt';lam=0.5;b=0.2;sL.set(lam,true);sB.set(b,true);ch();m.restart();}},
+      {label:'Spalt b ≈ 5 λ',run:()=>{mS.set('spalt',true);mode='spalt';lam=0.3;b=1.5;sL.set(lam,true);sB.set(b,true);ch();m.restart();}},
+      {label:'Kante (Halbebene)',run:()=>{mS.set('kante',true);mode='kante';lam=0.35;sL.set(lam,true);ch();m.restart();}},
+      {label:'Hindernis',run:()=>{mS.set('hind',true);mode='hind';lam=0.35;b=0.8;sL.set(lam,true);sB.set(b,true);ch();m.restart();}}]);
+    side.append(m.tb, el('p',{class:'note',html:'AB 06.1 (Falstad-Applet): „Two Sources“ entspricht hier AB 05, „Half Plane“ der Kante.'}));
+    cv=mkCanvas('Wellenwanne von oben'); cv.box.classList.add('grow'); stage.append(cv.box);
+  };
+  m.enter=()=>{dirty=true;};
+  const xs=x=>x*s, ys=y=>y*s+cv.h/2;
+  function centers(){ // Zentren für die Konstruktion
+    const segs=openSegs().map(([a,c])=>[Math.max(a,-VH/2),Math.min(c,VH/2)]).filter(([a,c])=>c>a);
+    const tot=segs.reduce((S,[a,c])=>S+(c-a),0); const out=[];
+    if(nc===1){ const [a,c]=segs[0]; out.push(mode==='spalt'?0:(mode==='kante'?-0.0:(a+c)/2)); return out; }
+    for(const [a,c] of segs){ const k=Math.max(1,Math.round(nc*(c-a)/tot)); for(let i=0;i<k;i++) out.push(k===1?(a+c)/2 : a+(c-a)*i/(k-1)); }
+    return out;
+  }
+  function construction(ctx){
+    const tb=xb/lam;
+    // einlaufende Wellenberge
+    ctx.strokeStyle=theme.w1; ctx.lineWidth=3;
+    for(let mm=Math.ceil(tau);mm<Math.ceil(tau)+400;mm++){ const xx=xb+lam*(tau-mm); if(xx<0) break; if(xx<=lam*tau) line(ctx,xs(xx),0,xs(xx),cv.h); }
+    // Elementarwellen
+    const cs=centers();
+    for(let mm=Math.ceil(tb-1e-9);mm<tau;mm++){ const rho=lam*(tau-mm); if(rho*s>cv.w*1.6) continue;
+      ctx.strokeStyle=rgba(theme.w1,.55); ctx.lineWidth=1.3;
+      for(const y of cs){ ctx.beginPath(); ctx.arc(xs(xb),ys(y),rho*s,-Math.PI/2,Math.PI/2); ctx.stroke(); }
+      // Einhüllende
+      ctx.strokeStyle=theme.w1; ctx.lineWidth=3.2; ctx.beginPath();
+      for(const [a,c] of openSegs()){ ctx.moveTo(xs(xb+rho),ys(a)); ctx.lineTo(xs(xb+rho),ys(c)); }
+      ctx.stroke();
+      // Ränder: Bögen in den Schattenraum
+      ctx.lineWidth=3.2;
+      const edges=mode==='spalt'?[[-b/2,-1],[b/2,1]]:mode==='kante'?[[0,1]]:[[-b/2,1],[b/2,-1]];
+      for(const [ey,dir] of edges){ ctx.beginPath(); if(dir>0) ctx.arc(xs(xb),ys(ey),rho*s,0,Math.PI/2); else ctx.arc(xs(xb),ys(ey),rho*s,-Math.PI/2,0); ctx.stroke(); }
+    }
+    for(const y of cs) dot(ctx,xs(xb),ys(y),4.5,theme.mom);
+  }
+  m.frame=(dt)=>{
+    tau+=dt/1.2;
+    const ctx=cv.begin(), W=cv.w, H=cv.h; s=H/3.2; VH=H/s; VW=W/s; xb=Math.min(1.5,VW*0.32);
+    const k=TAU/lam, tb=xb/lam; if(tau<0) tau=Math.max(0,tb-1);
+    if(view!=='lines'){
+      if(dirty){ const nx=Math.max(20,Math.round(W/FIELD_RES)), ny=Math.max(20,Math.round(H/FIELD_RES));
+        const del=lam/6, pts=[], A=[];
+        for(const [a,c] of openSegs()){ const n=Math.max(1,Math.round((c-a)/del)); const dd=(c-a)/n; for(let i=0;i<n;i++){ const y=a+dd*(i+.5); const far=VH/2+3, tl=2.4; const dist=far-Math.abs(y); const tp=dist<tl? 0.5-0.5*Math.cos(Math.PI*Math.max(0,dist)/tl) : 1; pts.push([xb,y]); A.push(dd*tp); } }
+        field.compute(nx,ny,{x0:0,y0:-VH/2,w:VW,h:VH},[{pts,a:A,ph:-Math.PI/4,falloff:r=>1/Math.sqrt(lam*Math.max(r,lam*0.5)),t0:tb,region:(x)=>x>xb,norm:0.9,normR:lam}],k); dirty=false; }
+      field.render(ctx,W,H,{mode:view,omega:TAU,t:tau,c:lam,k,amp:1.3,iscale:0.7,plane:{x0:0,xb,iamp:1}});
+    } else construction(ctx);
+    // Wand zeichnen
+    ctx.fillStyle=theme.dark?'#5d6b69':'#3b4645';
+    const wt=Math.max(5,0.05*s), yTop=-VH/2, yBot=VH/2;
+    const walls= mode==='spalt'?[[yTop,-b/2],[b/2,yBot]] : mode==='kante'?[[0,yBot]] : [[-b/2,b/2]];
+    for(const [a,c] of walls) ctx.fillRect(xs(xb)-wt/2,ys(a),wt,ys(c)-ys(a));
+    if(mode!=='kante'){ measure(ctx,xs(xb)-wt/2-14,ys(-b/2),xs(xb)-wt/2-14,ys(b/2),'b',theme.kb,-1); }
+    measure(ctx,xs(0.15),18,xs(0.15+lam),18,'λ',theme.kb,1);
+    arrow(ctx,xs(0.15),H-18,xs(0.15)+60,H-18,theme.w1,2,8); text(ctx,'einlaufende Welle',xs(0.15)+66,H-13,{size:12.5,color:theme.w1,halo:theme.plot});
+    cv.title(view==='lines'?'Huygens-Konstruktion: <span style="font-weight:400">dünn = Elementarwellen, dick = Einhüllende (Wellenberge)</span>':view==='field'?'Wellenwanne (Momentbild): <span style="font-weight:400">berechnet als Summe vieler Elementarwellen</span>':'Intensität (zeitliches Mittel): <span style="font-weight:400">hell = starke Bewegung</span>');
+    cv.status('b/λ = '+nf(b/lam,2)+(view!=='lines'&&field.boost>1.05?' · hinter dem Spalt '+nf(field.boost,1)+'-fach verstärkt dargestellt':''));
+  };
+  m.info=`<h2>AB 06 · Huygens’sches Prinzip</h2>
+  <p><b>Jeder Punkt einer Wellenfront ist Ausgangspunkt einer Elementarwelle.</b> Die neue Wellenfront ist die Einhüllende (Umhüllende) aller Elementarwellen.</p>
+  <ul><li><b>Konstruktion</b>: Wie auf dem AB werden um einige Punkte der Öffnung Halbkreise gezeichnet. Die dicke Linie ist die Einhüllende: gerade, wo die Welle ungestört durchläuft, und gebogen an den Rändern. Dort dringt die Welle in den Schattenraum ein (<b>Beugung</b>).</li>
+  <li><b>Wellenwanne</b> und <b>Intensität</b> sind wirklich so berechnet: Die App addiert die Elementarwellen von sehr vielen Punkten der Öffnung (Superposition).</li>
+  <li>Ist die Öffnung klein gegen λ, bleibt praktisch nur eine Elementarwelle übrig: Hinter dem Spalt entsteht eine Kreiswelle.</li>
+  <li>Im Raum (3D) sind die Elementarwellen Kugelwellen.</li></ul>
+  <p class="note">Vereinfachung: Die Wand reflektiert nicht, und Wellen hinter der Wand laufen nur nach rechts.</p>`;
+  return m;
+})());
+/* ================= AB 07: Stehende Wellen ================= */
+defMod((()=>{
+  const m={id:'07',short:'Stehende Welle',title:'Stehende Wellen',
+    lead:'Eine Welle läuft zum Ende des Seils und wird reflektiert. Hin- und rücklaufende Welle überlagern sich zu einer stehenden Welle.'};
+  const L=8, c=1, A=0.5;
+  let t=0, sub='refl', end='fest', exc='welle', lam=2.4;
+  let l=0.8, f0=880, n=0, ts=0;
+  let cv, gR, gS, tTW, tKB, tEnv, tMes, seqTimer=null, voice=null;
+  m.restart=()=>{t=0;ts=0;};
+  const w=1.2;
+  function y1(x,tt){ const xi=c*tt-x; if(xi<=0) return 0; if(exc==='impuls') return xi<w? A*Math.sin(Math.PI*xi/w):0; return A*Math.sin(TAU*xi/lam); }
+  function y2(x,tt){ return (end==='fest'?-1:1)*y1(2*L-x,tt); }
+  function stopSnd(){ if(seqTimer){clearInterval(seqTimer);seqTimer=null;} stopAll(); m.sndBtns&&m.sndBtns.forEach(b=>b.classList.remove('on')); }
+  m.leave=stopSnd;
+  m.build=(side,stage)=>{
+    const subS=seg([{v:'refl',label:'Reflexion am Seilende'},{v:'saite',label:'Schwingende Saite'}],sub,v=>{sub=v;gR.hidden=v!=='refl';gS.hidden=v!=='saite';stopSnd();m.restart();upd();},'full');
+    side.append(subS.el);
+    // Reflexion
+    const eS=seg([{v:'fest',label:'festes Ende'},{v:'lose',label:'loses Ende'}],end,v=>{end=v;m.restart();},'full');
+    const xS=seg([{v:'welle',label:'Welle (dauernd)'},{v:'impuls',label:'einzelner Berg'}],exc,v=>{exc=v;m.restart();},'full');
+    const lS=slider({label:'Wellenlänge <i>λ</i>',min:1,max:4,step:0.1,value:lam,fmt:v=>nf(v,1)+' m',oninput:v=>{lam=v;}});
+    tTW=tog({label:'hin',color:'var(--w1)',value:true}); const tTW2=tog({label:'zurück',color:'var(--w2)',value:true});
+    m.tTW2=tTW2;
+    tKB=tog({label:'Knoten / Bäuche',color:'var(--des)',value:true}); tEnv=tog({label:'Einhüllende',color:'var(--muted)',value:false}); tMes=tog({label:'Abstand messen',color:'var(--kb)',value:true});
+    m.rdR=readout();
+    gR=el('div',{class:'grp',style:'gap:12px'},grp('Ende des Seils',eS.el),grp('Erreger',xS.el),lS.el,grp('Anzeigen',el('div',{class:'togs'},tTW.el,tTW2.el,tKB.el,tEnv.el,tMes.el)),m.rdR,
+      taskBox('07',['Einzelner Berg, festes Ende: Was wird bei der Reflexion aus dem Berg? (Phasensprung)','Welle, festes Ende: Warten, bis die reflektierte Welle zurück ist. Welche Stellen bewegen sich nie?','Welchen Abstand haben benachbarte Knoten bzw. Bäuche?','Was ist am festen Ende immer: Knoten oder Bauch? Und am losen Ende?'],[
+        {label:'Phasensprung zeigen',run:()=>{eS.set('fest',true);end='fest';xS.set('impuls',true);exc='impuls';m.restart();setPlaying(true);}},
+        {label:'Stehende Welle',run:()=>{eS.set('fest',true);end='fest';xS.set('welle',true);exc='welle';t=17;setPlaying(true);}}]));
+    // Saite
+    const sl=slider({label:'Länge der Saite <i>l</i>',min:0.2,max:1.2,step:0.01,value:l,fmt:v=>nf(v*100,0)+' cm',oninput:v=>{l=v;}});
+    const sf=slider({label:'Grundfrequenz <i>f</i>₀',min:50,max:1000,step:1,value:f0,fmt:v=>nf(v,0)+' Hz',oninput:v=>{f0=v;}});
+    const nS=seg([0,1,2,3,4].map(k=>({v:String(k),label:k===0?'Grund&shy;schwingung':k+'. OS'})),'0',v=>{n=+v;ts=0;},'full');
+    const hb=(lbl)=>el('button',{class:'btn hearbtn',type:'button',html:HEAR+'<span>'+lbl+'</span>'});
+    const b1=hb('diese Schwingung'), b2=hb('Saitenklang'), b3=hb('Obertonreihe (wie Harmonics.ogg)');
+    m.sndBtns=[b1,b2,b3];
+    b1.onclick=()=>{ const on=b1.classList.contains('on'); stopSnd(); if(on) return; b1.classList.add('on'); playTones([{f:(n+1)*f0,a:1}],1.6,()=>b1.classList.remove('on')); };
+    b2.onclick=()=>{ const on=b2.classList.contains('on'); stopSnd(); if(on) return; b2.classList.add('on'); playTones([1,2,3,4,5,6,7,8].map(k=>({f:k*f0,a:1/k})),2,()=>b2.classList.remove('on')); };
+    b3.onclick=()=>{ const on=b3.classList.contains('on'); stopSnd(); if(on) return; b3.classList.add('on'); let k=1; const f=55;
+      const step=()=>{ stopAll(); if(k>32){ stopSnd(); return;} const parts=[]; for(let j=1;j<=k;j++) parts.push({f:j*f,a:1/Math.sqrt(j)}); playTones(parts,0.62); m.seqK=k; k++; };
+      step(); seqTimer=setInterval(step,550); };
+    m.rdS=readout();
+    gS=el('div',{class:'grp',style:'gap:12px',hidden:true},sl.el,sf.el,grp('Eigenschwingung',nS.el),grp('Anhören',el('div',{class:'togs'},b1,b2,b3)),m.rdS,
+      taskBox('07',['Tonhöhe ändern: Was passiert mit f₀, wenn du die Saite kürzer machst (Bund greifen)?','Übung 2: Hör dir die Obertonreihe an (A₁ = 55 Hz bis a³ = 1760 Hz). Welche Frequenzen haben die Obertöne?','Übung 3: Geige mit l = 80 cm und f₀ = 880 Hz. Lies die ersten vier Obertöne und c ab.'],[
+        {label:'Übung 3: Geige',title:'l = 80 cm, f₀ = 880 Hz',run:()=>{sl.set(0.8,true);l=0.8;sf.set(880,true);f0=880;}},
+        {label:'A₁ = 55 Hz',run:()=>{sf.set(55,true);f0=55;}}]));
+    side.append(gR,gS);
+    cv=mkCanvas('Seil'); cv.box.classList.add('grow'); stage.append(cv.box);
+    function upd(){ cv.title(sub==='refl'?'Seil mit Reflexion am Ende':'Saite, an beiden Enden eingespannt'); }
+    upd();
+  };
+  function frameRefl(dt){
+    t+=dt;
+    const ctx=cv.begin(), W=cv.w, H=cv.h, pad=36, s=(W-2*pad-20)/L, y0=H*0.5, ys=H*0.17/A;
+    const X=x=>pad+x*s, Y=v=>y0-v*ys;
+    ctx.strokeStyle=theme.grid; ctx.lineWidth=1; for(let x=0;x<=L;x++){ line(ctx,X(x),y0-H*0.42,X(x),y0+H*0.42); text(ctx,x+' m',X(x),y0+H*0.42+14,{align:'center',size:11,w:'400',color:theme.muted}); }
+    ctx.strokeStyle=theme.axis; line(ctx,X(0),y0,X(L),y0);
+    // Ende
+    if(end==='fest'){ ctx.fillStyle=theme.dark?'#5d6b69':'#3b4645'; ctx.fillRect(X(L),y0-H*0.3,12,H*0.6); }
+    else { ctx.strokeStyle=theme.axis; ctx.lineWidth=3; line(ctx,X(L)+6,y0-H*0.36,X(L)+6,y0+H*0.36); }
+    const both=x=> c*t>2*L-x; // reflektierte Welle schon da?
+    if(tEnv.get()&&exc==='welle'){ ctx.strokeStyle=theme.muted; ctx.lineWidth=1.3; ctx.setLineDash([5,4]); const k=TAU/lam;
+      for(const sg of [1,-1]){ ctx.beginPath(); let st=false; for(let i=0;i<=400;i++){ const x=L*i/400; if(!both(x)){st=false;continue;} const e=2*A*Math.abs(end==='fest'?Math.sin(k*(L-x)):Math.cos(k*(L-x))); const py=Y(sg*e); if(!st){ctx.moveTo(X(x),py);st=true;} else ctx.lineTo(X(x),py);} ctx.stroke(); } ctx.setLineDash([]); }
+    if(tTW.get()){ ctx.strokeStyle=theme.w1; ctx.lineWidth=2; curve(ctx,x=>y1(x,t),0,L,X,Y,600); }
+    if(m.tTW2.get()){ ctx.strokeStyle=theme.w2; ctx.lineWidth=2; curve(ctx,x=>y2(x,t),0,L,X,Y,600); }
+    ctx.strokeStyle=theme.sum; ctx.lineWidth=4; ctx.lineJoin='round'; curve(ctx,x=>y1(x,t)+y2(x,t),0,L,X,Y,800);
+    // Ende-Punkt
+    dot(ctx,X(L),Y(y1(L,t)+y2(L,t)),6,theme.sum);
+    let res='';
+    if(exc==='welle'){
+      const nodes=[],bel=[]; for(let j=0;j<40;j++){ const xn= end==='fest'? L-j*lam/2 : L-lam/4-j*lam/2; const xb= end==='fest'? L-lam/4-j*lam/2 : L-j*lam/2; if(xn>=0&&both(xn)) nodes.push(xn); if(xb>=0&&both(xb)) bel.push(xb); }
+      if(tKB.get()){ for(const x of nodes){ dot(ctx,X(x),y0,7,null,theme.des,2.5); } for(const x of bel){ ctx.strokeStyle=theme.con; ctx.lineWidth=2; ctx.setLineDash([3,3]); line(ctx,X(x),Y(2*A)-4,X(x),Y(-2*A)+4); ctx.setLineDash([]); dot(ctx,X(x),Y(2*A)-8,4,theme.con); }
+        if(nodes.length) text(ctx,'Knoten',X(nodes[0])-(end==='fest'?10:0),y0+28,{align:end==='fest'?'right':'center',size:12.5,color:theme.des,halo:theme.plot});
+        if(bel.length) text(ctx,'Bauch',X(bel[0]),Y(2*A)-16,{align:'center',size:12.5,color:theme.con,halo:theme.plot}); }
+      if(tMes.get()&&nodes.length>=2) measure(ctx,X(nodes[1]),y0+H*0.32,X(nodes[0]),y0+H*0.32,'λ/2 = '+nf(lam/2,2)+' m',theme.kb,1);
+      res= nodes.length? (end==='fest'?'Am festen Ende ist ein Knoten.':'Am losen Ende ist ein Bauch.')+' Knotenabstand λ/2.' : 'Warte, bis die reflektierte Welle zurückläuft …';
+    } else {
+      const back=c*t>L+w*0.5; res= back? (end==='fest'?'Phasensprung um π: Der Berg kommt als Tal zurück.':'Kein Phasensprung: Der Berg kommt als Berg zurück.') : 'Der Berg läuft zum Ende …';
+      if(c*t>2*L+w){ t=0; }
+    }
+    cv.status('t = '+nf(t,1)+' s · c = 1 m/s');
+    setRead(m.rdR,[['Wellenlänge λ',nf(lam,1)+' m'],['Frequenz f = c/λ',nf(c/lam,3)+' Hz'],['Abstand Knoten–Knoten',nf(lam/2,2)+' m'],['Abstand Knoten–Bauch',nf(lam/4,2)+' m']],res,'');
+  }
+  function frameSaite(dt){
+    ts+=dt;
+    const ctx=cv.begin(), W=cv.w, H=cv.h; const pad=60, s=(W-2*pad)/l, y0=H*0.48, amp=H*0.22;
+    const X=x=>pad+x*s;
+    const k=n+1, nu=0.6*k; const ph=Math.cos(TAU*nu*ts);
+    // Stege
+    ctx.fillStyle=theme.dark?'#5d6b69':'#3b4645'; ctx.fillRect(X(0)-10,y0-30,10,60); ctx.fillRect(X(l),y0-30,10,60);
+    ctx.strokeStyle=theme.grid; ctx.lineWidth=1; line(ctx,X(0),y0,X(l),y0);
+    // Einhüllende
+    ctx.strokeStyle=theme.muted; ctx.lineWidth=1.3; ctx.setLineDash([5,4]);
+    for(const sg of [1,-1]){ ctx.beginPath(); for(let i=0;i<=300;i++){ const x=l*i/300; const py=y0-sg*amp*Math.sin(k*Math.PI*x/l); i?ctx.lineTo(X(x),py):ctx.moveTo(X(x),py);} ctx.stroke(); }
+    ctx.setLineDash([]);
+    ctx.fillStyle=rgba(theme.w1,.08); ctx.beginPath(); for(let i=0;i<=300;i++){ const x=l*i/300; ctx.lineTo(X(x),y0-amp*Math.abs(Math.sin(k*Math.PI*x/l))); } for(let i=300;i>=0;i--){ const x=l*i/300; ctx.lineTo(X(x),y0+amp*Math.abs(Math.sin(k*Math.PI*x/l))); } ctx.fill();
+    ctx.strokeStyle=theme.sum; ctx.lineWidth=4; ctx.beginPath(); for(let i=0;i<=400;i++){ const x=l*i/400; const py=y0-amp*Math.sin(k*Math.PI*x/l)*ph; i?ctx.lineTo(X(x),py):ctx.moveTo(X(x),py);} ctx.stroke();
+    for(let j=0;j<=k;j++) dot(ctx,X(j*l/k),y0,7,null,theme.des,2.5);
+    for(let j=0;j<k;j++) dot(ctx,X((j+.5)*l/k),y0-amp-10,4,theme.con);
+    const lamn=2*l/k;
+    if(k>=2) measure(ctx,X(0),y0+amp+26,X(lamn),y0+amp+26,'λ'+['₀','₁','₂','₃','₄'][n]+' = '+nf(lamn*100,1)+' cm',theme.kb,1);
+    else { measure(ctx,X(0),y0+amp+26,X(l),y0+amp+26,'l = λ₀/2',theme.kb,1); }
+    measure(ctx,X(0),y0-amp-30,X(l),y0-amp-30,'l = '+nf(l*100,0)+' cm',theme.muted,-1);
+    text(ctx,(n===0?'Grundschwingung':n+'. Oberschwingung')+': '+(k+1)+' Knoten, '+k+(k===1?' Bauch':' Bäuche'),W/2,H-14,{align:'center',size:14,color:theme.ink});
+    cv.status('Zeitlupe');
+    const cc=2*l*f0;
+    const rows=[['Wellenlänge λₙ = 2l/(n+1)',nf(lamn*100,1)+' cm'],['Frequenz fₙ = (n+1)·f₀',nf(k*f0,0)+' Hz'],['Ausbreitungsgeschw. c = 2l·f₀',nf(cc,0)+' m/s']];
+    setRead(m.rdS,rows,'Obertöne: '+[2,3,4,5].map((q,i)=>'f'+['₁','₂','₃','₄'][i]+' = '+nf(q*f0,0)+' Hz').join(', '));
+  }
+  m.frame=(dt)=>{ if(sub==='refl') frameRefl(dt); else frameSaite(dt); };
+  m.info=`<h2>AB 07 · Stehende Wellen</h2>
+  <p>Zwei Wellen mit <b>gleicher Frequenz und Amplitude</b>, die in <b>entgegengesetzte Richtungen</b> laufen, überlagern sich zu einer stehenden Welle. Es gibt Orte, die immer in Ruhe sind (<b>Knoten</b>, rot) und Orte mit maximaler Auslenkung (<b>Bäuche</b>, grün). Benachbarte Knoten haben den Abstand λ/2.</p>
+  <ul><li><b>Festes Ende</b>: Phasensprung um π, aus einem Berg wird ein Tal. Am Ende ist immer ein Knoten.</li>
+  <li><b>Loses Ende</b>: kein Phasensprung. Am Ende ist ein Bauch.</li>
+  <li>Die App rechnet die reflektierte Welle wie eine Welle aus einem gespiegelten Seil hinter dem Ende (beim festen Ende mit umgekehrtem Vorzeichen).</li></ul>
+  <h3>Schwingende Saite</h3>
+  <p>An beiden Enden ist ein Knoten. Deshalb passen nur halbe Wellenlängen auf die Saite: l = (n+1)·λₙ/2. Mit c = λ·f folgt fₙ = (n+1)·f₀ mit f₀ = c/(2l). Die Eigenfrequenzen sind ganzzahlige Vielfache der Grundfrequenz, genau die Obertöne aus der App „Additive Synthese“.</p>
+  <p class="note">Bewegung in Zeitlupe; der Ton beim Anhören hat die echte Frequenz.</p>`;
+  return m;
+})());
+/* ================= AB 08: Elektromagnetisches Spektrum ================= */
+defMod((()=>{
+  const m={id:'08',short:'EM-Spektrum',title:'Elektromagnetisches Spektrum',
+    lead:'Alle elektromagnetischen Wellen breiten sich im Vakuum mit c ≈ 300 000 km/s aus. Sie unterscheiden sich nur in Frequenz und Wellenlänge: f = c/λ.'};
+  const C0=299792458, H_eV=4.135667696e-15;
+  const LMIN=1e-13, LMAX=1e4;
+  let lam=532e-9, glass=false, nGl=1.5;
+  let cv, sL, tG;
+  const REG=[
+    {a:LMIN,b:1e-11,n:'Gamma',col:'#7a4fb0'},
+    {a:1e-11,b:1e-8,n:'Röntgen',col:'#5a63c4'},
+    {a:1e-8,b:380e-9,n:'UV',col:'#6f5bd8'},
+    {a:380e-9,b:780e-9,n:'Licht',col:'rain'},
+    {a:780e-9,b:1e-3,n:'Infrarot (Wärme)',col:'#c2503a'},
+    {a:1e-3,b:1,n:'Mikrowellen',col:'#c98a2c'},
+    {a:1,b:LMAX,n:'Radiowellen',col:'#5f9b55'}];
+  const SIZE=[[1e-13,'kleiner als ein Atom (Atomkern ≈ 10⁻¹⁴ m)'],[1e-10,'ein Atom'],[1e-9,'ein Molekül'],[1e-7,'ein Virus'],[1e-6,'ein Bakterium'],[1e-5,'eine rote Blutzelle'],[7e-5,'ein Haar (Dicke)'],[1e-3,'ein Sandkorn'],[1e-2,'ein Fingernagel'],[0.12,'eine Hand'],[1.7,'ein Mensch'],[15,'ein Haus'],[100,'ein Fußballfeld'],[1000,'ein Stadtteil'],[1e4,'eine Stadt']];
+  const EX=[['UKW-Radio',C0/100e6],['WLAN 2,4 GHz',C0/2.4e9],['5G 3,6 GHz',C0/3.6e9],['Wärme (Haut)',10e-6],['rot',650e-9],['grün',532e-9],['violett',405e-9],['UV-C',254e-9],['Röntgen',1e-10],['Gamma',1e-12]];
+  const P=v=>Math.log10(v/LMIN)/Math.log10(LMAX/LMIN);
+  const regionOf=x=>REG.find(r=>x>=r.a&&x<r.b)||REG[REG.length-1];
+  m.build=(side,stage)=>{
+    sL=slider({label:'Wellenlänge im Vakuum <i>λ</i> (gold)',min:LMIN,max:LMAX,log:true,value:lam,fmt:v=>len(v,3),color:'var(--mom)',oninput:v=>{lam=v;}});
+    const ex=el('div',{class:'togs'}); EX.forEach(([nm,v])=>{ const b=el('button',{class:'btn',type:'button',html:nm,style:'min-height:34px;padding:5px 9px;font-size:14px'}); b.onclick=()=>{lam=v;sL.set(v,true);}; ex.append(b); });
+    tG=tog({label:'in Glas (n = 1,5)',sub:'statt Vakuum',color:'var(--w1)',value:false,big:true,onchange:v=>{glass=v;}});
+    side.append(sL.el,grp('Beispiele',ex),grp('Medium',tG.el));
+    m.rd=readout(); side.append(m.rd);
+    side.append(taskBox('08',[
+      'Schalte „in Glas“ ein. Was ändert sich: Frequenz oder Wellenlänge? Woran erkennt man also die Farbe?',
+      'Suche die Grenze zur ionisierenden Strahlung (rot gestrichelt). Welche Bereiche liegen darüber?',
+      'Wähle einen Bereich (z. B. WLAN, UV-C, Röntgen) und notiere λ, f und die Energie eines Photons.']));
+    cv=mkCanvas('Spektrum (logarithmische Skala: jeder Strich = Faktor 10)'); cv.box.classList.add('grow'); stage.append(cv.box);
+    const pick=(px,py)=>{ const r=m.band; if(!r) return; if(py>r.lupe.y-8 && py<r.lupe.y+r.lupe.h+30){ const nm=380+clamp((px-r.lupe.x)/r.lupe.w,0,1)*400; lam=nm*1e-9; } else { const u=clamp((px-r.x)/r.w,0,1); lam=LMIN*Math.pow(LMAX/LMIN,u);} sL.set(lam,true); };
+    onDrag(cv,{down:pick,move:pick});
+  };
+  m.frame=()=>{
+    const ctx=cv.begin(), W=cv.w, H=cv.h; const x0=24, wB=W-48, yB=Math.max(44,H*0.1), hB=Math.min(84,H*0.15);
+    const X=v=>x0+P(v)*wB;
+    // Bänder
+    for(const r of REG){ const a=X(r.a), b=X(r.b);
+      if(r.col==='rain'){ const g=ctx.createLinearGradient(a,0,b,0); for(let i=0;i<=10;i++){ const nm=380+40*i; g.addColorStop(i/10,wlCss(Math.min(780,nm))); } ctx.fillStyle=g; }
+      else ctx.fillStyle=rgba(r.col,theme.dark?.55:.75);
+      ctx.fillRect(a,yB,b-a,hB); }
+    ctx.strokeStyle=theme.line; ctx.strokeRect(x0,yB,wB,hB);
+    for(const r of REG){ const a=X(r.a), b=X(r.b); const mid=(a+b)/2; if(r.n==='Licht'){ text(ctx,'Licht',mid,yB-8,{align:'center',size:12.5,color:theme.ink}); continue; }
+      if(b-a>50) text(ctx,r.n,mid,yB+hB/2+5,{align:'center',size:13,color:'#fff',w:'700'}); else text(ctx,r.n,mid,yB-8,{align:'center',size:12,color:theme.ink}); }
+    // λ-Achse oben, f unten
+    for(let e=-13;e<=4;e++){ const x=X(Math.pow(10,e)); ctx.strokeStyle=theme.axis; ctx.lineWidth=1; line(ctx,x,yB+hB,x,yB+hB+6);
+      if((e+13)%2===0) text(ctx,'10'+String(e).split('').map(c=>SUP[c]).join('')+' m',x,yB+hB+19,{align:'center',size:11.5,w:'400',color:theme.muted}); }
+    text(ctx,'λ',x0-14,yB+hB+19,{size:13,font:'Georgia,serif',w:'italic 400',color:theme.muted});
+    for(let e=4;e<=21;e+=2){ const v=C0/Math.pow(10,e); if(v<LMIN||v>LMAX) continue; const x=X(v); line(ctx,x,yB+hB+26,x,yB+hB+31); text(ctx,'10'+String(e).split('').map(c=>SUP[c]).join('')+' Hz',x,yB+hB+44,{align:'center',size:11.5,w:'400',color:theme.muted}); }
+    text(ctx,'f',x0-14,yB+hB+44,{size:13,font:'Georgia,serif',w:'italic 400',color:theme.muted});
+    text(ctx,'← hohe Frequenz, hohe Energie',x0,yB-26,{size:12,w:'400',color:theme.muted}); text(ctx,'große Wellenlänge →',x0+wB,yB-26,{align:'right',size:12,w:'400',color:theme.muted});
+    // ionisierend
+    const lIon=H_eV*C0/5, lB=H_eV*C0/3;
+    ctx.strokeStyle=theme.des; ctx.lineWidth=2; ctx.setLineDash([6,4]); line(ctx,X(lIon),yB-4,X(lIon),yB+hB+4); ctx.setLineDash([]);
+    ctx.fillStyle=rgba(theme.des,.12); ctx.fillRect(x0,yB-4,X(lIon)-x0,4);
+    // Marker
+    const xm=X(lam); ctx.strokeStyle=theme.mom; ctx.lineWidth=3; line(ctx,xm,yB-12,xm,yB+hB+8); dot(ctx,xm,yB-12,6,theme.mom);
+    // Lupe sichtbar
+    const ly=yB+hB+92, lh=Math.min(46,H*0.1), lx=x0+wB*0.12, lw=wB*0.76; m.band={x:x0,w:wB,lupe:{x:lx,y:ly,w:lw,h:lh}};
+    for(let i=0;i<lw;i++){ const nm=380+400*i/lw; ctx.fillStyle=wlCss(nm); ctx.fillRect(lx+i,ly,1.2,lh); }
+    ctx.strokeStyle=theme.line; ctx.strokeRect(lx,ly,lw,lh);
+    ctx.strokeStyle=theme.axis; ctx.setLineDash([3,3]); line(ctx,X(380e-9),yB+hB,lx,ly); line(ctx,X(780e-9),yB+hB,lx+lw,ly); ctx.setLineDash([]);
+    for(let nm=400;nm<=750;nm+=50){ const x=lx+(nm-380)/400*lw; line(ctx,x,ly+lh,x,ly+lh+5); text(ctx,nm+' nm',x,ly+lh+17,{align:'center',size:11,w:'400',color:theme.muted}); }
+    const xb3=lx+(lB*1e9-380)/400*lw; ctx.strokeStyle=theme.des; ctx.lineWidth=1.5; ctx.setLineDash([3,3]); line(ctx,xb3,ly-4,xb3,ly+lh+4); ctx.setLineDash([]); text(ctx,'3 eV',xb3+4,ly-6,{size:11.5,color:theme.des});
+    if(lam>=380e-9&&lam<=780e-9){ const x=lx+(lam*1e9-380)/400*lw; ctx.strokeStyle=theme.mom; ctx.lineWidth=3; line(ctx,x,ly-8,x,ly+lh+8); }
+    text(ctx,'Lupe: sichtbares Licht (antippen zum Wählen)',lx+lw,ly+lh+34,{align:'right',size:12,w:'400',color:theme.muted});
+    text(ctx,'← ionisierend (E > 5 eV)',X(lIon)-4,yB+hB+62,{align:'right',size:12.5,color:theme.des,halo:theme.plot}); ctx.strokeStyle=theme.des; ctx.setLineDash([6,4]); ctx.lineWidth=1.5; line(ctx,X(lIon),yB+hB+4,X(lIon),yB+hB+50); ctx.setLineDash([]);
+    // Welle zeichnen: Vakuum vs Glas
+    const wy=ly+lh+70, wh=Math.max(30,Math.min(70,H-wy-30));
+    if(wh>30){
+      const lamD=glass? lam/nGl : lam; const reg=regionOf(lam);
+      const col= reg.n==='Licht'? wlCss(lam*1e9) : (reg.col==='rain'?theme.w1:reg.col);
+      text(ctx,'Ausschnitt der Welle '+(glass?'im Glas':'im Vakuum')+' (Breite = 4 λ'+(glass?'₀':'')+'):',x0,wy-8,{size:12.5,w:'400',color:theme.muted});
+      if(glass){ ctx.fillStyle=rgba(theme.w1,.08); ctx.fillRect(x0,wy,wB,wh); }
+      ctx.strokeStyle=col; ctx.lineWidth=3; ctx.beginPath(); for(let i=0;i<=600;i++){ const u=i/600*4; const y=wy+wh/2-Math.sin(TAU*u*lam/lamD)*wh*0.4; i?ctx.lineTo(x0+u/4*wB,y):ctx.moveTo(x0+u/4*wB,y);} ctx.stroke();
+      if(glass){ ctx.strokeStyle=rgba(theme.ink,.25); ctx.lineWidth=1.5; ctx.setLineDash([4,4]); ctx.beginPath(); for(let i=0;i<=600;i++){ const u=i/600*4; const y=wy+wh/2-Math.sin(TAU*u)*wh*0.4; i?ctx.lineTo(x0+u/4*wB,y):ctx.moveTo(x0+u/4*wB,y);} ctx.stroke(); ctx.setLineDash([]); }
+    }
+    const f=C0/lam, E=H_eV*f; const reg=regionOf(lam); const sz=SIZE.reduce((b,s)=>Math.abs(Math.log10(s[0]/lam))<Math.abs(Math.log10(b[0]/lam))?s:b);
+    const rows=[['Bereich',reg.n],['Wellenlänge λ (Vakuum)',len(lam)],['Frequenz f = c/λ',freq(f)],['Energie eines Photons',sci(E,3)+' eV']];
+    if(glass) rows.push(['im Glas: c = c₀/n','2,00·10⁸ m/s'],['im Glas: λ = λ₀/n',len(lam/nGl)],['im Glas: f','unverändert '+freq(f)]);
+    let res = E>5? '⚠ ionisierend: Ein Photon kann Elektronen aus Atomen lösen.' : E>3? 'nicht ionisierend, aber energiereich genug, um Moleküle zu verändern (> 3 eV).' : 'nicht ionisierend';
+    if(reg.n==='Licht') res+= glass? ' Farbe bleibt gleich, weil f gleich bleibt.' : '';
+    setRead(m.rd,rows,res,E>5?'des':'');
+    cv.status('λ ist etwa so groß wie '+sz[1]);
+  };
+  m.info=`<h2>AB 08 · Elektromagnetisches Spektrum</h2>
+  <p>Elektromagnetische Wellen sind Transversalwellen aus gekoppelten elektrischen und magnetischen Feldern. Sie brauchen kein Medium. Im Vakuum gilt für alle: c = λ·f ≈ 3·10⁸ m/s.</p>
+  <ul><li>Die Skala ist <b>logarithmisch</b>: Von einem Strich zum nächsten wird λ zehnmal so groß.</li>
+  <li><b>Farbe und Frequenz</b>: Beim Übergang in Glas wird die Welle langsamer und λ kleiner, f bleibt gleich und damit auch die Farbe. Die Wellenlängen in Spektren beziehen sich auf Vakuum bzw. Luft.</li>
+  <li><b>Energie eines Photons</b>: E = h·f (h = 4,14·10⁻¹⁵ eV·s). Ab etwa 5 eV (f ≈ 1,2·10¹⁵ Hz, λ ≈ 250 nm) wirkt Strahlung ionisierend. Ab etwa 3 eV (violettes Licht) können Moleküle verändert werden.</li></ul>
+  <p class="note">Die Grenzen zwischen den Bereichen sind fließend und in Büchern leicht verschieden angegeben.</p>`;
+  m.noTransport=true;
+  return m;
+})());
+/* ============ Gemeinsam für AB 09 und AB 10: Wellenbild hinter Spalten (Modell) ============ */
+function SlitModel(o){ // o: {getN, getD, getLam, cv}
+  const S={field:makeField(),dirty:true,tau:-1,Py:3.5,key:''};
+  const VH=20; // cm
+  S.frame=(dt,cv,showRays)=>{
+    S.tau+=dt/1.2;
+    const N=o.getN(), d=o.getD(), lam=o.getLam();
+    const ctx=cv.begin(), W=cv.w, H=cv.h, s=H/VH, VW=W/s;
+    const xb=Math.min(7,VW*0.26), xsc=VW-1.6, e=xsc-xb; const k=TAU/lam; if(S.tau<0) S.tau=Math.max(0,xb/lam-1);
+    const ys=y=>y*s+H/2, xs=x=>x*s;
+    const key=[N,d,lam,Math.round(W),Math.round(H),FIELD_RES].join('|'); if(key!==S.key){S.dirty=true;S.key=key;}
+    const src=[]; for(let j=0;j<N;j++) src.push([xb,(j-(N-1)/2)*d]);
+    if(S.dirty){ const nx=Math.max(20,Math.round(W/FIELD_RES)), ny=Math.max(20,Math.round(H/FIELD_RES));
+      S.field.compute(nx,ny,{x0:0,y0:-VH/2,w:VW,h:VH},[{pts:src,ph:-Math.PI/4,falloff:r=>Math.sqrt(lam/Math.max(r,lam)),t0:xb/lam,region:x=>x>xb&&x<xsc,norm:0.9,normR:2*lam}],k); S.dirty=false; }
+    S.field.render(ctx,W,H,{mode:'field',omega:TAU,t:S.tau,c:lam,k,amp:Math.max(1.2,0.9*Math.sqrt(N)),plane:{x0:0,xb}});
+    // Wand mit Spalten
+    ctx.fillStyle=theme.dark?'#5d6b69':'#3b4645'; const wt=Math.max(5,0.3*s), gap=Math.max(3,0.35*s);
+    let yPrev=-VH/2; for(const [x,y] of src){ const top=ys(yPrev), bot=ys(y)-gap/2; if(bot>top) ctx.fillRect(xs(xb)-wt/2,top,wt,bot-top); yPrev=y+gap/2/s; }
+    ctx.fillRect(xs(xb)-wt/2,ys(yPrev),wt,H-ys(yPrev));
+    // Schirm + Intensität
+    ctx.fillStyle=theme.plot; ctx.fillRect(xs(xsc),0,W-xs(xsc),H);
+    ctx.strokeStyle=theme.axis; ctx.lineWidth=2; line(ctx,xs(xsc),0,xs(xsc),H);
+    const I=[]; let mx=0; for(let py=0;py<=H;py+=2){ const y=(py-H/2)/s; let cr=0,ci=0; for(const [qx,qy] of src){ const r=Math.hypot(xsc-qx,y-qy); const a=1/Math.sqrt(r); cr+=a*Math.cos(k*r); ci+=a*Math.sin(k*r);} const v=cr*cr+ci*ci; I.push([py,v]); if(v>mx) mx=v; }
+    const bw=W-xs(xsc)-4;
+    ctx.fillStyle=rgba(theme.con,.85); ctx.beginPath(); ctx.moveTo(xs(xsc),0); for(const [py,v] of I) ctx.lineTo(xs(xsc)+v/mx*bw,py); ctx.lineTo(xs(xsc),H); ctx.closePath(); ctx.fill();
+    text(ctx,'Schirm',xs(xsc)-4,14,{align:'right',size:12,color:theme.muted,halo:theme.plot});
+    // Punkt P und Strahlen
+    const Py=clamp(S.Py,-VH/2+0.5,VH/2-0.5); S.Py=Py; const PX=xs(xsc), PY=ys(Py);
+    const r=src.map(([qx,qy])=>Math.hypot(xsc-qx,Py-qy));
+    let Ds=null, al=Math.atan2(Py,e);
+    if(showRays){ const show=N<=2?src:[src[0],src[1]];
+      ctx.lineWidth=1.6; show.forEach(([qx,qy],i)=>{ ctx.strokeStyle=i?theme.w2:theme.w1; line(ctx,xs(qx),ys(qy),PX,PY); });
+      // Lot und Gangunterschied (zwischen den ersten beiden Spalten)
+      const [a,b]=[src[0],src[1]]; const ra=Math.hypot(xsc-a[0],Py-a[1]), rb=Math.hypot(xsc-b[0],Py-b[1]);
+      Ds=ra-rb; const [lq,rl,rs]= ra>rb? [a,ra,rb]:[b,rb,ra]; const ux=(xsc-lq[0])/rl, uy=(Py-lq[1])/rl;
+      ctx.strokeStyle=theme.kb; ctx.lineWidth=5; ctx.globalAlpha=.85; line(ctx,xs(lq[0]),ys(lq[1]),xs(lq[0]+ux*(rl-rs)),ys(lq[1]+uy*(rl-rs))); ctx.globalAlpha=1;
+      const sq=ra>rb?b:a; ctx.strokeStyle=theme.kb; ctx.lineWidth=1.2; ctx.setLineDash([3,3]); line(ctx,xs(sq[0]),ys(sq[1]),xs(lq[0]+ux*(rl-rs)),ys(lq[1]+uy*(rl-rs))); ctx.setLineDash([]);
+      text(ctx,'Δs',xs(lq[0]+ux*(rl-rs)/2)-6,ys(lq[1]+uy*(rl-rs)/2)+(ra>rb?-8:16),{align:'right',size:13,color:theme.kb,halo:theme.plot,w:'700'});
+      // Winkel
+      ctx.strokeStyle=theme.kb; ctx.lineWidth=1.2; ctx.setLineDash([2,3]); line(ctx,xs(xb),ys(0),PX,ys(0)); line(ctx,xs(xb),ys(0),PX,PY); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.arc(xs(xb),ys(0),Math.min(60,e*s*0.3),Math.min(0,al),Math.max(0,al)); ctx.stroke();
+      text(ctx,'α',xs(xb)+Math.min(60,e*s*0.3)+6,ys(Math.tan(al/2)*Math.min(60,e*s*0.3)/s)+5,{size:14,color:theme.kb,halo:theme.plot,font:'Georgia,serif',w:'italic 700'});
+    }
+    dot(ctx,PX,PY,8,theme.mom,theme.plot,2.5); text(ctx,'P',PX-12,PY-10,{align:'right',size:14,color:theme.mom,halo:theme.plot,w:'700'});
+    if(d*s>18) measure(ctx,xs(xb)-wt-12,ys(src[0][1]),xs(xb)-wt-12,ys(src[1][1]),'d',theme.kb,-1);
+    measure(ctx,xs(xb),H-14,xs(xsc),H-14,'e = '+nf(e,1)+' cm',theme.kb,-1);
+    measure(ctx,xs(0.5),16,xs(0.5+lam),16,'λ',theme.kb,1);
+    return {Ds,al,lam,d,e,a:Py,s};
+  };
+  S.drag=(cv,py)=>{ const s=cv.h/VH; S.Py=(py-cv.h/2)/s; };
+  return S;
+}
+/* Intensität am Schirm für N schmale Spalte (Fernfeld) */
+function gridI(N,d,lam,sinA){ const ph=Math.PI*d*sinA/lam; const sn=Math.sin(ph); if(Math.abs(sn)<1e-9) return 1; const v=Math.sin(N*ph)/(N*sn); return v*v; }
+function whiteRGB(N,d,sinA){ let r=0,g=0,b=0,nr=0,ng=0,nb=0; for(let nm=400;nm<=700;nm+=6){ const c=wl2rgb(nm); const I=gridI(N,d,nm*1e-9,sinA); r+=c[0]*I;g+=c[1]*I;b+=c[2]*I; nr+=c[0];ng+=c[1];nb+=c[2]; } return [r/nr,g/ng,b/nb]; }
+const ORD=['₀','₁','₂','₃','₄','₅','₆','₇','₈','₉'];
+
+/* ================= AB 09: Doppelspalt ================= */
+defMod((()=>{
+  const m={id:'09',short:'Doppelspalt',title:'Beugung und Interferenz am Doppelspalt',
+    lead:'Licht fällt auf zwei schmale Spalte. Hinter den Spalten laufen Elementarwellen los und interferieren. Auf dem Schirm entstehen helle und dunkle Streifen.'};
+  let view='model', lamM=1.6, dM=4;
+  let lam=650e-9, d=0.5e-3, e=2.0, white=false, hide=false, approx=true;
+  let a=0, rul=null; // Messpunkt und Lineal in m (Schirmkoordinate)
+  let cvM, cvA, cvB, model, gM, gE, sLam, sD, sE, tW, tH, tAp;
+  m.restart=()=>{ if(model) model.tau=-1; };
+  m.build=(side,stage)=>{
+    const vS=seg([{v:'model',label:'Wellenbild (Modell)'},{v:'exp',label:'Experiment (echte Maße)'}],view,v=>{view=v;gM.hidden=v!=='model';gE.hidden=v!=='exp';cvM.box.hidden=v!=='model';cvA.box.hidden=cvB.box.hidden=v!=='exp';},'full');
+    side.append(vS.el);
+    const sl=slider({label:'Wellenlänge <i>λ</i> (Modell)',min:0.6,max:3,step:0.05,value:lamM,fmt:v=>nf(v,2)+' cm',oninput:v=>{lamM=v;}});
+    const sd=slider({label:'Spaltabstand <i>d</i> (Modell)',min:1,max:9,step:0.1,value:dM,fmt:v=>nf(v,1)+' cm',oninput:v=>{dM=v;}});
+    m.rdM=readout();
+    gM=el('div',{class:'grp',style:'gap:12px'},sl.el,sd.el,el('p',{class:'note',html:'Wie in einer Wellenwanne, nur stark vergrößert. Der grüne Verlauf rechts zeigt die Intensität auf dem Schirm. Ziehe P auf dem Schirm.'}),m.rdM);
+    sLam=slider({label:'Wellenlänge <i>λ</i>',min:380,max:780,step:1,value:lam*1e9,fmt:v=>hide?'?':nf(v,0)+' nm',cls:'rainbow',oninput:v=>{lam=v*1e-9;}});
+    sD=slider({label:'Spaltabstand <i>d</i>',min:0.05,max:2,step:0.01,log:true,value:d*1e3,fmt:v=>nfs(v,3)+' mm',oninput:v=>{d=v*1e-3;}});
+    sE=slider({label:'Abstand Doppelspalt–Schirm <i>e</i>',min:0.5,max:5,step:0.01,value:e,fmt:v=>nf(v,2)+' m',oninput:v=>{e=v;}});
+    tW=tog({label:'weißes Licht',color:'var(--muted)',value:false,onchange:v=>{white=v;}});
+    tH=tog({label:'λ verbergen',sub:'Messaufgabe',color:'var(--lab)',value:false,onchange:v=>{hide=v;sLam.set(lam*1e9,true);}});
+    tAp=tog({label:'Näherung kleine Winkel',color:'var(--kb)',line:'dash',value:true,onchange:v=>{approx=v;}});
+    m.rdE=readout();
+    gE=el('div',{class:'grp',style:'gap:12px',hidden:true},sLam.el,sD.el,sE.el,el('div',{class:'togs'},tW.el,tH.el,tAp.el),el('p',{class:'note',html:'Schirm unten: P (gold) antippen und ziehen. Lineal (violett): mit zwei Fingern bzw. Umschalt+Ziehen, oder die Griffe ziehen.'}),m.rdE);
+    side.append(gM,gE);
+    side.append(taskBox('09',[
+      'Modell: Ziehe P zum ersten hellen Streifen neben der Mitte. Wie groß ist Δs? Und beim ersten dunklen?',
+      'Vergrößere d. Was passiert mit dem Abstand a der Maxima? (Lückentext)',
+      'Weißes Licht: Welche Farbe liegt innen, welche außen? Welche Farbe wird stärker gebeugt?',
+      'Übung: Miss mit dem Lineal 5 Streifenabstände und berechne λ = a·d/(e·n).'],[
+      {label:'Übung: Hg grün',title:'d = 1,2 mm, e = 2,73 m, λ verborgen',run:()=>{vS.set('exp');lam=546e-9;d=1.2e-3;e=2.73;tH.set(true);tW.set(false);sLam.set(546,true);sD.set(1.2,true);sE.set(2.73,true);rul=[-3.1e-3,3.1e-3];}},
+      {label:'Übung: Hg blau',title:'d = 1,2 mm, e = 2,73 m, λ verborgen',run:()=>{vS.set('exp');lam=436e-9;d=1.2e-3;e=2.73;tH.set(true);tW.set(false);sLam.set(436,true);sD.set(1.2,true);sE.set(2.73,true);rul=[-2.45e-3,2.45e-3];}},
+      {label:'Lösung zeigen',run:()=>{tH.set(false);}},
+      {label:'Weißes Licht',run:()=>{vS.set('exp');tH.set(false);tW.set(true);d=0.3e-3;sD.set(0.3,true);}}]));
+    cvM=mkCanvas('Wellenbild hinter dem Doppelspalt (Modell)'); cvM.box.classList.add('grow');
+    cvA=mkCanvas('Aufbau (nicht maßstäblich)'); cvA.box.style.flex='0 0 38%'; cvA.box.hidden=true;
+    cvB=mkCanvas('Schirmbild'); cvB.box.classList.add('grow'); cvB.box.hidden=true;
+    stage.append(cvM.box,cvA.box,cvB.box);
+    model=SlitModel({getN:()=>2,getD:()=>dM,getLam:()=>lamM});
+    onDrag(cvM,{down:(px,py)=>{model.drag(cvM,py);},move:(px,py)=>model.drag(cvM,py)});
+    let dragWhat=null;
+    onDrag(cvB,{down:(px,py,ev)=>{ const A=m.toA(px); if(rul){ const h0=m.toPx(rul[0]),h1=m.toPx(rul[1]); if(py>m.rulY-22&&py<m.rulY+22){ if(Math.abs(px-h0)<22){dragWhat='r0';return;} if(Math.abs(px-h1)<22){dragWhat='r1';return;} } }
+        if(ev.shiftKey||py>m.rulY-22){ rul=[A,A]; dragWhat='r1'; return; } dragWhat='p'; a=A; },
+      move:(px)=>{ const A=m.toA(px); if(dragWhat==='p') a=A; else if(dragWhat==='r0') rul[0]=A; else if(dragWhat==='r1') rul[1]=A; }});
+  };
+  m.frame=(dt)=>{
+    if(view==='model'){ const r=model.frame(dt,cvM,true); const q=r.Ds/r.lam; const aq=Math.abs(q), n=Math.round(aq), fr=Math.abs(aq-n);
+      const res= fr<0.08? 'Maximum '+n+'. Ordnung: Δs ≈ '+n+'·λ' : Math.abs(aq-Math.floor(aq)-0.5)<0.08? 'Minimum: Δs ≈ '+(2*Math.floor(aq)+1)+'·λ/2':'';
+      setRead(m.rdM,[['Δs = r₁ − r₂',nf(Math.abs(r.Ds),2)+' cm'],['Δs : λ',nf(aq,2)],['α (zur Mittelachse)',nf(Math.abs(r.al)*180/Math.PI,1)+'°'],['d · sin α',nf(Math.abs(r.d*Math.sin(r.al)),2)+' cm']],res,fr<0.08?'con':res?'des':'');
+      cvM.status('Fernfeld-Näherung Δs ≈ d·sin α'); return; }
+    // ---- Experiment ----
+    const amax=Math.max(1e-3, e*Math.tan(Math.min(Math.asin(Math.min(1,4.6*lam/d)),1.3)));
+    // Aufbau
+    let ctx=cvA.begin(), W=cvA.w, H=cvA.h;
+    const xL=30, xS=W*0.3, xSc=W-40, yc=H/2;
+    ctx.fillStyle=theme.dark?'#3a4847':'#55605f'; ctx.fillRect(xL,yc-14,60,28); text(ctx,'Laser',xL+30,yc+5,{align:'center',size:12,color:'#fff'});
+    const col= white? theme.ink : wlCss(lam*1e9);
+    ctx.strokeStyle=col; ctx.lineWidth=4; line(ctx,xL+60,yc,xS,yc);
+    ctx.fillStyle=theme.dark?'#5d6b69':'#3b4645'; const dd=22; ctx.fillRect(xS-3,yc-H*0.4,6,H*0.4-dd/2-3); ctx.fillRect(xS-3,yc-dd/2+3,6,dd-6); ctx.fillRect(xS-3,yc+dd/2+3,6,H*0.4-dd/2-3);
+    ctx.strokeStyle=theme.axis; ctx.lineWidth=3; line(ctx,xSc,yc-H*0.42,xSc,yc+H*0.42);
+    const ya=yc-clamp(a/amax,-1,1)*H*0.4;
+    ctx.lineWidth=1.6; ctx.strokeStyle=theme.w1; line(ctx,xS,yc-dd/2,xSc,ya); ctx.strokeStyle=theme.w2; line(ctx,xS,yc+dd/2,xSc,ya);
+    ctx.strokeStyle=theme.kb; ctx.setLineDash([3,3]); ctx.lineWidth=1.2; line(ctx,xS,yc,xSc,yc); line(ctx,xS,yc,xSc,ya); ctx.setLineDash([]);
+    const angP=Math.atan2(ya-yc,xSc-xS); ctx.beginPath(); ctx.arc(xS,yc,48,Math.min(0,angP),Math.max(0,angP)); ctx.stroke(); text(ctx,'α',xS+54,yc+(ya<yc?-6:14),{size:14,color:theme.kb,font:'Georgia,serif',w:'italic 700'});
+    measure(ctx,xS-16,yc-dd/2,xS-16,yc+dd/2,'d',theme.kb,-1);
+    measure(ctx,xS,yc+H*0.42+2,xSc,yc+H*0.42+2,'e',theme.kb,-1);
+    if(Math.abs(ya-yc)>14) measure(ctx,xSc+12,yc,xSc+12,ya,'a',theme.kb,1);
+    dot(ctx,xSc,ya,7,theme.mom,theme.plot,2); text(ctx,'P',xSc-10,ya-8,{align:'right',size:13,color:theme.mom,w:'700',halo:theme.plot});
+    // Schirm
+    ctx=cvB.begin(); W=cvB.w; H=cvB.h; const pad=30, w=W-2*pad;
+    m.toA=px=>((px-pad)/w*2-1)*amax; m.toPx=A=>pad+(A/amax+1)/2*w;
+    const sy=H*0.56, sh=Math.min(70,H*0.22); m.rulY=sy+sh+30;
+    const gTop=12, gH=sy-gTop-24;
+    // Streifenbild
+    for(let i=0;i<w;i++){ const A=((i+.5)/w*2-1)*amax; const sinA=Math.sin(Math.atan(A/e));
+      let rgb; if(white) rgb=whiteRGB(2,d,sinA); else { const I=gridI(2,d,lam,sinA); const c=wl2rgb(lam*1e9); rgb=[c[0]*I,c[1]*I,c[2]*I]; }
+      ctx.fillStyle=`rgb(${Math.round(255*Math.pow(clamp(rgb[0],0,1),.8))},${Math.round(255*Math.pow(clamp(rgb[1],0,1),.8))},${Math.round(255*Math.pow(clamp(rgb[2],0,1),.8))})`; ctx.fillRect(pad+i,sy,1.5,sh); }
+    ctx.strokeStyle=theme.line; ctx.strokeRect(pad,sy,w,sh);
+    // Intensitätskurve
+    ctx.strokeStyle=theme.grid; line(ctx,pad,gTop+gH,pad+w,gTop+gH);
+    ctx.strokeStyle= white? theme.ink : wlCss(lam*1e9); ctx.lineWidth=2.2; ctx.beginPath(); for(let i=0;i<=w;i++){ const A=(i/w*2-1)*amax; const sA=Math.sin(Math.atan(A/e)); let I; if(white){ I=0; let c=0; for(let nm=400;nm<=700;nm+=10){ I+=gridI(2,d,nm*1e-9,sA); c++; } I/=c; } else I=gridI(2,d,lam,sA); const y=gTop+gH-I*gH; i?ctx.lineTo(pad+i,y):ctx.moveTo(pad+i,y);} ctx.stroke();
+    text(ctx,'I',pad-12,gTop+10,{size:13,font:'Georgia,serif',w:'italic 400',color:theme.muted});
+    // Maxima exakt / genähert
+    if(!white) for(let n=-9;n<=9;n++){ const sA=n*lam/d; if(Math.abs(sA)>=1) continue; const Ae=e*Math.tan(Math.asin(sA)); if(Math.abs(Ae)<=amax){ const x=m.toPx(Ae); ctx.strokeStyle=theme.con; ctx.lineWidth=1.5; line(ctx,x,sy-6,x,sy); if(!hide) text(ctx,String(Math.abs(n)),x,sy-9,{align:'center',size:11.5,color:theme.con}); }
+      if(approx){ const Aa=n*lam*e/d; if(Math.abs(Aa)<=amax){ const x=m.toPx(Aa); ctx.strokeStyle=theme.kb; ctx.setLineDash([3,3]); line(ctx,x,sy+sh,x,sy+sh+8); ctx.setLineDash([]); } } }
+    // Achse in mm
+    const unit= amax<0.05? 1e-3: 1e-2, un= unit===1e-3?'mm':'cm';
+    const st=(()=>{const raw=2*amax/unit/8; const p=Math.pow(10,Math.floor(Math.log10(raw))); const q=raw/p; return (q<1.5?1:q<3?2:q<7?5:10)*p;})();
+    for(let v=-Math.floor(amax/unit/st)*st; v<=amax/unit+1e-9; v+=st){ const x=m.toPx(v*unit); ctx.strokeStyle=theme.axis; line(ctx,x,sy+sh,x,sy+sh+4); text(ctx,nft(v),x,sy+sh+16,{align:'center',size:11,w:'400',color:theme.muted}); }
+    text(ctx,'a in '+un,pad+w,sy+sh+16,{align:'right',size:12,color:theme.muted,halo:theme.plot});
+    // Lineal
+    if(rul){ const x0=m.toPx(rul[0]), x1=m.toPx(rul[1]); measure(ctx,x0,m.rulY,x1,m.rulY,len(Math.abs(rul[1]-rul[0]),3),theme.kb,1); dot(ctx,x0,m.rulY,6,theme.kb); dot(ctx,x1,m.rulY,6,theme.kb); }
+    else text(ctx,'Hier ziehen: Lineal',pad+w/2,m.rulY+4,{align:'center',size:12,color:theme.kb});
+    // P
+    const xp=m.toPx(clamp(a,-amax,amax)); ctx.strokeStyle=theme.mom; ctx.lineWidth=2; line(ctx,xp,gTop,xp,sy+sh); dot(ctx,xp,sy-2,7,theme.mom,theme.plot,2);
+    cvB.status(white?'weißes Licht: Maxima 0. Ordnung weiß, außen farbige Säume':'grün: Maxima exakt'+(approx?' · violett gestrichelt: Näherung a = n·λ·e/d':''));
+    // Auswertung
+    const al=Math.atan(a/e), Ds=d*Math.sin(al), q=Ds/lam;
+    const rows=[['Abstand a von der Mitte',len(Math.abs(a),3)],['Winkel α = arctan(a/e)',nf(Math.abs(al)*180/Math.PI,3)+'°'],['Δs = d · sin α',len(Math.abs(Ds),3)],['Δs : λ',hide?'?':nf(Math.abs(q),2)]];
+    if(rul) rows.push(['Lineal',len(Math.abs(rul[1]-rul[0]),3)]);
+    if(!hide&&!white){ const a1=e*Math.tan(Math.asin(lam/d)), a1n=lam*e/d; rows.push(['1. Maximum exakt',len(a1,4)],['1. Maximum genähert λ·e/d',len(a1n,4)]); }
+    setRead(m.rdE,rows,hide?'Wellenlänge verborgen: Miss den Streifenabstand und rechne λ = a·d/(n·e).':'',hide?'':'');
+  };
+  m.info=`<h2>AB 09 · Doppelspalt</h2>
+  <p>Hinter jedem Spalt läuft nach Huygens eine Elementarwelle los (<b>Beugung</b>: das Licht erreicht auch den Schattenraum). Die beiden Wellen <b>interferieren</b>. Am Punkt P entscheidet der Gangunterschied Δs:</p>
+  <ul><li>Maximum: Δs = n·λ (n = 0, 1, 2, … ist die <b>Ordnung</b>)</li><li>Minimum: Δs = (2n+1)·λ/2</li>
+  <li>Weit entfernter Schirm: Δs = d·sin α und tan α = a/e. Allgemein gilt für Maxima λ = d·sin(arctan(a/e))/n.</li>
+  <li>Nur für kleine Winkel (a ≪ e) gilt sin α ≈ tan α und damit λ ≈ a·d/(n·e). Die violett gestrichelten Marken zeigen diese Näherung: Bei großen Winkeln liegen sie neben den echten Maxima (grün).</li></ul>
+  <h3>Zwei Ansichten</h3>
+  <ul><li><b>Wellenbild (Modell)</b>: wie in der Wellenwanne, vergrößert. Δs wird exakt aus den beiden Wegen berechnet.</li>
+  <li><b>Experiment</b>: echte Maße (nm, mm, m). Schirmbild und Intensität sind für sehr schmale Spalte berechnet. Weißes Licht: Summe vieler Farben, innen blau, außen rot.</li></ul>`;
+  return m;
+})());
+/* ================= AB 10: Gitter ================= */
+defMod((()=>{
+  const m={id:'10',short:'Gitter',title:'Beugung und Interferenz am Gitter',
+    lead:'Viele Spalte im gleichen Abstand d (Gitterkonstante). Die Maxima bleiben an derselben Stelle wie beim Doppelspalt, werden aber schmaler und heller.'};
+  let view='exp', NM=5, dM=3, lamM=1.4;
+  let N=6, g=300, lam=532e-9, e=1.5, white=false, cmp=true, approx=false, a=0.1;
+  let cvM, cvA, cvB, model, gM, gE, sN, sG, sLam, sE, tW, tC, tAp;
+  const d=()=>1e-3/g;
+  m.restart=()=>{ if(model) model.tau=-1; };
+  m.build=(side,stage)=>{
+    const vS=seg([{v:'model',label:'Wellenbild (Modell)'},{v:'exp',label:'Schirm und Zeiger'}],view,v=>{view=v;gM.hidden=v!=='model';gE.hidden=v!=='exp';cvM.box.hidden=v!=='model';cvA.box.hidden=cvB.box.hidden=v!=='exp';},'full');
+    side.append(vS.el);
+    const smN=slider({label:'Zahl der Spalte <i>N</i> (Modell)',min:2,max:10,step:1,value:NM,fmt:v=>String(v),oninput:v=>{NM=v;}});
+    const smD=slider({label:'Gitterkonstante <i>d</i> (Modell)',min:1.2,max:5,step:0.1,value:dM,fmt:v=>nf(v,1)+' cm',oninput:v=>{dM=v;}});
+    const smL=slider({label:'Wellenlänge <i>λ</i> (Modell)',min:0.6,max:2.5,step:0.05,value:lamM,fmt:v=>nf(v,2)+' cm',oninput:v=>{lamM=v;}});
+    gM=el('div',{class:'grp',style:'gap:12px',hidden:true},smN.el,smD.el,smL.el,el('p',{class:'note',html:'Vergleiche N = 2 mit N = 10: Die grünen Maxima am Schirm bleiben an ihrem Ort, werden aber schärfer. P zeigt Δs zwischen den ersten beiden Spalten.'}));
+    sN=slider({label:'Zahl der beleuchteten Spalte <i>N</i>',min:2,max:40,step:1,value:N,fmt:v=>String(v),oninput:v=>{N=v;m.tb.clearAct();}});
+    sG=slider({label:'Linien pro mm',min:50,max:1200,step:1,log:true,value:g,fmt:v=>nf(v,0)+' <span style="font-weight:400;color:var(--muted)">(d = '+len(1e-3/v,3)+')</span>',oninput:v=>{g=v;m.tb.clearAct();}});
+    sLam=slider({label:'Wellenlänge <i>λ</i>',min:380,max:780,step:1,value:lam*1e9,fmt:v=>nf(v,0)+' nm',cls:'rainbow',oninput:v=>{lam=v*1e-9;m.tb.clearAct();}});
+    sE=slider({label:'Abstand Gitter–Schirm <i>e</i>',min:0.3,max:3,step:0.01,value:e,fmt:v=>nf(v,2)+' m',oninput:v=>{e=v;m.tb.clearAct();}});
+    tW=tog({label:'weißes Licht',color:'var(--muted)',value:false,onchange:v=>{white=v;}});
+    tC=tog({label:'Doppelspalt zum Vergleich',color:'var(--ink)',line:'dash',value:true,onchange:v=>{cmp=v;}});
+    tAp=tog({label:'Näherung kleine Winkel',color:'var(--kb)',line:'dash',value:false,onchange:v=>{approx=v;}});
+    m.rd=readout();
+    gE=el('div',{class:'grp',style:'gap:12px'},sN.el,sG.el,sLam.el,sE.el,el('div',{class:'togs'},tW.el,tC.el,tAp.el),m.rd);
+    side.append(gM,gE);
+    m.tb=taskBox('10',[
+      'Erhöhe N von 2 auf 40. Was passiert mit Lage, Breite und Helligkeit der Maxima?',
+      'Setze P auf „Δs = 1,1 λ“ (Vorlage). Lies in der Tabelle ab, welche Spalte sich mit A auslöschen.',
+      'Zeiger: Jeder Spalt liefert einen Pfeil. Im Maximum liegen alle Pfeile in einer Linie, sonst krümmt sich die Kette.',
+      'Übung 1: Vergleiche die exakten Lagen mit der Näherung a ≈ n·λ·e/d. Wann darf man nähern?'],[
+      {label:'P′: Δs = 1,1 λ',run:()=>{ N=10;sN.set(10,true); const sA=1.1*lam/d(); a=e*Math.tan(Math.asin(Math.min(.99,sA))); }},
+      {label:'Übung 1 (780 nm)',title:'500 Linien/mm, e = 1,5 m',run:()=>{g=500;lam=780e-9;e=1.5;N=30;sG.set(500,true);sLam.set(780,true);sE.set(1.5,true);sN.set(30,true);tAp.set(true);tW.set(false);a=e*Math.tan(Math.asin(lam/d()));}},
+      {label:'Übung 2 (Na 590 nm)',title:'2a₁ = 11,8 cm bei e = 1 m',run:()=>{g=100;lam=590e-9;e=1;N=30;sG.set(100,true);sLam.set(590,true);sE.set(1,true);sN.set(30,true);tW.set(false);a=e*Math.tan(Math.asin(lam/d()));}}]);
+    side.append(m.tb);
+    cvM=mkCanvas('Wellenbild hinter dem Gitter (Modell)'); cvM.box.classList.add('grow'); cvM.box.hidden=true;
+    cvA=mkCanvas('Schirmbild und Intensität'); cvA.box.classList.add('grow');
+    cvB=mkCanvas('Zeigerdiagramm im Punkt P'); cvB.box.style.flex='0 0 44%';
+    stage.append(cvM.box,cvA.box,cvB.box);
+    model=SlitModel({getN:()=>NM,getD:()=>dM,getLam:()=>lamM});
+    onDrag(cvM,{down:(px,py)=>{model.drag(cvM,py);},move:(px,py)=>model.drag(cvM,py)});
+    onDrag(cvA,{down:(px)=>{a=m.toA(px);},move:(px)=>{a=m.toA(px);}});
+  };
+  m.frame=(dt)=>{
+    if(view==='model'){ const r=model.frame(dt,cvM,true); cvM.status('Δs (A–B) : λ = '+nf(Math.abs(r.Ds)/r.lam,2)); return; }
+    const D=d(); const nmax=Math.floor(D/lam-1e-9);
+    const amaxA=Math.asin(Math.min(0.985,(Math.min(nmax,4)+0.5)*lam/D));
+    const amax=e*Math.tan(amaxA);
+    a=clamp(a,-amax,amax);
+    let ctx=cvA.begin(), W=cvA.w, H=cvA.h; const pad=34, w=W-2*pad;
+    m.toA=px=>clamp(((px-pad)/w*2-1)*amax,-amax,amax); const toPx=A=>pad+(A/amax+1)/2*w;
+    const sh=Math.min(60,H*0.2), sy=H-sh-26, gTop=14, gH=sy-gTop-22;
+    for(let i=0;i<w;i++){ const A=((i+.5)/w*2-1)*amax; const sA=Math.sin(Math.atan(A/e));
+      let rgb; if(white) rgb=whiteRGB(N,D,sA); else { const I=gridI(N,D,lam,sA); const c=wl2rgb(lam*1e9); rgb=[c[0]*I,c[1]*I,c[2]*I]; }
+      const gm=x=>Math.round(255*Math.pow(clamp(x*(white?1.6:1),0,1),.7)); ctx.fillStyle=`rgb(${gm(rgb[0])},${gm(rgb[1])},${gm(rgb[2])})`; ctx.fillRect(pad+i,sy,1.5,sh); }
+    ctx.strokeStyle=theme.line; ctx.strokeRect(pad,sy,w,sh);
+    ctx.strokeStyle=theme.grid; line(ctx,pad,gTop+gH,pad+w,gTop+gH);
+    const plot=(n,col,lw,dash)=>{ ctx.strokeStyle=col; ctx.lineWidth=lw; ctx.setLineDash(dash||[]); ctx.beginPath(); const M=Math.round(w*2); for(let i=0;i<=M;i++){ const A=(i/M*2-1)*amax; const I=gridI(n,D,lam,Math.sin(Math.atan(A/e))); const y=gTop+gH-I*gH; i?ctx.lineTo(pad+i/2,y):ctx.moveTo(pad,y);} ctx.stroke(); ctx.setLineDash([]); };
+    if(cmp) plot(2,rgba(theme.ink,.5),1.5,[5,4]);
+    plot(N,white?theme.ink:wlCss(lam*1e9),2.4);
+    text(ctx,'I / I₀',pad+4,gTop+10,{size:12,color:theme.muted});
+    for(let n=-nmax;n<=nmax;n++){ const sA=n*lam/D; const Ae=e*Math.tan(Math.asin(sA)); if(Math.abs(Ae)<=amax){ const x=toPx(Ae); ctx.strokeStyle=theme.con; ctx.lineWidth=1.5; line(ctx,x,sy-8,x,sy); text(ctx,String(Math.abs(n)),x,sy-11,{align:'center',size:11.5,color:theme.con}); }
+      if(approx){ const Aa=n*lam*e/D; if(Math.abs(Aa)<=amax){ const x=toPx(Aa); ctx.strokeStyle=theme.kb; ctx.lineWidth=2; ctx.setLineDash([4,3]); line(ctx,x,sy,x,sy+sh+8); ctx.setLineDash([]); } } }
+    const unit= amax<0.5? 1e-2: 1, un= unit===1?'m':'cm';
+    const st=(()=>{const raw=2*amax/unit/8; const p=Math.pow(10,Math.floor(Math.log10(raw))); const q=raw/p; return (q<1.5?1:q<3?2:q<7?5:10)*p;})();
+    for(let v=-Math.floor(amax/unit/st)*st; v<=amax/unit+1e-9; v+=st){ const x=toPx(v*unit); ctx.strokeStyle=theme.axis; line(ctx,x,sy+sh,x,sy+sh+4); text(ctx,nft(v),x,sy+sh+16,{align:'center',size:11,w:'400',color:theme.muted}); }
+    text(ctx,'a in '+un,pad+w,sy+sh+16,{align:'right',size:12,color:theme.muted,halo:theme.plot});
+    const xp=toPx(a); ctx.strokeStyle=theme.mom; ctx.lineWidth=2; line(ctx,xp,gTop,xp,sy+sh); dot(ctx,xp,sy-2,7,theme.mom,theme.plot,2); text(ctx,'P',xp+9,gTop+12,{size:13,color:theme.mom,w:'700',halo:theme.plot});
+    cvA.status('grün: Lage der Maxima'+(approx?' · violett: Näherung n·λ·e/d':'')+(cmp?' · gestrichelt: Doppelspalt':''));
+    // Zeiger
+    const al=Math.atan(a/e), del=D*Math.sin(al)/lam; // Gangunterschied benachbarter Spalte in λ
+    ctx=cvB.begin(); W=cvB.w; H=cvB.h;
+    const pw=Math.min(W*0.5,H*1.2), cx0=pw*0.5, cy0=H*0.5;
+    const u=Math.min(pw,H)*0.9/N; let x=0,y=0,pts=[[0,0]];
+    for(let j=0;j<N;j++){ const ph=TAU*del*j; x+=u*Math.cos(ph); y-=u*Math.sin(ph); pts.push([x,y]); }
+    // zentrieren
+    let mnx=0,mxx=0,mny=0,mxy=0; for(const [px,py] of pts){mnx=Math.min(mnx,px);mxx=Math.max(mxx,px);mny=Math.min(mny,py);mxy=Math.max(mxy,py);}
+    const ox=cx0-(mnx+mxx)/2, oy=cy0-(mny+mxy)/2;
+    for(let j=0;j<N;j++){ const [ax,ay]=pts[j],[bx,by]=pts[j+1]; arrow(ctx,ox+ax,oy+ay,ox+bx,oy+by,j===0?theme.w1:j===1?theme.w2:rgba(theme.w1,.6),2,Math.min(8,u*0.4)); }
+    const res=Math.hypot(pts[N][0],pts[N][1]);
+    if(res>2) arrow(ctx,ox,oy,ox+pts[N][0],oy+pts[N][1],theme.sum,3.5,10); else dot(ctx,ox,oy,4,theme.des);
+    text(ctx,'Resultierende: '+nf(res/(N*u)*100,0)+' % der Höchstamplitude',cx0,H-10,{align:'center',size:12.5,color:theme.ink});
+    text(ctx,'Ein Pfeil je Spalt, gedreht um 360°·Δs/λ',cx0,16,{align:'center',size:12,w:'400',color:theme.muted});
+    // Tabelle
+    const tx=pw+20, rows=Math.min(N,12); const rh=Math.min(22,(H-30)/(rows));
+    text(ctx,'Gangunterschied zu Spalt A',tx,16,{size:12.5,color:theme.muted});
+    const L='ABCDEFGHIJKL';
+    for(let j=1;j<rows;j++){ const v=j*del; const frac=v-Math.floor(v); const can=Math.abs(frac-0.5)<0.06, con=Math.min(frac,1-frac)<0.06;
+      const yy=30+j*rh; text(ctx,'Δs(A'+L[j]+') = '+nf(v,2)+' λ',tx,yy,{size:13.5,font:'ui-monospace,Menlo,Consolas,monospace',w:'600',color:can?theme.des:con?theme.con:theme.ink});
+      if(can) text(ctx,'← löscht A aus',tx+170,yy,{size:12.5,color:theme.des}); else if(con) text(ctx,'← verstärkt A',tx+170,yy,{size:12.5,color:theme.con}); }
+    if(N>12) text(ctx,'… (nur die ersten 12)',tx,30+12*rh,{size:12,w:'400',color:theme.muted});
+    cvB.status('Δs benachbarter Spalte = '+nf(del,3)+' λ');
+    // Auswertung
+    const rows2=[['Gitterkonstante d',len(D,3)],['P: a',len(Math.abs(a),3)],['Δs benachbarter Spalte',nf(Math.abs(del),3)+' λ'],['höchste Ordnung',String(nmax)]];
+    let extra='';
+    if(nmax>=1){ const a1=e*Math.tan(Math.asin(lam/D)), a1n=lam*e/D; rows2.push(['a₁ exakt / genähert',len(a1,3)+' / '+len(a1n,3)]); }
+    if(nmax>=2){ const a1=e*Math.tan(Math.asin(lam/D)), a2=e*Math.tan(Math.asin(2*lam/D)); rows2.push(['a₂ exakt / genähert',len(a2,3)+' / '+len(2*lam*e/D,3)],['a₂ − a₁ exakt / genähert',len(a2-a1,3)+' / '+len(lam*e/D,3)]);
+      const al2=Math.asin(2*lam/D)*180/Math.PI, err=(a2-2*lam*e/D)/a2*100; if(err>3) extra='Bei α₂ = '+nf(al2,1)+'° liegt die Näherung a₂ ≈ 2·λ·e/d um '+nf(err,0)+' % daneben: Hier exakt mit tan α = a/e rechnen.'; }
+    setRead(m.rd,rows2,extra,extra?'des':'');
+  };
+  m.info=`<h2>AB 10 · Beugungsgitter</h2>
+  <p>Beim Gitter liegen sehr viele Spalte im gleichen Abstand d. Für die <b>Lage der Maxima</b> gilt wie beim Doppelspalt sin αₙ = n·λ/d: Wenn A und B sich verstärken (Δs = n·λ), dann auch alle weiteren Spalte, denn deren Gangunterschiede sind ganzzahlige Vielfache davon.</p>
+  <p><b>Schärfere Maxima</b>: Schon ein kleiner Schritt neben das Maximum (z. B. Δs = 1,1 λ zwischen Nachbarn) führt bei vielen Spalten zu Paaren, die sich auslöschen (A und F: 5,5 λ). Je größer N, desto schmaler und heller die Maxima.</p>
+  <h3>Zeigerdiagramm</h3>
+  <p>Jede Teilwelle ist ein Pfeil gleicher Länge. Von Spalt zu Spalt dreht sich der Pfeil um 360°·Δs/λ. Die Summe der Pfeile (dunkel) ist die Amplitude in P. Im Maximum liegen alle Pfeile in einer Linie, bei Auslöschung schließt sich die Kette zu einem Vieleck.</p>
+  <p><b>Achtung Näherung</b>: aₙ ≈ n·λ·e/d gilt nur für kleine Winkel. Bei 500 Linien/mm und 780 nm liegt das 2. Maximum bei 51°. Dann muss man mit tan αₙ = aₙ/e und sin αₙ = n·λ/d rechnen.</p>`;
+  return m;
+})());
+
+init();
+</script>
+</body>
+</html>
