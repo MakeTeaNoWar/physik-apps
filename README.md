@@ -5,6 +5,7 @@ Interaktive Apps für den Physik- und NWT-Unterricht. Startseite: https://makete
 | Ordner | App | Stand |
 |---|---|---|
 | `bewegungslabor/` | [Bewegungslabor](https://maketeanowar.github.io/physik-apps/bewegungslabor/) | 2026-10-02 |
+| `raumfluglabor/` | [Raumfluglabor](https://maketeanowar.github.io/physik-apps/raumfluglabor/) | 2026-10-18 |
 | `lehrertool-lite/` | [Lehrertool Lite](https://maketeanowar.github.io/physik-apps/lehrertool-lite/) | 2026-10-04 |
 | `feldlabor/` | [Feldlabor](https://maketeanowar.github.io/physik-apps/feldlabor/) | 2026-10-04 |
 | `wellenlabor/` | [Wellenlabor](https://maketeanowar.github.io/physik-apps/wellenlabor/) | 2026-10-16 |
