@@ -1,18 +1,18 @@
 # physik-apps
 
-Interaktive Apps für den Physik- und NWT-Unterricht. Startseite: https://maketeanowar.github.io/physik-apps/
+Interaktive Apps für den Physik- und NWT-Unterricht. Startseite: https://schulapplikationen.github.io/physik-apps/
 
 | Ordner | App | Stand |
 |---|---|---|
-| `bewegungslabor/` | [Bewegungslabor](https://maketeanowar.github.io/physik-apps/bewegungslabor/) | 2026-10-02 |
-| `raumfluglabor/` | [Raumfluglabor](https://maketeanowar.github.io/physik-apps/raumfluglabor/) | 2026-10-18 |
-| `lehrertool-lite/` | [Lehrertool Lite](https://maketeanowar.github.io/physik-apps/lehrertool-lite/) | 2026-10-04 |
-| `feldlabor/` | [Feldlabor](https://maketeanowar.github.io/physik-apps/feldlabor/) | 2026-10-04 |
-| `wellenlabor/` | [Wellenlabor](https://maketeanowar.github.io/physik-apps/wellenlabor/) | 2026-10-16 |
-| `additive-synthese/` | [Additive Synthese](https://maketeanowar.github.io/physik-apps/additive-synthese/) | 2026-09-29 |
-| `geige-hoervergleich/` | [Geige im Hörvergleich](https://maketeanowar.github.io/physik-apps/geige-hoervergleich/) | 2026-09-29 |
-| `steckplatinen-ansicht/` | [Steckplatinen-Ansicht](https://maketeanowar.github.io/physik-apps/steckplatinen-ansicht/) | 2026-09-09 |
-| `signalkette-wheatstone/` | [Signalkette Wheatstone-Brücke](https://maketeanowar.github.io/physik-apps/signalkette-wheatstone/) | 2026-09-09 |
+| `bewegungslabor/` | [Bewegungslabor](https://schulapplikationen.github.io/physik-apps/bewegungslabor/) | 2026-10-02 |
+| `raumfluglabor/` | [Raumfluglabor](https://schulapplikationen.github.io/physik-apps/raumfluglabor/) | 2026-10-18 |
+| `lehrertool-lite/` | [Lehrertool Lite](https://schulapplikationen.github.io/physik-apps/lehrertool-lite/) | 2026-10-04 |
+| `feldlabor/` | [Feldlabor](https://schulapplikationen.github.io/physik-apps/feldlabor/) | 2026-10-04 |
+| `wellenlabor/` | [Wellenlabor](https://schulapplikationen.github.io/physik-apps/wellenlabor/) | 2026-10-16 |
+| `additive-synthese/` | [Additive Synthese](https://schulapplikationen.github.io/physik-apps/additive-synthese/) | 2026-09-29 |
+| `geige-hoervergleich/` | [Geige im Hörvergleich](https://schulapplikationen.github.io/physik-apps/geige-hoervergleich/) | 2026-09-29 |
+| `steckplatinen-ansicht/` | [Steckplatinen-Ansicht](https://schulapplikationen.github.io/physik-apps/steckplatinen-ansicht/) | 2026-09-09 |
+| `signalkette-wheatstone/` | [Signalkette Wheatstone-Brücke](https://schulapplikationen.github.io/physik-apps/signalkette-wheatstone/) | 2026-09-09 |
 
 ## Aufbau
 

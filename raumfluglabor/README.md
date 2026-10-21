@@ -11,7 +11,7 @@ Für Tablets im Querformat gebaut (iPad 10./11. Gen.): feste Bühne, die sich an
 - **Labor:** jeder Flug zum Auswerten (Zeitleiste, Kraftpfeile, s-, v-, a-, F-, p-Diagramme, Abschnitt messen, Nachrechnen, Messwerte); freier Flug 1D/2D, Flugplan, Stoß, Rückstoß, Bonus Lichtgeschwindigkeit.
 - **Quiz:** Flug ↔ Diagramm zuordnen, Denkfehler, Rechnen, Diagramm nachfliegen.
 
-- **Live:** https://maketeanowar.github.io/physik-apps/raumfluglabor/
+- **Live:** https://schulapplikationen.github.io/physik-apps/raumfluglabor/
 - **QR-Code für die Klasse:** `qr_raumfluglabor.png`
 - **Aktuelle Version:** `index.html` (Stand 2026-10-18, Fassung 02: Lichtschranke statt Ring, Massepunkt-Ansicht, feste Kamera)
 - **Versionen:** Ordner `versionen/` – jede Fassung als `JJJJ-MM-TT_NN_raumfluglabor.html`, die neueste ist identisch mit `index.html`.

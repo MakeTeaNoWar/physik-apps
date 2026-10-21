@@ -2,7 +2,7 @@
 
 Mündliche Mitarbeit per Sitzplan, Noten und Termine – abgespeckte Fassung, läuft auch auf dem iPad. Ohne Daten: Kurse und Namen legt jede Lehrkraft selbst an.
 
-- **Live:** https://maketeanowar.github.io/physik-apps/lehrertool-lite/
+- **Live:** https://schulapplikationen.github.io/physik-apps/lehrertool-lite/
 - **QR-Code für die Klasse:** `qr_lehrertool-lite.png`
 - **Aktuelle Version:** `index.html` (Stand 2026-10-04)
 - **Versionen:** Ordner `versionen/` – jede Fassung als `JJJJ-MM-TT_NN_lehrertool-lite.html`, die neueste ist identisch mit `index.html`.
